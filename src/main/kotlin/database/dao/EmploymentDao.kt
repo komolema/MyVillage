@@ -1,4 +1,4 @@
 package database.dao
 
-class JobDao {
+class EmploymentDao {
 }
