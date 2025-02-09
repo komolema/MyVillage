@@ -3,10 +3,6 @@ package models
 import java.util.UUID
 import java.time.LocalDate
 
-
-
-
-
 data class Address(
     val id: UUID,
     val line: String,

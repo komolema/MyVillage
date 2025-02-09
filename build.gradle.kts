@@ -9,6 +9,10 @@ plugins {
 group = "org.village"
 version = "1.0-SNAPSHOT"
 
+val koinVersion = "4.0.2"
+val exposedVersion = "0.59.0"
+val arrowVersion = "2.0.1"
+
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -25,19 +29,33 @@ dependencies {
     implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
 
     // Exposed ORM and SQLite
-    implementation("org.jetbrains.exposed:exposed-core:0.57.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.57.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.57.0")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.57.0") // Add this line
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("org.xerial:sqlite-jdbc:3.41.2.2")
 
     // Kotlin standard library
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
 
-    implementation("io.arrow-kt:arrow-core:1.2.4")
-    implementation("io.arrow-kt:arrow-fx-coroutines:1.2.4")
+    // Arrow dependencies
+    implementation("io.arrow-kt:arrow-core:$arrowVersion")
+    implementation("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
 
-    implementation("io.github.sunny-chung:composable-table:1.3.0")
+    implementation("com.github.sproctor:compose-data-table:0.10.1")
+
+    // Koin for dependency injection
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-core-ext:$koinVersion")
+    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
+
+    implementation("io.insert-koin:koin-test:$koinVersion")
+    implementation("io.insert-koin:koin-test-junit5:$koinVersion")
+
+    implementation("io.insert-koin:koin-compose:$koinVersion")
+    implementation("io.insert-koin:koin-compose-viewmodel:$koinVersion")
+    implementation("io.insert-koin:koin-compose-viewmodel-nav:$koinVersion")
+    implementation("io.insert-koin:koin-compose-viewmodel-navigation:$koinVersion")
 }
 
 compose.desktop {
