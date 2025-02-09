@@ -2,6 +2,7 @@ package viewmodel
 
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.mutableStateOf
+import database.dao.ResidentDao
 
 class ResidentViewModel(private val residentDao: ResidentDao) {
     sealed interface Intent {
