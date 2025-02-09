@@ -42,11 +42,10 @@ dependencies {
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
     implementation("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
 
-    implementation("com.github.sproctor:compose-data-table:0.10.1")
+    implementation("com.seanproctor:data-table:0.10.1")
 
     // Koin for dependency injection
     implementation("io.insert-koin:koin-core:$koinVersion")
-    implementation("io.insert-koin:koin-core-ext:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
     implementation("io.insert-koin:koin-test:$koinVersion")
@@ -54,7 +53,6 @@ dependencies {
 
     implementation("io.insert-koin:koin-compose:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel:$koinVersion")
-    implementation("io.insert-koin:koin-compose-viewmodel-nav:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel-navigation:$koinVersion")
 }
 

@@ -5,7 +5,6 @@ import models.Qualification
 class ResidentWindowState(
     val residentState: ResidentState,
     val qualifications: List<Qualification>,
-    // Other tab states...
     val mode: WindowMode
 ) {
     fun toggleMode() {
