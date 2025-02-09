@@ -1,7 +1,6 @@
 package models
 
 import java.util.UUID
-import java.time.LocalDate
 
 data class Address(
     val id: UUID,
@@ -12,18 +11,17 @@ data class Address(
     val postalCode: String,
     val geoCoordinates: String?,
     val landmark: String?
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+) {
+    companion object {
+        val default = Address(
+            id = UUID.randomUUID(),
+            line = "",
+            houseNumber = "",
+            suburb = "",
+            town = "",
+            postalCode = "",
+            geoCoordinates = null,
+            landmark = null
+        )
+    }
+}

@@ -12,4 +12,17 @@ data class Qualification(
     val startDate: LocalDate,
     val endDate: LocalDate?,
     val city: String
-)
+) {
+    companion object {
+        val default = Qualification(
+            id = UUID.randomUUID(),
+            residentId = UUID.randomUUID(),
+            name = "",
+            instituteName = "",
+            nqfLevel = 0,
+            startDate = LocalDate.now(),
+            endDate = null,
+            city = ""
+        )
+    }
+}

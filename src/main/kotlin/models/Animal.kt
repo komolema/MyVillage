@@ -13,4 +13,18 @@ data class Animal(
     val healthStatus: String,
     val vaccinationStatus: Boolean,
     val vaccinationDate: LocalDate?
-)
+) {
+    companion object {
+        val default = Animal(
+            id = UUID.randomUUID(),
+            species = "",
+            breed = "",
+            gender = "",
+            dob = LocalDate.now(),
+            tagNumber = "",
+            healthStatus = "",
+            vaccinationStatus = false,
+            vaccinationDate = null
+        )
+    }
+}

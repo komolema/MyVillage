@@ -9,4 +9,14 @@ data class Payment(
     val method: String,
     val note: String?,
     val price: Double
-)
+) {
+    companion object {
+        val default = Payment(
+            id = UUID.randomUUID(),
+            date = LocalDate.now(),
+            method = "",
+            note = null,
+            price = 0.0
+        )
+    }
+}

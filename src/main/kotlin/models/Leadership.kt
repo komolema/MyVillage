@@ -10,4 +10,15 @@ data class Leadership(
     val startDate: LocalDate,
     val endDate: LocalDate?,
     val villageName: String
-)
+) {
+    companion object {
+        val default = Leadership(
+            id = UUID.randomUUID(),
+            name = "",
+            role = "",
+            startDate = LocalDate.now(),
+            endDate = null,
+            villageName = ""
+        )
+    }
+}

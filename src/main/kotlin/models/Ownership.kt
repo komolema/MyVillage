@@ -13,4 +13,18 @@ data class Ownership(
     val acquisitionMethod: String,
     val ownershipType: String,
     val sharedWith: String?
-)
+) {
+    companion object {
+        val default = Ownership(
+            id = UUID.randomUUID(),
+            residentId = UUID.randomUUID(),
+            animalId = UUID.randomUUID(),
+            paymentId = null,
+            valid = false,
+            acquisitionDate = LocalDate.now(),
+            acquisitionMethod = "",
+            ownershipType = "",
+            sharedWith = null
+        )
+    }
+}

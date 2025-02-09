@@ -5,7 +5,7 @@ import models.Qualification
 class ResidentWindowState(
     val residentState: ResidentState,
     val qualifications: List<Qualification>,
-    val mode: WindowMode
+    var mode: WindowMode
 ) {
     fun toggleMode() {
         mode = when (mode) {

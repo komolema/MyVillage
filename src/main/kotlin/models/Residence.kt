@@ -8,4 +8,13 @@ data class Residence(
     val residentId: UUID,
     val addressId: UUID,
     val occupationDate: LocalDate
-)
+) {
+    companion object {
+        val default = Residence(
+            id = UUID.randomUUID(),
+            residentId = UUID.randomUUID(),
+            addressId = UUID.randomUUID(),
+            occupationDate = LocalDate.now()
+        )
+    }
+}

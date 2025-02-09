@@ -10,4 +10,15 @@ data class Employment(
     val role: String,
     val startDate: LocalDate,
     val endDate: LocalDate?
-)
+) {
+    companion object {
+        val default = Employment(
+            id = UUID.randomUUID(),
+            residentId = UUID.randomUUID(),
+            employer = "",
+            role = "",
+            startDate = LocalDate.now(),
+            endDate = null
+        )
+    }
+}
