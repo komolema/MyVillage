@@ -1,19 +1,25 @@
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.seanproctor.datatable.rememberDataTableState
+import com.seanproctor.datatable.*
+import com.seanproctor.datatable.paging.BasicPaginatedDataTable
+import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import models.Address
 import viewmodel.ResidentViewModel
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
+import kotlin.math.ceil
 
 // ResidentScreen.kt
 @Composable
@@ -21,13 +27,13 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
     val query = remember { mutableStateOf("") }
     val pageSize = 20
-    val dataTableState = rememberDataTableState()
+    val dataTableState = rememberPaginatedDataTableState()
 
-    LaunchedEffect(query.value, dataTableState.page) {
+    LaunchedEffect(query.value, dataTableState.pageIndex) {
         if (query.value.isEmpty()) {
-            viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.page))
+            viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize))
         } else {
-            viewModel.processIntent(ResidentViewModel.Intent.Search(query.value, dataTableState.page))
+            viewModel.processIntent(ResidentViewModel.Intent.Search(query.value, dataTableState.pageIndex))
         }
     }
 
@@ -45,18 +51,16 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Data Table Implementation
-        DataTable(
-            state = dataTableState.copy(
-                pageCount = ceil(state.totalItems.toDouble() / pageSize).toInt()
-            ),
+        BasicPaginatedDataTable(
+            state = dataTableState,
             columns = listOf(
-                ColumnConfig("ID Number", 150.dp),
-                ColumnConfig("Name", 200.dp),
-                ColumnConfig("DOB", 120.dp),
-                ColumnConfig("Age", 80.dp),
-                ColumnConfig("Gender", 100.dp),
-                ColumnConfig("Address", 250.dp),
-                ColumnConfig("Dependents", 120.dp)
+                DataColumn { Text("ID Number") },
+                DataColumn { Text("Name") },
+                DataColumn { Text("DOB") },
+                DataColumn { Text("Age") },
+                DataColumn { Text("Gender") },
+                DataColumn { Text("Address") },
+                DataColumn { Text("Dependents") }
             )
         ) {
             state.residents.forEach { resident ->
@@ -87,17 +91,17 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
-                    onClick = { dataTableState.page-- },
-                    enabled = dataTableState.page > 0
+                    onClick = { dataTableState.pageIndex-- },
+                    enabled = dataTableState.pageIndex > 0
                 ) {
                     Icon(Icons.Default.ArrowBack, "Previous Page")
                 }
 
-                Text("Page ${dataTableState.page + 1} of ${dataTableState.pageCount}")
+                Text("Page ${dataTableState.pageIndex + 1} of ${dataTableState.pageSize}")
 
                 IconButton(
-                    onClick = { dataTableState.page++ },
-                    enabled = dataTableState.page < dataTableState.pageCount - 1
+                    onClick = { dataTableState.pageIndex++ },
+                    enabled = dataTableState.pageIndex < dataTableState.pageSize - 1
                 ) {
                     Icon(Icons.Default.ArrowForward, "Next Page")
                 }
