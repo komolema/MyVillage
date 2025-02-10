@@ -1,10 +1,13 @@
 package ui.screens.resident
 
+import VerticalTabs
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import ui.components.WindowToolbar
+import ui.screens.resident.tabs.QualificationTab
 import ui.screens.resident.tabs.ResidentTab
 import viewmodel.ResidentWindowViewModel
 import java.util.*

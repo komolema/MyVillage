@@ -1,4 +1,9 @@
 package ui.screens.resident
 
-class ResidentState {
+import models.Resident
+
+data class ResidentState(val residents: List<Resident> = emptyList(), val isLoading: Boolean = true) {
+    companion object {
+        val default = ResidentState()
+    }
 }

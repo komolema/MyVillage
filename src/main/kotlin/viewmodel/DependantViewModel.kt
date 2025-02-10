@@ -1,4 +1,6 @@
 package viewmodel
 
-class DependantViewModel {
+import androidx.lifecycle.ViewModel
+
+class DependantViewModel: ViewModel() {
 }

@@ -1,4 +1,6 @@
 package viewmodel
 
-class EmploymentViewModel {
+import androidx.lifecycle.ViewModel
+
+class EmploymentViewModel: ViewModel() {
 }

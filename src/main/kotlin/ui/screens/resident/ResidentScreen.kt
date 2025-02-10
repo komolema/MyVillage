@@ -26,7 +26,7 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
     val query = remember { mutableStateOf("") }
     val pageSize = 20
-    val dataTableState = rememberPaginatedDataTableState()
+    val dataTableState = rememberPaginatedDataTableState(10, 0, 10)
 
     LaunchedEffect(query.value, dataTableState.pageIndex) {
         if (query.value.isEmpty()) {

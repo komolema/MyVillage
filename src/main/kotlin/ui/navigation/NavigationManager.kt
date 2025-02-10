@@ -6,20 +6,24 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import org.koin.compose.viewmodel.koinViewModel
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
 import ui.screens.resident.WindowMode
 import ui.screens.resource.ResourceScreen
 import ui.screens.settings.SettingsScreen
+import viewmodel.ResidentViewModel
 import java.util.*
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val residentViewModel: ResidentViewModel = koinViewModel()
+
     NavHost(navController = navController, startDestination = "dashboard") {
         composable("dashboard") { DashboardScreen(navController) }
-        composable("resident") { ResidentScreen(navController) }
+        composable("resident") { ResidentScreen(navController, residentViewModel) }
         composable("animal") { AnimalScreen(navController) }
         composable("resource") { ResourceScreen(navController) }
         composable("admin") { AdminScreen(navController) }

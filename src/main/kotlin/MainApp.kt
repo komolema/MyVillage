@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.navigation.compose.rememberNavController
+import di.appModule
 import di.daoModule
 import org.koin.core.context.startKoin
 import ui.navigation.AppNavigation
@@ -19,7 +20,7 @@ fun App() {
 
 fun main() = {
     startKoin{
-        modules(daoModule)
+        modules(appModule)
     }
     application {
         Window(onCloseRequest = ::exitApplication) {

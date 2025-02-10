@@ -1,11 +1,13 @@
 package viewmodel
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
 import database.dao.ResidentDao
 import ui.screens.resident.ResidentState
 
-class ResidentViewModel(private val residentDao: ResidentDao) {
+class ResidentViewModel(private val residentDao: ResidentDao): ViewModel() {
     val PAGE_SIZE = 0
 
     sealed interface Intent {
@@ -15,7 +17,7 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
     }
 
     private val _state = mutableStateOf(ResidentState())
-    val state: Recomposer.State<ResidentState> = _state
+    val state: MutableState<ResidentState> = _state
 
     fun processIntent(intent: Intent) {
         when (intent) {
