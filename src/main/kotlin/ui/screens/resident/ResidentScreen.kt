@@ -1,11 +1,10 @@
+package ui.screens.resident
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -14,13 +13,12 @@ import com.seanproctor.datatable.*
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import models.Address
+import models.formatFriendly
 import viewmodel.ResidentViewModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import kotlin.math.ceil
 
-// ResidentScreen.kt
 @Composable
 fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
@@ -37,7 +35,6 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Search Bar Implementation
         OutlinedTextField(
             value = query.value,
             onValueChange = { query.value = it },
@@ -49,7 +46,6 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Data Table Implementation
         BasicPaginatedDataTable(
             state = dataTableState,
             columns = listOf(
@@ -62,25 +58,22 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                 DataColumn { Text("Dependents") }
             )
         ) {
-            state.residents.forEach { resident ->
-                row(
-                    onClick = { /* Handle single click */ },
-                    onDoubleClick = {
-                        navController.navigate("resident/${resident.id}?mode=view")
+            state.residents.forEach { resExp ->
+                row {
+                    onClick = {
+                        navController.navigate("resident/${resExp.resident.id}?mode=view")
                     }
-                ) {
-                    cell { Text(resident.idNumber) }
-                    cell { Text("${resident.firstName} ${resident.lastName}") }
-                    cell { Text(resident.dob.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))) }
-                    cell { Text(Period.between(resident.dob, LocalDate.now()).years.toString()) }
-                    cell { Text(resident.gender) }
-                    cell { Text(resident.address?.formatFriendly() ?: "") }
-                    cell { Text(resident.dependents.size.toString()) }
+                    cell { Text(resExp.resident.idNumber) }
+                    cell { Text("${resExp.resident.firstName} ${resExp.resident.lastName}") }
+                    cell { Text(resExp.resident.dob.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))) }
+                    cell { Text(Period.between(resExp.resident.dob, LocalDate.now()).years.toString()) }
+                    cell { Text(resExp.resident.gender) }
+                    cell { Text(resExp.address.fold({ "" }, { it.formatFriendly() })) }
+                    cell { Text(resExp.dependents.size.toString()) }
                 }
             }
         }
 
-        // Pagination Controls
         Row(
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -116,12 +109,3 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     }
 }
 
-// Address extension for friendly format
-fun Address.formatFriendly(): String {
-    return """
-        $houseNumber $line
-        $suburb
-        $town
-        $postalCode
-    """.trimIndent()
-}

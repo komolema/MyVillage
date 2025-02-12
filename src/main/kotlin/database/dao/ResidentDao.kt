@@ -1,13 +1,21 @@
 package database.dao
 
+import arrow.core.Option
+import arrow.core.toOption
+import database.schema.Residences
 import database.schema.Residents
+import models.Address
+import models.Residence
 import models.Resident
+import models.expanded.ResidentExpanded
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 class ResidentDao {
+
     fun getAll(page: Int, pageSize: Int): List<Resident> = transaction {
         Residents.selectAll()
             .limit(pageSize).offset(start = (page * pageSize).toLong())
@@ -24,6 +32,24 @@ class ResidentDao {
             .map { it.toResident() }
     }
 
+    fun getResidentById(id: UUID): Resident? = transaction {
+        Residents.select(Residents.id eq id)
+            .mapNotNull { it.toResident() }
+            .singleOrNull()
+    }
+
+    fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
+        Residents.selectAll()
+            .limit(pageSize).offset(start = (page * pageSize).toLong())
+            .map { it.toResidentExpanded() }
+    }
+
+    fun getResidentExpandedById(id: UUID): ResidentExpanded? = transaction {
+        Residents.select(Residents.id eq id)
+            .mapNotNull { it.toResidentExpanded() }
+            .singleOrNull()
+    }
+
     private fun ResultRow.toResident(): Resident {
         return Resident(
             id = this[Residents.id].value,
@@ -35,5 +61,22 @@ class ResidentDao {
             phoneNumber = this[Residents.phoneNumber],
             email = this[Residents.email],
         )
+    }
+
+    private fun ResultRow.toResidentExpanded(): ResidentExpanded {
+        val resident = this.toResident()
+        val address = AddressDao().getAddressByResidentId(resident.id).toOption()
+        val residence = ResidenceDao().getResidenceByResidentId(resident.id).toOption()
+        val dependents = getDependentsByResidentId(resident.id)
+        return ResidentExpanded(
+            resident = resident,
+            address = address,
+            residence = residence,
+            dependents = dependents
+        )
+    }
+
+    private fun getDependentsByResidentId(residentId: UUID): List<Resident> = transaction {
+        Residents.select(Residents.parentId eq residentId).map { it.toResident() }
     }
 }

@@ -25,3 +25,12 @@ data class Address(
         )
     }
 }
+
+fun Address.formatFriendly(): String {
+    return """
+        $houseNumber $line
+        $suburb
+        $town
+        $postalCode
+    """.trimIndent()
+}

@@ -1,6 +1,8 @@
 package di
 
 import database.dao.*
+import org.koin.core.context.GlobalContext.get
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import viewmodel.*
@@ -21,12 +23,12 @@ val daoModule = module {
 }
 
 val viewModelModule = module {
-    viewModel { ResidentViewModel(get()) }
-    viewModel { ResidenceViewModel() }
-    viewModel { DependantViewModel() }
-    viewModel { QualificationViewModel() }
-    viewModel { EmploymentViewModel() }
-    viewModel { ResidentWindowViewModel() }
+    factory { ResidentViewModel(get()) }
+    factory { ResidenceViewModel() }
+    factory { DependantViewModel() }
+    factory { QualificationViewModel() }
+    factory { EmploymentViewModel() }
+    factory { ResidentWindowViewModel() }
 }
 
 val appModule = listOf(daoModule, viewModelModule)

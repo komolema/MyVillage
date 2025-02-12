@@ -5,4 +5,4 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import database.dao.ResidentDao
 
-class ResidenceViewModel(): ViewModel(){}
+class ResidenceViewModel(){}

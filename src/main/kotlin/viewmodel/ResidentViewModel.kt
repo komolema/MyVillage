@@ -1,14 +1,16 @@
 package viewmodel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Recomposer
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import database.dao.ResidentDao
 import ui.screens.resident.ResidentState
 
-class ResidentViewModel(private val residentDao: ResidentDao): ViewModel() {
-    val PAGE_SIZE = 0
+class ResidentViewModel(private val residentDao: ResidentDao) {
+    val PAGE_SIZE = 20
 
     sealed interface Intent {
         data class LoadResidents(val page: Int) : Intent
@@ -16,8 +18,8 @@ class ResidentViewModel(private val residentDao: ResidentDao): ViewModel() {
         object AddResident : Intent
     }
 
-    private val _state = mutableStateOf(ResidentState())
-    val state: MutableState<ResidentState> = _state
+    private val _state = MutableStateFlow(ResidentState())
+    val state: StateFlow<ResidentState> = _state
 
     fun processIntent(intent: Intent) {
         when (intent) {
@@ -28,19 +30,22 @@ class ResidentViewModel(private val residentDao: ResidentDao): ViewModel() {
     }
 
     private fun searchResidents(query: String, page: Int) {
-
+        // Implement search logic here
     }
 
     private fun addResident() {
-        TODO("Not yet implemented")
+        // Implement add resident logic here
     }
 
     private fun loadResidents(page: Int) {
-        _state.value = _state.value.copy(
-            residents = residentDao.getAll(page, PAGE_SIZE),
-            isLoading = false
-        )
+        CoroutineScope(Dispatchers.IO).launch {
+            val residents = residentDao.getAll(page, PAGE_SIZE)
+            _state.update { currentState ->
+                currentState.copy(
+                    residents = residents,
+                    isLoading = false
+                )
+            }
+        }
     }
-
-    // Similar implementations for search and add
 }
