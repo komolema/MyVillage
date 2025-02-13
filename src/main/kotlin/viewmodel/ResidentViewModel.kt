@@ -39,7 +39,7 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
 
     private fun loadResidents(page: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            val residents = residentDao.getAll(page, PAGE_SIZE)
+            val residents = residentDao.getAllResidentExpanded(page, PAGE_SIZE)
             _state.update { currentState ->
                 currentState.copy(
                     residents = residents,

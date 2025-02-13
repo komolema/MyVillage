@@ -18,7 +18,7 @@ class DatabaseConfig(private val dbUrl: String, private val driver: String) {
                 Qualifications,
                 Jobs,
                 Animals,
-                Dependents,
+                Dependants,
                 Leadership,
                 ManagedBy,
                 Ownerships,

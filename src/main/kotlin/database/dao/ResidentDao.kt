@@ -1,11 +1,7 @@
 package database.dao
 
-import arrow.core.Option
 import arrow.core.toOption
-import database.schema.Residences
 import database.schema.Residents
-import models.Address
-import models.Residence
 import models.Resident
 import models.expanded.ResidentExpanded
 import org.jetbrains.exposed.sql.*
@@ -14,7 +10,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-class ResidentDao {
+class ResidentDao(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao) {
 
     fun getAll(page: Int, pageSize: Int): List<Resident> = transaction {
         Residents.selectAll()
@@ -65,18 +61,15 @@ class ResidentDao {
 
     private fun ResultRow.toResidentExpanded(): ResidentExpanded {
         val resident = this.toResident()
-        val address = AddressDao().getAddressByResidentId(resident.id).toOption()
-        val residence = ResidenceDao().getResidenceByResidentId(resident.id).toOption()
-        val dependents = getDependentsByResidentId(resident.id)
+        val address = residenceDao.getAddressByResidentId(resident.id).toOption()
+        val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
+        val dependents = dependantDao.getDependentsByResidentId(resident.id)
         return ResidentExpanded(
             resident = resident,
             address = address,
             residence = residence,
-            dependents = dependents
+            dependants = dependents
         )
     }
 
-    private fun getDependentsByResidentId(residentId: UUID): List<Resident> = transaction {
-        Residents.select(Residents.parentId eq residentId).map { it.toResident() }
-    }
 }

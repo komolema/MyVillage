@@ -12,7 +12,6 @@ import androidx.navigation.NavController
 import com.seanproctor.datatable.*
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
-import models.Address
 import models.formatFriendly
 import viewmodel.ResidentViewModel
 import java.time.LocalDate
@@ -69,7 +68,7 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                     cell { Text(Period.between(resExp.resident.dob, LocalDate.now()).years.toString()) }
                     cell { Text(resExp.resident.gender) }
                     cell { Text(resExp.address.fold({ "" }, { it.formatFriendly() })) }
-                    cell { Text(resExp.dependents.size.toString()) }
+                    cell { Text(resExp.dependants.size.toString()) }
                 }
             }
         }

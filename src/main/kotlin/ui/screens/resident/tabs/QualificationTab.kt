@@ -7,12 +7,13 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import database.schema.Qualifications
 import models.Qualification
 import ui.screens.resident.WindowMode
 
 @Composable
-fun QualificationTab(qualification: Qualification?, mode: WindowMode) {
-    val editableQualification = remember { mutableStateOf(qualification ?: Qualification.default) }
+fun QualificationTab(qualifications: List<Qualifications>, mode: WindowMode) {
+    val editableQualifications = remember { mutableStateOf(qualifications }
 
     Column {
         TextField(

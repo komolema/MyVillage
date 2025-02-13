@@ -18,7 +18,7 @@ val daoModule = module {
     single { PaymentDao() }
     single { QualificationDao() }
     single { ResidenceDao() }
-    single { ResidentDao() }
+    single { ResidentDao(get(), get()) }
     single { ResourceDao() }
 }
 
