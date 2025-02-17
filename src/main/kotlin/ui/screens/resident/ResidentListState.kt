@@ -1,15 +1,14 @@
 package ui.screens.resident
 
-import models.Resident
 import models.expanded.ResidentExpanded
 
-data class ResidentState(
+data class ResidentListState(
     val residents: List<ResidentExpanded> = emptyList(),
     val isLoading: Boolean = true,
     val totalItems: Int = 0
 ) {
 
     companion object {
-        val default = ResidentState()
+        val default = ResidentListState()
     }
 }

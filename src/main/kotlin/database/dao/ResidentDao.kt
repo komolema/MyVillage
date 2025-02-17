@@ -10,15 +10,23 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-class ResidentDao(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao) {
+interface ResidentDao {
+    fun getAll(page: Int, pageSize: Int): List<Resident>
+    fun search(query: String, page: Int, pageSize: Int): List<Resident>
+    fun getResidentById(id: UUID): Resident?
+    fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded>
+    fun getResidentExpandedById(id: UUID): ResidentExpanded?
+}
 
-    fun getAll(page: Int, pageSize: Int): List<Resident> = transaction {
+class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao): ResidentDao {
+
+    override fun getAll(page: Int, pageSize: Int): List<Resident> = transaction {
         Residents.selectAll()
             .limit(pageSize).offset(start = (page * pageSize).toLong())
             .map { it.toResident() }
     }
 
-    fun search(query: String, page: Int, pageSize: Int): List<Resident> = transaction {
+    override fun search(query: String, page: Int, pageSize: Int): List<Resident> = transaction {
         Residents.select(
             (Residents.idNumber like "%$query%") or
                     (Residents.firstName like "%$query%") or
@@ -28,19 +36,19 @@ class ResidentDao(private val residenceDao: ResidenceDao, private val dependantD
             .map { it.toResident() }
     }
 
-    fun getResidentById(id: UUID): Resident? = transaction {
+    override fun getResidentById(id: UUID): Resident? = transaction {
         Residents.select(Residents.id eq id)
             .mapNotNull { it.toResident() }
             .singleOrNull()
     }
 
-    fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
+    override fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
         Residents.selectAll()
             .limit(pageSize).offset(start = (page * pageSize).toLong())
             .map { it.toResidentExpanded() }
     }
 
-    fun getResidentExpandedById(id: UUID): ResidentExpanded? = transaction {
+    override fun getResidentExpandedById(id: UUID): ResidentExpanded? = transaction {
         Residents.select(Residents.id eq id)
             .mapNotNull { it.toResidentExpanded() }
             .singleOrNull()

@@ -11,7 +11,6 @@ import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import database.dao.QualificationDao
 import models.Qualification
 import ui.screens.resident.WindowMode
-import viewmodel.QualificationViewModel
 import java.util.*
 
 @Composable

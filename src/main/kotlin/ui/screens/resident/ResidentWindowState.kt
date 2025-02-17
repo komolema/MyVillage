@@ -1,13 +1,10 @@
 package ui.screens.resident
 
-import models.Dependant
-import models.Employment
-import models.Qualification
-import models.Residence
+import models.*
 
 class ResidentWindowState(
-    val residentState: ResidentState,
     val residence: Residence,
+    val resident: Resident,
     val qualifications: List<Qualification>,
     val dependants: List<Dependant>,
     val employmentHistory: List<Employment>,

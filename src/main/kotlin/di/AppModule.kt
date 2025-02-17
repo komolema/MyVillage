@@ -10,7 +10,7 @@ import viewmodel.*
 val daoModule = module {
     single { AddressDao() }
     single { AnimalDao() }
-    single { DependantDao() }
+    single<DependantDao> { DependantDaoImpl() }
     single { EmploymentDao() }
     single { LeadershipDao() }
     single { ManagedByDao() }
@@ -18,7 +18,7 @@ val daoModule = module {
     single { PaymentDao() }
     single<QualificationDao> { QualificationDaoImpl() }
     single<ResidenceDao> { ResidenceDaoImpl() }
-    single { ResidentDao(get(), get()) }
+    single<ResidentDao> { ResidentDaoImpl(get(), get()) }
     single { ResourceDao() }
 }
 
@@ -26,9 +26,8 @@ val viewModelModule = module {
     factory { ResidentViewModel(get()) }
     factory { ResidenceViewModel() }
     factory { DependantViewModel() }
-    factory { QualificationViewModel(get()) }
     factory { EmploymentViewModel() }
-    factory { ResidentWindowViewModel() }
+    factory { ResidentWindowViewModel(get(), get()) }
 }
 
 val appModule = listOf(daoModule, viewModelModule)

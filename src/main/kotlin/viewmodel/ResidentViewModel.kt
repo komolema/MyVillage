@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import database.dao.ResidentDao
-import ui.screens.resident.ResidentState
+import ui.screens.resident.ResidentListState
 
 class ResidentViewModel(private val residentDao: ResidentDao) {
     val PAGE_SIZE = 20
@@ -15,26 +15,20 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
     sealed interface Intent {
         data class LoadResidents(val page: Int) : Intent
         data class Search(val query: String, val page: Int) : Intent
-        object AddResident : Intent
     }
 
-    private val _state = MutableStateFlow(ResidentState())
-    val state: StateFlow<ResidentState> = _state
+    private val _state = MutableStateFlow(ResidentListState())
+    val state: StateFlow<ResidentListState> = _state
 
     fun processIntent(intent: Intent) {
         when (intent) {
             is Intent.LoadResidents -> loadResidents(intent.page)
             is Intent.Search -> searchResidents(intent.query, intent.page)
-            Intent.AddResident -> addResident()
         }
     }
 
     private fun searchResidents(query: String, page: Int) {
         // Implement search logic here
-    }
-
-    private fun addResident() {
-        // Implement add resident logic here
     }
 
     private fun loadResidents(page: Int) {
