@@ -12,6 +12,7 @@ version = "1.0-SNAPSHOT"
 val koinVersion = "4.0.2"
 val exposedVersion = "0.59.0"
 val arrowVersion = "2.0.1"
+val kotestVersion = "6.0.0.M2"
 
 repositories {
     mavenCentral()
@@ -35,6 +36,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("org.xerial:sqlite-jdbc:3.41.2.2")
 
+
     // Kotlin standard library
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
 
@@ -54,6 +56,10 @@ dependencies {
     implementation("io.insert-koin:koin-compose:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel-navigation:$koinVersion")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 compose.desktop {

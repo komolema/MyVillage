@@ -16,8 +16,8 @@ val daoModule = module {
     single { ManagedByDao() }
     single { OwnershipDao() }
     single { PaymentDao() }
-    single { QualificationDao() }
-    single { ResidenceDao() }
+    single<QualificationDao> { QualificationDaoImpl() }
+    single<ResidenceDao> { ResidenceDaoImpl() }
     single { ResidentDao(get(), get()) }
     single { ResourceDao() }
 }
@@ -26,7 +26,7 @@ val viewModelModule = module {
     factory { ResidentViewModel(get()) }
     factory { ResidenceViewModel() }
     factory { DependantViewModel() }
-    factory { QualificationViewModel() }
+    factory { QualificationViewModel(get()) }
     factory { EmploymentViewModel() }
     factory { ResidentWindowViewModel() }
 }

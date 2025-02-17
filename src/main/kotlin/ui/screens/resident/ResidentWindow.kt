@@ -44,7 +44,8 @@ fun ResidentWindow(
                     mode = mode
                 )
                 1 -> QualificationTab(
-                    qualifications = viewModels.qualificationViewModel.loadQualifications(residentId),
+                    residentId = residentId,
+                    qualificationViewModel = viewModels.qualificationViewModel,
                     mode = mode
                 )
                 // Other tabs

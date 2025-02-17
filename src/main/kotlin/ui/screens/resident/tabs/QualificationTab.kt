@@ -1,33 +1,80 @@
 package ui.screens.resident.tabs
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import database.schema.Qualifications
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.seanproctor.datatable.DataColumn
+import com.seanproctor.datatable.paging.BasicPaginatedDataTable
+import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import database.dao.QualificationDao
 import models.Qualification
 import ui.screens.resident.WindowMode
+import viewmodel.QualificationViewModel
+import java.util.*
 
 @Composable
-fun QualificationTab(qualifications: List<Qualifications>, mode: WindowMode) {
-    val editableQualifications = remember { mutableStateOf(qualifications }
+fun QualificationTab(residentId: UUID?, qualificationViewModel: QualificationViewModel, mode: WindowMode) {
+    val qualifications = remember { mutableStateOf(listOf<Qualification>()) }
+    val editableQualification = remember { mutableStateOf(Qualification.default) }
+    val dataTableState = rememberPaginatedDataTableState(10, 0, 10)
 
-    Column {
-        TextField(
-            label = { Text("Qualification") },
-            value = editableQualification.value.name,
-            enabled = mode != WindowMode.VIEW,
-            onValueChange = { editableQualification.value = editableQualification.value.copy(name = it) }
-        )
+    LaunchedEffect(residentId) {
+        qualifications.value = qualificationViewModel.loadQualifications(residentId)
+    }
 
-        // Other fields
+    Row(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+            TextField(
+                label = { Text("Qualification") },
+                value = editableQualification.value.name,
+                enabled = mode != WindowMode.VIEW,
+                onValueChange = { editableQualification.value = editableQualification.value.copy(name = it) }
+            )
 
-        if (mode == WindowMode.NEW) {
-            Button(onClick = { /* Save new qualification */ }) {
-                Text("Create Qualification")
+            // Add other fields as needed
+
+            if (mode == WindowMode.NEW) {
+                Button(onClick = {
+                    qualificationViewModel.createQualification(editableQualification.value)
+                    qualifications.value = qualificationViewModel.loadQualifications(residentId)
+                }) {
+                    Text("Create Qualification")
+                }
+            } else if (mode == WindowMode.UPDATE) {
+                Button(onClick = {
+                    qualificationViewModel.updateQualification(editableQualification.value)
+                    qualifications.value = qualificationViewModel.loadQualifications(residentId)
+                }) {
+                    Text("Update Qualification")
+                }
+            }
+        }
+
+        BasicPaginatedDataTable(
+            state = dataTableState,
+            columns = listOf(
+                DataColumn { Text("Name") },
+                DataColumn { Text("Institution") },
+                DataColumn { Text("Start Date") },
+                DataColumn { Text("End Date") },
+                DataColumn { Text("NQF Level") },
+                DataColumn { Text("City") }
+            )
+        ) {
+            qualifications.value.forEach { qualification ->
+                row {
+                    onClick = {
+                        editableQualification.value = qualification
+                    }
+                    cell { Text(qualification.name) }
+                    cell { Text(qualification.institution) }
+                    cell { Text(qualification.startDate.toString()) }
+                    cell { Text(qualification.endDate.toString()) }
+                    cell { Text(qualification.nqfLevel.toString()) }
+                    cell { Text(qualification.city) }
+                }
             }
         }
     }
