@@ -18,7 +18,7 @@ fun App() {
     }
 }
 
-fun main() = {
+fun main()  {
     startKoin{
         modules(appModule)
     }

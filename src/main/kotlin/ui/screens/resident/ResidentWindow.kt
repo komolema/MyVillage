@@ -45,9 +45,9 @@ fun ResidentWindow(
                     mode = mode
                 )
                 1 -> QualificationTab(
-                    residentId = residentId,
-                    viewModel= ResidentWindowViewModel,
-                    mode = mode
+                    residentId ,
+                    viewModel,
+                    mode
                 )
                 // Other tabs
             }

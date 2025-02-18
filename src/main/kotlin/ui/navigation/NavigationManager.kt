@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
@@ -19,7 +20,7 @@ import java.util.*
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val residentViewModel: ResidentViewModel = koinViewModel()
+    val residentViewModel: ResidentViewModel = koinInject()
 
     NavHost(navController = navController, startDestination = "dashboard") {
         composable("dashboard") { DashboardScreen(navController) }

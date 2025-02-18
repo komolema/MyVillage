@@ -12,20 +12,15 @@ import ui.screens.resident.WindowMode
 fun ResidenceTab(residence: Residence?, mode: WindowMode) {
     var editableResidence by remember { mutableStateOf(Residence.default) }
 
-    Column {
-        TextField(
-            value = editableResidence.occupationDate,
-            onValueChange = { newValue -> editableResidence = editableResidence.copy(occupationDate = newValue) },
-            label = { Text("Occupation Date") },
-            enabled = mode != WindowMode.VIEW
-        )
+    // Other fields
 
-        // Other fields
-
-        if (mode == WindowMode.NEW) {
-            Button(onClick = { /* Save new residence */ }) {
-                Text("Create Residence")
-            }
+    if (mode == WindowMode.NEW) {
+        Button(onClick = { /* Save new residence */ }) {
+            Text("Create Residence")
+        }
+    } else if (mode == WindowMode.UPDATE) {
+        Button(onClick = { /* Save updated residence */ }) {
+            Text("Update Residence")
         }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
@@ -14,13 +15,13 @@ import viewmodel.ResidentWindowViewModel
 import java.util.*
 
 @Composable
-fun QualificationTab(residentId: UUID?,viewModel: ResidentWindowViewModel, mode: WindowMode) {
-    val qualifications = remember { mutableStateOf(listOf<Qualification>()) }
+fun QualificationTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: WindowMode) {
+    val qualifications = viewModel.state.collectAsStateWithLifecycle().value.qualifications
     val editableQualification = remember { mutableStateOf(Qualification.default) }
     val dataTableState = rememberPaginatedDataTableState(10, 0, 10)
 
-    LaunchedEffect(residentId) {
-        qualifications.value = qualificationViewModel.loadQualifications(residentId)
+    if(mode != WindowMode.NEW && residentId != null) {
+        viewModel.processIntent(ResidentWindowViewModel.Intent.LoadQualifications(residentId!!))
     }
 
     Row(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -36,15 +37,13 @@ fun QualificationTab(residentId: UUID?,viewModel: ResidentWindowViewModel, mode:
 
             if (mode == WindowMode.NEW) {
                 Button(onClick = {
-                    qualificationViewModel.createQualification(editableQualification.value)
-                    qualifications.value = qualificationViewModel.loadQualifications(residentId)
+                    viewModel.processIntent(ResidentWindowViewModel.Intent.CreateQualification(editableQualification.value))
                 }) {
                     Text("Create Qualification")
                 }
             } else if (mode == WindowMode.UPDATE) {
                 Button(onClick = {
-                    qualificationViewModel.updateQualification(editableQualification.value)
-                    qualifications.value = qualificationViewModel.loadQualifications(residentId)
+                    viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateQualification(editableQualification.value))
                 }) {
                     Text("Update Qualification")
                 }
@@ -62,7 +61,7 @@ fun QualificationTab(residentId: UUID?,viewModel: ResidentWindowViewModel, mode:
                 DataColumn { Text("City") }
             )
         ) {
-            qualifications.value.forEach { qualification ->
+            qualifications.forEach { qualification ->
                 row {
                     onClick = {
                         editableQualification.value = qualification

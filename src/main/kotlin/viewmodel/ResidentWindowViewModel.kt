@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import models.Qualification
 import models.Resident
 import ui.screens.resident.ResidentWindowState
 import java.util.UUID
@@ -19,6 +20,9 @@ class ResidentWindowViewModel(
 
     sealed interface Intent {
         data class LoadResident(val residentId: UUID) : Intent
+        data class LoadQualifications(val residentId: UUID) : Intent
+        data class CreateQualification(val newQualification: Qualification) : Intent
+        data class UpdateQualification(val updatedQualification: Qualification) : Intent
     }
 
     private val _state = MutableStateFlow(ResidentWindowState())
@@ -27,6 +31,32 @@ class ResidentWindowViewModel(
     fun processIntent(intent: Intent) {
         when (intent) {
             is Intent.LoadResident -> loadResident(intent.residentId)
+            is Intent.LoadQualifications -> loadQualifications(intent.residentId)
+            is Intent.CreateQualification -> createQualification(intent.newQualification)
+            is Intent.UpdateQualification -> updateQualification(intent.updatedQualification)
+        }
+    }
+
+    private fun updateQualification(updatedQualification: Qualification) {
+        CoroutineScope(Dispatchers.IO).launch {
+            qualificationDao.updateQualification(updatedQualification)
+        }
+    }
+
+    private fun createQualification(newQualification: Qualification) {
+        CoroutineScope(Dispatchers.IO).launch {
+            qualificationDao.createQualification(newQualification)
+        }
+    }
+
+    private fun loadQualifications(residentId: UUID) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val qualifications = qualificationDao.getQualificationsByResidentId(residentId)
+            _state.update { currentState ->
+                currentState.copy(
+                    qualifications = qualifications,
+                )
+            }
         }
     }
 
