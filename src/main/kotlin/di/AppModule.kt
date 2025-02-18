@@ -24,9 +24,6 @@ val daoModule = module {
 
 val viewModelModule = module {
     factory { ResidentViewModel(get()) }
-    factory { ResidenceViewModel() }
-    factory { DependantViewModel() }
-    factory { EmploymentViewModel() }
     factory { ResidentWindowViewModel(get(), get()) }
 }
 

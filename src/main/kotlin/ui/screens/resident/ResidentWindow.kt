@@ -17,7 +17,7 @@ fun ResidentWindow(
     residentId: UUID?,
     mode: WindowMode,
     onClose: () -> Unit,
-    viewModels: ResidentWindowViewModel
+    viewModel: ResidentWindowViewModel
 ) {
     val currentTab = remember { mutableStateOf(0) }
 
@@ -40,12 +40,13 @@ fun ResidentWindow(
 
             when (currentTab.value) {
                 0 -> ResidentTab(
-                    resident = viewModels.residentViewModel.loadResident(residentId),
+                    residentId,
+                    viewModel,
                     mode = mode
                 )
                 1 -> QualificationTab(
                     residentId = residentId,
-                    qualificationViewModel = viewModels.qualificationViewModel,
+                    viewModel= ResidentWindowViewModel,
                     mode = mode
                 )
                 // Other tabs

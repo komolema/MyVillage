@@ -13,6 +13,7 @@ import java.util.*
 interface ResidentDao {
     fun getAll(page: Int, pageSize: Int): List<Resident>
     fun search(query: String, page: Int, pageSize: Int): List<Resident>
+    fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded>
     fun getResidentById(id: UUID): Resident?
     fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded>
     fun getResidentExpandedById(id: UUID): ResidentExpanded?
@@ -26,14 +27,21 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
             .map { it.toResident() }
     }
 
-    override fun search(query: String, page: Int, pageSize: Int): List<Resident> = transaction {
-        Residents.select(
+    private fun searchResidents(query: String, page: Int, pageSize: Int): Query {
+        return Residents.select(
             (Residents.idNumber like "%$query%") or
                     (Residents.firstName like "%$query%") or
                     (Residents.lastName like "%$query%")
         )
             .limit(pageSize).offset(start = (page * pageSize).toLong())
-            .map { it.toResident() }
+    }
+
+    override fun search(query: String, page: Int, pageSize: Int): List<Resident> = transaction {
+        searchResidents(query, page, pageSize).map { it.toResident() }
+    }
+
+    override fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
+        searchResidents(query, page, pageSize).map { it.toResidentExpanded() }
     }
 
     override fun getResidentById(id: UUID): Resident? = transaction {
@@ -69,6 +77,18 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
 
     private fun ResultRow.toResidentExpanded(): ResidentExpanded {
         val resident = this.toResident()
+        val address = residenceDao.getAddressByResidentId(resident.id).toOption()
+        val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
+        val dependents = dependantDao.getDependentsByResidentId(resident.id)
+        return ResidentExpanded(
+            resident = resident,
+            address = address,
+            residence = residence,
+            dependants = dependents
+        )
+    }
+
+    fun mapResidentToExpanded(resident: Resident): ResidentExpanded {
         val address = residenceDao.getAddressByResidentId(resident.id).toOption()
         val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
         val dependents = dependantDao.getDependentsByResidentId(resident.id)

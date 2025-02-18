@@ -8,13 +8,13 @@ import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
-import database.dao.QualificationDao
 import models.Qualification
 import ui.screens.resident.WindowMode
+import viewmodel.ResidentWindowViewModel
 import java.util.*
 
 @Composable
-fun QualificationTab(residentId: UUID?, qualificationViewModel: QualificationViewModel, mode: WindowMode) {
+fun QualificationTab(residentId: UUID?,viewModel: ResidentWindowViewModel, mode: WindowMode) {
     val qualifications = remember { mutableStateOf(listOf<Qualification>()) }
     val editableQualification = remember { mutableStateOf(Qualification.default) }
     val dataTableState = rememberPaginatedDataTableState(10, 0, 10)

@@ -13,6 +13,7 @@ data class Resident(
     val phoneNumber: String?,
     val email: String?
 ) {
+
     companion object {
         val default = Resident(
             id = UUID.randomUUID(),

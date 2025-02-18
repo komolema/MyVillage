@@ -2,14 +2,13 @@ package ui.screens.resident
 
 import models.*
 
-class ResidentWindowState(
-    val residence: Residence,
-    val resident: Resident,
-    val qualifications: List<Qualification>,
-    val dependants: List<Dependant>,
-    val employmentHistory: List<Employment>,
-    var mode: WindowMode
-
+data class ResidentWindowState(
+    val residence: Residence = Residence.default,
+    val resident: Resident = Resident.default,
+    val qualifications: List<Qualification> = emptyList(),
+    val dependants: List<Dependant> = emptyList(),
+    val employmentHistory: List<Employment> = emptyList(),
+    var mode: WindowMode = WindowMode.VIEW
 ) {
     fun toggleMode() {
         mode = when (mode) {
@@ -17,5 +16,9 @@ class ResidentWindowState(
             WindowMode.UPDATE -> WindowMode.VIEW
             else -> mode
         }
+    }
+
+    companion object {
+        val default = ResidentWindowState()
     }
 }
