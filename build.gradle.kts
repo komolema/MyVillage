@@ -29,6 +29,10 @@ dependencies {
     // Compose dependencies
     implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
 
+    // Coroutines for Swing
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+
+
     // Exposed ORM and SQLite
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")

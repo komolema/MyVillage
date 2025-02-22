@@ -18,6 +18,7 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
+
 @Composable
 fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
@@ -100,11 +101,10 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
         }
 
         Button(
-            onClick = { navController.navigate("resident/new?mode=new") },
+            onClick = { navController.navigate("resident/?mode=new") },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text("Add New Resident")
         }
     }
 }
-

@@ -5,7 +5,10 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class DatabaseConfig(private val dbUrl: String, private val driver: String) {
+object DatabaseConfig {
+    private const val dbUrl = "jdbc:sqlite:village.db"
+    private const val driver = "org.sqlite.JDBC"
+
     fun initialize() {
         // Connect to the database
         Database.connect(dbUrl, driver)
@@ -29,5 +32,4 @@ class DatabaseConfig(private val dbUrl: String, private val driver: String) {
             )
         }
     }
-
 }
