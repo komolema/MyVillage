@@ -17,9 +17,11 @@ interface ResidentDao {
     fun getResidentById(id: UUID): Resident?
     fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded>
     fun getResidentExpandedById(id: UUID): ResidentExpanded?
+    fun createResident(residentState: Resident)
+    fun updateResident(residentState: Resident)
 }
 
-class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao): ResidentDao {
+class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao) : ResidentDao {
 
     override fun getAll(page: Int, pageSize: Int): List<Resident> = transaction {
         Residents.selectAll()
@@ -60,6 +62,36 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
         Residents.select(Residents.id eq id)
             .mapNotNull { it.toResidentExpanded() }
             .singleOrNull()
+    }
+
+    override fun createResident(residentState: Resident) {
+        transaction {
+            Residents.insert {
+                it[id] = residentState.id
+                it[idNumber] = residentState.idNumber
+                it[firstName] = residentState.firstName
+                it[lastName] = residentState.lastName
+                it[dob] = residentState.dob
+                it[email] = residentState.email
+                it[phoneNumber] = residentState.phoneNumber
+                it[gender] = residentState.gender
+
+            }
+        }
+    }
+
+    override fun updateResident(residentState: Resident) {
+        transaction {
+            Residents.update({ Residents.id eq residentState.id }) {
+                it[idNumber] = residentState.idNumber
+                it[firstName] = residentState.firstName
+                it[lastName] = residentState.lastName
+                it[dob] = residentState.dob
+                it[email] = residentState.email
+                it[phoneNumber] = residentState.phoneNumber
+                it[gender] = residentState.gender
+            }
+        }
     }
 
     private fun ResultRow.toResident(): Resident {

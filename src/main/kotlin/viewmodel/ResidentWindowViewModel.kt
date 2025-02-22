@@ -23,6 +23,8 @@ class ResidentWindowViewModel(
         data class LoadQualifications(val residentId: UUID) : Intent
         data class CreateQualification(val newQualification: Qualification) : Intent
         data class UpdateQualification(val updatedQualification: Qualification) : Intent
+        data class CreateResident(val residentState: Resident) : Intent
+        data class UpdateResident(val residentState: Resident) : Intent
     }
 
     private val _state = MutableStateFlow(ResidentWindowState())
@@ -34,6 +36,20 @@ class ResidentWindowViewModel(
             is Intent.LoadQualifications -> loadQualifications(intent.residentId)
             is Intent.CreateQualification -> createQualification(intent.newQualification)
             is Intent.UpdateQualification -> updateQualification(intent.updatedQualification)
+            is Intent.CreateResident -> createResident(intent.residentState)
+            is Intent.UpdateResident -> updateResident(intent.residentState)
+        }
+    }
+
+    private fun updateResident(residentState: Resident) {
+        CoroutineScope(Dispatchers.IO).launch {
+            residentDao.updateResident(residentState)
+        }
+    }
+
+    private fun createResident(residentState: Resident) {
+        CoroutineScope(Dispatchers.IO).launch {
+            residentDao.createResident(residentState)
         }
     }
 

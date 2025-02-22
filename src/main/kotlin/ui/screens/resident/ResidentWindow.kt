@@ -1,11 +1,13 @@
 package ui.screens.resident
 
-import VerticalTabs
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import ui.components.WindowToolbar
 import ui.screens.resident.tabs.QualificationTab
 import ui.screens.resident.tabs.ResidentTab
@@ -20,6 +22,7 @@ fun ResidentWindow(
     viewModel: ResidentWindowViewModel
 ) {
     val currentTab = remember { mutableStateOf(0) }
+    val tabTitles = listOf("Resident", "Qualifications", "Dependents", "Residence", "Employment")
 
     Scaffold(
         topBar = {
@@ -31,12 +34,19 @@ fun ResidentWindow(
             )
         }
     ) {
-        Row {
-            VerticalTabs(
-                selectedTab = currentTab.value,
-                tabs = listOf("Resident", "Qualifications", "Dependents", "Residence", "Employment"),
-                onTabSelected = { currentTab.value = it }
-            )
+        Column {
+            TabRow(
+                selectedTabIndex = currentTab.value,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = currentTab.value == index,
+                        onClick = { currentTab.value = index },
+                        text = { Text(title) }
+                    )
+                }
+            }
 
             when (currentTab.value) {
                 0 -> ResidentTab(
@@ -45,11 +55,11 @@ fun ResidentWindow(
                     mode = mode
                 )
                 1 -> QualificationTab(
-                    residentId ,
+                    residentId,
                     viewModel,
                     mode
                 )
-                // Other tabs
+                // Add other tabs as needed
             }
         }
     }
