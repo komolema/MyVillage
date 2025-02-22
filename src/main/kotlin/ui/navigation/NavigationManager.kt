@@ -1,5 +1,6 @@
 package ui.navigation
 
+import ResidentScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -10,7 +11,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
-import ui.screens.resident.ResidentScreen
 import ui.screens.resident.ResidentWindow
 import ui.screens.resident.WindowMode
 import ui.screens.resource.ResourceScreen

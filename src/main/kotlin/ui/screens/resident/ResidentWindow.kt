@@ -1,5 +1,6 @@
 package ui.screens.resident
 
+import ResidentTab
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import ui.components.WindowToolbar
 import ui.screens.resident.tabs.QualificationTab
-import ui.screens.resident.tabs.ResidentTab
 import viewmodel.ResidentWindowViewModel
 import java.util.*
 

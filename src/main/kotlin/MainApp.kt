@@ -3,6 +3,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.WindowPlacement
 import di.appModule
 import org.koin.core.context.startKoin
 import ui.navigation.AppNavigation
@@ -22,7 +24,8 @@ fun main() {
     }
     DatabaseConfig.initialize()
     application {
-        Window(onCloseRequest = ::exitApplication) {
+        val windowState = rememberWindowState(placement = WindowPlacement.Maximized)
+        Window(onCloseRequest = ::exitApplication, state = windowState) {
             App()
         }
     }

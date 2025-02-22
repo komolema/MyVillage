@@ -54,7 +54,7 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
 
     override fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
         Residents.selectAll()
-            .limit(pageSize).offset(start = (page * pageSize).toLong())
+            .limit(pageSize).offset(start = (0 * pageSize).toLong())
             .map { it.toResidentExpanded() }
     }
 
