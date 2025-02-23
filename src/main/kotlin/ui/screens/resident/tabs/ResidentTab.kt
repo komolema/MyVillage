@@ -173,20 +173,5 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
             )
         }
 
-        // Save Button (New or Edit)
-        if (mode != WindowMode.VIEW) {
-            Button(
-                onClick = {
-                    if (mode == WindowMode.NEW) {
-                        viewModel.processIntent(ResidentWindowViewModel.Intent.CreateResident(residentState))
-                    } else {
-                        viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateResident(residentState))
-                    }
-                },
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(8.dp)
-            ) {
-                Text(if (mode == WindowMode.NEW) "Create Resident" else "Save Changes")
-            }
-        }
     }
 }
