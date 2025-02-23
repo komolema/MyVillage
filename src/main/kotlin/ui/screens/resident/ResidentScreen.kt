@@ -1,3 +1,6 @@
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -5,6 +8,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.seanproctor.datatable.*
@@ -24,6 +28,7 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val query = remember { mutableStateOf("") }
     val pageSize = 20
     val dataTableState = rememberPaginatedDataTableState(10, 0, 0)
+    var clickedRow by remember { mutableStateOf(-1) }
 
     LaunchedEffect(query.value, dataTableState.pageIndex) {
         if (query.value.isEmpty()) {
@@ -55,30 +60,160 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            BasicPaginatedDataTable(
-                state = dataTableState,
-                columns = listOf(
-                    DataColumn { Text("ID Number") },
-                    DataColumn { Text("Name") },
-                    DataColumn { Text("DOB") },
-                    DataColumn { Text("Age") },
-                    DataColumn { Text("Gender") },
-                    DataColumn { Text("Address") },
-                    DataColumn { Text("Dependents") }
-                )
-            ) {
-                state.residents.forEach { resExp ->
-                    row {
-                        onClick = {
-                            navController.navigate("resident/${resExp.resident.id}?mode=view")
+            if (state.residents.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Color.Black)
+                ) {
+                    BasicPaginatedDataTable(
+                        contentPadding = PaddingValues(10.dp),
+                        separator = {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                                    .background(Color.Black)
+                            )
+                        },
+
+                        headerBackgroundColor = Color.Gray,
+                        rowBackgroundColor ={
+                            if (it == clickedRow) Color.Blue else Color.LightGray
+                        },
+                        rowHeight = 50.dp,
+
+                        state = dataTableState,
+                        columns = listOf(
+                            DataColumn(
+                                width = TableColumnWidth.Flex(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("ID Number")
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(200.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Name")
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Flex(100f)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Date of Birth")
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Flex(100f)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Age")
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(100.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Gender")
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(400.dp)
+
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Address")
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Flex(100f)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Dependants")
+                                }
+                            }
+                        )
+                    ) {
+                        state.residents.forEachIndexed { index, resExp ->
+                            val backgroundColor = if (index % 2 == 0) Color.DarkGray else Color.Gray
+                            row {
+                                color = backgroundColor
+                                onClick = {
+                                    clickedRow = index
+                                    navController.navigate("resident/${resExp.resident.id}?mode=view")
+
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text(resExp.resident.idNumber) }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text("${resExp.resident.firstName} ${resExp.resident.lastName}") }
+                                }
+                                cell {
+                                   Box(
+                                       modifier = Modifier.fillMaxWidth(),
+                                       contentAlignment = Alignment.Center
+                                   ) { Text(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE)) }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        val age = Period.between(resExp.resident.dob, LocalDate.now()).years
+                                        Text(age.toString())
+                                    }
+                                }
+                                cell {
+                                   Box(
+                                       modifier = Modifier.fillMaxWidth(),
+                                       contentAlignment = Alignment.Center
+                                   ) { Text(resExp.resident.gender)}
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text(resExp.address.fold({ "" }, { it.formatFriendly() })) }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text(resExp.dependants.size.toString()) }
+                                }
+                            }
                         }
-                        cell { Text(resExp.resident.idNumber) }
-                        cell { Text("${resExp.resident.firstName} ${resExp.resident.lastName}") }
-                        cell { Text(resExp.resident.dob.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))) }
-                        cell { Text(Period.between(resExp.resident.dob, LocalDate.now()).years.toString()) }
-                        cell { Text(resExp.resident.gender) }
-                        cell { Text(resExp.address.fold({ "" }, { it.formatFriendly() })) }
-                        cell { Text(resExp.dependants.size.toString()) }
                     }
                 }
             }
