@@ -28,6 +28,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     // Compose dependencies
     implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
+    implementation("io.github.epicarchitect:epic-calendar-compose:1.0.8")
 
     // Coroutines for Swing
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")

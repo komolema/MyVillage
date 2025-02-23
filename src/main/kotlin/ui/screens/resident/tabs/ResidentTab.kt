@@ -1,9 +1,8 @@
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,16 +10,24 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import models.Resident
+import epicarchitect.calendar.compose.basis.config.rememberBasisEpicCalendarConfig
+import epicarchitect.calendar.compose.datepicker.EpicDatePicker
+import epicarchitect.calendar.compose.datepicker.config.rememberEpicDatePickerConfig
+import epicarchitect.calendar.compose.datepicker.state.EpicDatePickerState
+import epicarchitect.calendar.compose.datepicker.state.rememberEpicDatePickerState
+import epicarchitect.calendar.compose.pager.config.rememberEpicCalendarPagerConfig
+import kotlinx.datetime.toJavaLocalDate
 import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
-import java.time.LocalDate
 import java.util.*
+import models.Resident
 
 @Composable
 fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: WindowMode) {
     var residentState by remember { mutableStateOf(Resident.default) }
+    var showDatePicker by remember { mutableStateOf(false) }
     val viewModelState by viewModel.state.collectAsStateWithLifecycle()
 
     // Load resident data once if in edit/view mode
@@ -66,29 +73,68 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("Date of Birth (YYYY-MM-DD):", modifier = Modifier.weight(1f))
+            Text("Date of Birth:", modifier = Modifier.weight(1f))
             TextField(
                 value = residentState.dob.toString(),
                 enabled = mode != WindowMode.VIEW,
-                onValueChange = { newDate ->
-                    residentState = residentState.copy(dob = LocalDate.parse(newDate))
-                },
-                modifier = Modifier.weight(2f).focusOrder(focusRequesters[2]) { next = focusRequesters[3] },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { focusRequesters[3].requestFocus() })
+                onValueChange = {},
+                modifier = Modifier.weight(2f).focusOrder(focusRequesters[2]) { next = focusRequesters[3] }
+                    .clickable { showDatePicker = true },
+                readOnly = true
             )
+        }
+
+        if (showDatePicker) {
+            Dialog(onDismissRequest = { showDatePicker = false }) {
+                EpicDatePicker(
+                    state = rememberEpicDatePickerState(
+                        selectionMode = EpicDatePickerState.SelectionMode.Single(),
+                        config = rememberEpicDatePickerConfig(
+                            pagerConfig = rememberEpicCalendarPagerConfig(
+                                basisConfig = rememberBasisEpicCalendarConfig(
+                                    displayDaysOfAdjacentMonths = false
+                                )
+                            ),
+                            selectionContentColor = MaterialTheme.colors.onPrimary,
+                            selectionContainerColor = MaterialTheme.colors.primary,
+                        )
+                    )
+                ) { date ->
+                    residentState = residentState.copy(dob = date.toJavaLocalDate())
+                    showDatePicker = false
+                }
+            }
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Text("Gender:", modifier = Modifier.weight(1f))
-            TextField(
-                value = residentState.gender,
-                enabled = mode != WindowMode.VIEW,
-                onValueChange = { residentState = residentState.copy(gender = it) },
-                modifier = Modifier.weight(2f).focusOrder(focusRequesters[3]) { next = focusRequesters[4] },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { focusRequesters[4].requestFocus() })
-            )
+            var expanded by remember { mutableStateOf(false) }
+            Box(modifier = Modifier.weight(2f)) {
+                TextField(
+                    value = residentState.gender,
+                    enabled = mode != WindowMode.VIEW,
+                    onValueChange = {},
+                    modifier = Modifier.fillMaxWidth().clickable { expanded = true },
+                    readOnly = true
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        residentState = residentState.copy(gender = "Male")
+                        expanded = false
+                    }) {
+                        Text("Male")
+                    }
+                    DropdownMenuItem(onClick = {
+                        residentState = residentState.copy(gender = "Female")
+                        expanded = false
+                    }) {
+                        Text("Female")
+                    }
+                }
+            }
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
@@ -97,9 +143,9 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
                 value = residentState.idNumber,
                 enabled = mode != WindowMode.VIEW,
                 onValueChange = { residentState = residentState.copy(idNumber = it) },
-                modifier = Modifier.weight(2f).focusOrder(focusRequesters[4]) { next = focusRequesters[5] },
+                modifier = Modifier.weight(2f).focusOrder(focusRequesters[3]) { next = focusRequesters[4] },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { focusRequesters[5].requestFocus() })
+                keyboardActions = KeyboardActions(onNext = { focusRequesters[4].requestFocus() })
             )
         }
 
@@ -108,10 +154,10 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
             TextField(
                 value = residentState.phoneNumber ?: "",
                 enabled = mode != WindowMode.VIEW,
-                onValueChange = { residentState = residentState.copy(phoneNumber = it.ifEmpty { null }) },
-                modifier = Modifier.weight(2f).focusOrder(focusRequesters[5]) { next = focusRequesters[6] },
+                onValueChange = { residentState = residentState.copy(phoneNumber = it) },
+                modifier = Modifier.weight(2f).focusOrder(focusRequesters[4]) { next = focusRequesters[5] },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { focusRequesters[6].requestFocus() })
+                keyboardActions = KeyboardActions(onNext = { focusRequesters[5].requestFocus() })
             )
         }
 
@@ -120,10 +166,10 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
             TextField(
                 value = residentState.email ?: "",
                 enabled = mode != WindowMode.VIEW,
-                onValueChange = { residentState = residentState.copy(email = it.ifEmpty { null }) },
-                modifier = Modifier.weight(2f).focusOrder(focusRequesters[6]),
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { /* Handle done action */ })
+                onValueChange = { residentState = residentState.copy(email = it) },
+                modifier = Modifier.weight(2f).focusOrder(focusRequesters[5]) { next = focusRequesters[6] },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { focusRequesters[6].requestFocus() })
             )
         }
 
