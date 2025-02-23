@@ -19,6 +19,7 @@ interface ResidentDao {
     fun getResidentExpandedById(id: UUID): ResidentExpanded?
     fun createResident(residentState: Resident)
     fun updateResident(residentState: Resident)
+    fun delete(id: UUID)
 }
 
 class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao) : ResidentDao {
@@ -91,6 +92,12 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
                 it[phoneNumber] = residentState.phoneNumber
                 it[gender] = residentState.gender
             }
+        }
+    }
+
+    override fun delete(id: UUID) {
+        transaction {
+            Residents.deleteWhere { Residents.id eq id }
         }
     }
 

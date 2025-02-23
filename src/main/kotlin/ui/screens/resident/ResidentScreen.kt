@@ -78,7 +78,7 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                         },
 
                         headerBackgroundColor = Color.Gray,
-                        rowBackgroundColor ={
+                        rowBackgroundColor = {
                             if (it == clickedRow) Color.Blue else Color.LightGray
                         },
                         rowHeight = 50.dp,
@@ -155,6 +155,16 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                 ) {
                                     Text("Dependants")
                                 }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(100.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Delete")
+                                }
                             }
                         )
                     ) {
@@ -180,10 +190,10 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                     ) { Text("${resExp.resident.firstName} ${resExp.resident.lastName}") }
                                 }
                                 cell {
-                                   Box(
-                                       modifier = Modifier.fillMaxWidth(),
-                                       contentAlignment = Alignment.Center
-                                   ) { Text(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE)) }
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE)) }
                                 }
                                 cell {
                                     Box(
@@ -195,10 +205,10 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                     }
                                 }
                                 cell {
-                                   Box(
-                                       modifier = Modifier.fillMaxWidth(),
-                                       contentAlignment = Alignment.Center
-                                   ) { Text(resExp.resident.gender)}
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) { Text(resExp.resident.gender) }
                                 }
                                 cell {
                                     Box(
@@ -211,6 +221,26 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                         modifier = Modifier.fillMaxWidth(),
                                         contentAlignment = Alignment.Center
                                     ) { Text(resExp.dependants.size.toString()) }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.processIntent(
+                                                    ResidentViewModel.Intent.DeleteResident(resExp.resident.id)
+                                                )
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete",
+                                                tint = Color.Red
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

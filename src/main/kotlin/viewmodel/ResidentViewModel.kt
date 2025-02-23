@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import database.dao.ResidentDao
 import ui.screens.resident.ResidentState
+import java.util.*
 
 class ResidentViewModel(private val residentDao: ResidentDao) {
     val PAGE_SIZE = 20
@@ -15,6 +16,7 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
     sealed interface Intent {
         data class LoadResidents(val page: Int) : Intent
         data class Search(val query: String, val page: Int) : Intent
+        data class DeleteResident(val id: UUID) : Intent
     }
 
     private val _state = MutableStateFlow(ResidentState())
@@ -24,6 +26,14 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
         when (intent) {
             is Intent.LoadResidents -> loadResidents(intent.page)
             is Intent.Search -> searchResidents(intent.query, intent.page)
+            is Intent.DeleteResident -> deleteResident(intent.id)
+        }
+    }
+
+    private fun deleteResident(id: UUID) {
+        CoroutineScope(Dispatchers.IO).launch {
+            residentDao.delete(id)
+            loadResidents(0)
         }
     }
 
