@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.seanproctor.datatable.*
@@ -21,6 +22,39 @@ import viewmodel.ResidentViewModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+
+@Composable
+private fun TableCell(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface
+        )
+    }
+}
+
+@Composable
+private fun HeaderCell(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.subtitle1,
+            color = MaterialTheme.colors.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
 
 @Composable
 fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
@@ -48,179 +82,130 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
             )
         }
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
             OutlinedTextField(
                 value = query.value,
                 onValueChange = { query.value = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 placeholder = { Text("Search residents...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true
+                leadingIcon = { 
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "Search",
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                },
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             if (state.residents.isNotEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, Color.Black)
+                        .fillMaxHeight(0.85f)
+                        .border(1.dp, Color.LightGray, shape = MaterialTheme.shapes.small)
                 ) {
                     BasicPaginatedDataTable(
-                        contentPadding = PaddingValues(10.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         separator = {
                             Spacer(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(1.dp)
-                                    .background(Color.Black)
+                                    .background(Color.LightGray.copy(alpha = 0.5f))
                             )
                         },
-
-                        headerBackgroundColor = Color.Gray,
-                        rowBackgroundColor = {
-                            if (it == clickedRow) Color.Blue else Color.LightGray
+                        headerBackgroundColor = MaterialTheme.colors.surface,
+                        rowBackgroundColor = { index ->
+                            when {
+                                index == clickedRow -> MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                                index % 2 == 0 -> Color.White
+                                else -> Color(0xFFF8F9FA)
+                            }
                         },
-                        rowHeight = 50.dp,
+                        rowHeight = 56.dp,
 
                         state = dataTableState,
                         columns = listOf(
                             DataColumn(
+                                width = TableColumnWidth.Flex(1.2f)
+                            ) {
+                                HeaderCell("ID Number")
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Flex(1.5f)
+                            ) {
+                                HeaderCell("Name")
+                            },
+                            DataColumn(
                                 width = TableColumnWidth.Flex(1f)
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("ID Number")
-                                }
+                                HeaderCell("Date of Birth")
                             },
                             DataColumn(
-                                width = TableColumnWidth.Fixed(200.dp)
+                                width = TableColumnWidth.Flex(0.5f)
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Name")
-                                }
+                                HeaderCell("Age")
                             },
                             DataColumn(
-                                width = TableColumnWidth.Flex(100f)
+                                width = TableColumnWidth.Flex(0.8f)
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Date of Birth")
-                                }
+                                HeaderCell("Gender")
                             },
                             DataColumn(
-                                width = TableColumnWidth.Flex(100f)
+                                width = TableColumnWidth.Flex(2f)
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Age")
-                                }
+                                HeaderCell("Address")
                             },
                             DataColumn(
-                                width = TableColumnWidth.Fixed(100.dp)
+                                width = TableColumnWidth.Flex(0.8f)
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Gender")
-                                }
+                                HeaderCell("Dependants")
                             },
                             DataColumn(
-                                width = TableColumnWidth.Fixed(400.dp)
-
+                                width = TableColumnWidth.Flex(0.6f)
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Address")
-                                }
-                            },
-                            DataColumn(
-                                width = TableColumnWidth.Flex(100f)
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Dependants")
-                                }
-                            },
-                            DataColumn(
-                                width = TableColumnWidth.Fixed(100.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Delete")
-                                }
+                                HeaderCell("Delete")
                             }
                         )
                     ) {
                         state.residents.forEachIndexed { index, resExp ->
-                            val backgroundColor = if (index % 2 == 0) Color.DarkGray else Color.Gray
                             row {
-                                color = backgroundColor
                                 onClick = {
                                     clickedRow = index
                                     navController.navigate("resident/${resExp.resident.id}?mode=view")
-
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text(resExp.resident.idNumber) }
+                                    TableCell(resExp.resident.idNumber)
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text("${resExp.resident.firstName} ${resExp.resident.lastName}") }
+                                    TableCell("${resExp.resident.firstName} ${resExp.resident.lastName}")
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE)) }
+                                    TableCell(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE))
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        val age = Period.between(resExp.resident.dob, LocalDate.now()).years
-                                        Text(age.toString())
-                                    }
+                                    val age = Period.between(resExp.resident.dob, LocalDate.now()).years
+                                    TableCell(age.toString())
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text(resExp.resident.gender) }
+                                    TableCell(resExp.resident.gender)
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text(resExp.address.fold({ "" }, { it.formatFriendly() })) }
+                                    TableCell(resExp.address.fold({ "" }, { it.formatFriendly() }))
                                 }
                                 cell {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text(resExp.dependants.size.toString()) }
+                                    TableCell(resExp.dependants.size.toString())
                                 }
                                 cell {
                                     Box(
@@ -232,12 +217,13 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                                 viewModel.processIntent(
                                                     ResidentViewModel.Intent.DeleteResident(resExp.resident.id)
                                                 )
-                                            }
+                                            },
+                                            modifier = Modifier.size(32.dp)
                                         ) {
                                             Icon(
                                                 Icons.Default.Delete,
                                                 contentDescription = "Delete",
-                                                tint = Color.Red
+                                                tint = MaterialTheme.colors.error
                                             )
                                         }
                                     }
@@ -248,37 +234,75 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Showing ${state.residents.size} of ${state.totalItems} residents")
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Showing ${state.residents.size} of ${state.totalItems} residents",
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    )
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = { dataTableState.pageIndex-- },
-                        enabled = dataTableState.pageIndex > 0
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(Icons.Default.ArrowBack, "Previous Page")
-                    }
+                        OutlinedButton(
+                            onClick = { dataTableState.pageIndex-- },
+                            enabled = dataTableState.pageIndex > 0,
+                            modifier = Modifier.height(36.dp)
+                        ) {
+                            Icon(Icons.Default.ArrowBack, "Previous Page")
+                        }
 
-                    Text("Page ${dataTableState.pageIndex + 1} of ${dataTableState.pageSize}")
+                        Text(
+                            "Page ${dataTableState.pageIndex + 1} of ${dataTableState.pageSize}",
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
 
-                    IconButton(
-                        onClick = { dataTableState.pageIndex++ },
-                        enabled = dataTableState.pageIndex < dataTableState.pageSize - 1
-                    ) {
-                        Icon(Icons.Default.ArrowForward, "Next Page")
+                        OutlinedButton(
+                            onClick = { dataTableState.pageIndex++ },
+                            enabled = dataTableState.pageIndex < dataTableState.pageSize - 1,
+                            modifier = Modifier.height(36.dp)
+                        ) {
+                            Icon(Icons.Default.ArrowForward, "Next Page")
+                        }
                     }
                 }
             }
 
             Button(
                 onClick = { navController.navigate("resident/?mode=new") },
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(end = 16.dp, bottom = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.primary
+                )
             ) {
-                Text("Add New Resident")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Add",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "Add New Resident",
+                    style = MaterialTheme.typography.button
+                )
             }
         }
     }
