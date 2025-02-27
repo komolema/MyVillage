@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import models.formatFriendly
 import ui.components.WindowToolbar
 import ui.screens.resident.WindowMode
+import ui.utils.ScrollableContainer
 import viewmodel.ResidentViewModel
 import java.time.LocalDate
 import java.time.Period
@@ -59,16 +61,55 @@ private fun HeaderCell(text: String) {
 @Composable
 fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
-    val query = remember { mutableStateOf("") }
+    val idNumberSearch = remember { mutableStateOf("") }
+    val firstNameSearch = remember { mutableStateOf("") }
+    val lastNameSearch = remember { mutableStateOf("") }
+    val dobSearch = remember { mutableStateOf("") }
+    val ageSearch = remember { mutableStateOf("") }
+    val genderSearch = remember { mutableStateOf("") }
+    val addressSearch = remember { mutableStateOf("") }
+    val dependantsSearch = remember { mutableStateOf("") }
     val pageSize = 20
     val dataTableState = rememberPaginatedDataTableState(10, 0, 0)
     var clickedRow by remember { mutableStateOf(-1) }
 
-    LaunchedEffect(query.value, dataTableState.pageIndex) {
-        if (query.value.isEmpty()) {
+    LaunchedEffect(
+        idNumberSearch.value,
+        firstNameSearch.value,
+        lastNameSearch.value,
+        dobSearch.value,
+        ageSearch.value,
+        genderSearch.value,
+        addressSearch.value,
+        dependantsSearch.value,
+        dataTableState.pageIndex
+    ) {
+        val hasActiveSearch = listOf(
+            idNumberSearch.value,
+            firstNameSearch.value,
+            lastNameSearch.value,
+            dobSearch.value,
+            ageSearch.value,
+            genderSearch.value,
+            addressSearch.value,
+            dependantsSearch.value
+        ).any { it.isNotEmpty() }
+
+        if (!hasActiveSearch) {
             viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize))
         } else {
-            viewModel.processIntent(ResidentViewModel.Intent.Search(query.value, dataTableState.pageIndex))
+            val searchQuery = buildString {
+                if (idNumberSearch.value.isNotEmpty()) append("id:${idNumberSearch.value} ")
+                if (firstNameSearch.value.isNotEmpty()) append("firstName:${firstNameSearch.value} ")
+                if (lastNameSearch.value.isNotEmpty()) append("lastName:${lastNameSearch.value} ")
+                if (dobSearch.value.isNotEmpty()) append("dob:${dobSearch.value} ")
+                if (ageSearch.value.isNotEmpty()) append("age:${ageSearch.value} ")
+                if (genderSearch.value.isNotEmpty()) append("gender:${genderSearch.value} ")
+                if (addressSearch.value.isNotEmpty()) append("address:${addressSearch.value} ")
+                if (dependantsSearch.value.isNotEmpty()) append("dependants:${dependantsSearch.value} ")
+            }.trim()
+
+            viewModel.processIntent(ResidentViewModel.Intent.Search(searchQuery, dataTableState.pageIndex))
         }
     }
 
@@ -87,35 +128,17 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            OutlinedTextField(
-                value = query.value,
-                onValueChange = { query.value = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                placeholder = { Text("Search residents...") },
-                leadingIcon = { 
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = "Search",
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                },
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colors.primary,
-                    unfocusedBorderColor = Color.Gray
-                )
-            )
 
             if (state.residents.isNotEmpty()) {
-                Box(
+                ScrollableContainer(
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxHeight(0.85f)
+                        .padding(horizontal = 16.dp)
                         .border(1.dp, Color.LightGray, shape = MaterialTheme.shapes.small)
                 ) {
                     BasicPaginatedDataTable(
+                        modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         separator = {
                             Spacer(
@@ -138,44 +161,164 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                         state = dataTableState,
                         columns = listOf(
                             DataColumn(
-                                width = TableColumnWidth.Flex(1.2f)
+                                width = TableColumnWidth.Fixed(150.dp)
                             ) {
-                                HeaderCell("ID Number")
+                                Column {
+                                    HeaderCell("ID Number")
+                                    OutlinedTextField(
+                                        value = idNumberSearch.value,
+                                        onValueChange = { idNumberSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
                             },
                             DataColumn(
-                                width = TableColumnWidth.Flex(1.5f)
+                                width = TableColumnWidth.Fixed(120.dp)
                             ) {
-                                HeaderCell("Name")
+                                Column {
+                                    HeaderCell("First Name")
+                                    OutlinedTextField(
+                                        value = firstNameSearch.value,
+                                        onValueChange = { firstNameSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(120.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Last Name")
+                                    OutlinedTextField(
+                                        value = lastNameSearch.value,
+                                        onValueChange = { lastNameSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(120.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Date of Birth")
+                                    OutlinedTextField(
+                                        value = dobSearch.value,
+                                        onValueChange = { dobSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(80.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Age")
+                                    OutlinedTextField(
+                                        value = ageSearch.value,
+                                        onValueChange = { ageSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(100.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Gender")
+                                    OutlinedTextField(
+                                        value = genderSearch.value,
+                                        onValueChange = { genderSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
                             },
                             DataColumn(
                                 width = TableColumnWidth.Flex(1f)
                             ) {
-                                HeaderCell("Date of Birth")
+                                Column {
+                                    HeaderCell("Address")
+                                    OutlinedTextField(
+                                        value = addressSearch.value,
+                                        onValueChange = { addressSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth(0.5f).height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
                             },
                             DataColumn(
-                                width = TableColumnWidth.Flex(0.5f)
+                                width = TableColumnWidth.Fixed(100.dp)
                             ) {
-                                HeaderCell("Age")
+                                Column {
+                                    HeaderCell("Dependants")
+                                    OutlinedTextField(
+                                        value = dependantsSearch.value,
+                                        onValueChange = { dependantsSearch.value = it },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            textColor = MaterialTheme.colors.onSurface,
+                                            placeholderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                                        ),
+                                        placeholder = { Text("Search...") }
+                                    )
+                                }
                             },
                             DataColumn(
-                                width = TableColumnWidth.Flex(0.8f)
+                                width = TableColumnWidth.Fixed(80.dp)
                             ) {
-                                HeaderCell("Gender")
-                            },
-                            DataColumn(
-                                width = TableColumnWidth.Flex(2f)
-                            ) {
-                                HeaderCell("Address")
-                            },
-                            DataColumn(
-                                width = TableColumnWidth.Flex(0.8f)
-                            ) {
-                                HeaderCell("Dependants")
-                            },
-                            DataColumn(
-                                width = TableColumnWidth.Flex(0.6f)
-                            ) {
-                                HeaderCell("Delete")
+                                Column {
+                                    HeaderCell("Delete")
+                                    Spacer(modifier = Modifier.height(40.dp))
+                                }
                             }
                         )
                     ) {
@@ -189,7 +332,10 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                     TableCell(resExp.resident.idNumber)
                                 }
                                 cell {
-                                    TableCell("${resExp.resident.firstName} ${resExp.resident.lastName}")
+                                    TableCell(resExp.resident.firstName)
+                                }
+                                cell {
+                                    TableCell(resExp.resident.lastName)
                                 }
                                 cell {
                                     TableCell(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE))

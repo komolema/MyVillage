@@ -147,11 +147,16 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
                                 }
                             }
                             JPanel().apply { 
+                                layout = java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0)
                                 add(datePicker)
+                                preferredSize = java.awt.Dimension(200, 30)
                                 isEnabled = mode != WindowMode.VIEW
                             }
                         },
-                        modifier = Modifier.align(Alignment.CenterEnd)
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(200.dp)
+                            .height(30.dp)
                     )
                 }
             }

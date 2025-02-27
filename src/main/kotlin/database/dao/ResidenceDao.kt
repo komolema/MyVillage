@@ -39,7 +39,8 @@ class ResidenceDaoImpl : ResidenceDao {
     }
 
     override fun getResidenceById(id: UUID): Residence? = transaction {
-        Residences.select(Residences.id eq id)
+        Residences.selectAll()
+            .andWhere { Residences.id eq id }
             .mapNotNull { it.toResidence() }
             .singleOrNull()
     }

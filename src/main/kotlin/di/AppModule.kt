@@ -8,7 +8,7 @@ import org.koin.dsl.module
 import viewmodel.*
 
 val daoModule = module {
-    single { AddressDao() }
+    single<AddressDao> { AddressDaoImpl() }
     single { AnimalDao() }
     single<DependantDao> { DependantDaoImpl() }
     single { EmploymentDao() }
@@ -19,7 +19,7 @@ val daoModule = module {
     single<QualificationDao> { QualificationDaoImpl() }
     single<ResidenceDao> { ResidenceDaoImpl() }
     single<ResidentDao> { ResidentDaoImpl(get(), get()) }
-    single { ResourceDao() }
+    single<ResourceDao> { ResourceDaoImpl() }
 }
 
 val viewModelModule = module {
