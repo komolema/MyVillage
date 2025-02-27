@@ -15,10 +15,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.seanproctor.datatable.*
+import com.seanproctor.datatable.DataColumn
+import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import models.formatFriendly
+import models.expanded.ResidentExpanded
 import ui.components.WindowToolbar
 import ui.screens.resident.WindowMode
 import ui.utils.ScrollableContainer
@@ -26,6 +28,50 @@ import viewmodel.ResidentViewModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+
+// State for tracking edited cells
+data class EditedCell(val rowIndex: Int, val columnName: String, val value: String)
+
+@Composable
+private fun EditableCell(
+    text: String,
+    isEditing: Boolean,
+    onValueChange: (String) -> Unit,
+    onEditComplete: () -> Unit,
+    background: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(background)
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isEditing) {
+            TextField(
+                value = text,
+                onValueChange = onValueChange,
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onEditComplete() }),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEditComplete() }
+            )
+        }
+    }
+}
 
 @Composable
 private fun TableCell(text: String) {
@@ -40,6 +86,68 @@ private fun TableCell(text: String) {
             style = MaterialTheme.typography.body2,
             color = MaterialTheme.colors.onSurface
         )
+    }
+}
+
+@Composable
+private fun TableCellWithBackground(text: String, background: Color) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(background)
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface
+        )
+    }
+}
+
+@Composable
+private fun EditableTableCell(
+    initialText: String,
+    isEditing: Boolean,
+    onValueChange: (String) -> Unit,
+    onEditComplete: () -> Unit,
+    background: Color = MaterialTheme.colors.surface
+) {
+    var text by remember { mutableStateOf(initialText) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(background)
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isEditing) {
+            TextField(
+                value = text,
+                onValueChange = { 
+                    text = it
+                    onValueChange(it)
+                },
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onEditComplete() }),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEditComplete() }
+            )
+        }
     }
 }
 
@@ -60,6 +168,52 @@ private fun HeaderCell(text: String) {
     }
 }
 
+
+@Composable
+private fun ResidentIdCell(
+    index: Int,
+    resExp: ResidentExpanded,
+    rowBackground: Color,
+    editingCell: EditedCell?,
+    editedCells: MutableMap<Pair<Int, String>, String>,
+    onEdit: (EditedCell) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(rowBackground)
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (editingCell?.rowIndex == index && editingCell.columnName == "idNumber") {
+            TextField(
+                value = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                onValueChange = { editedCells[index to "idNumber"] = it },
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { 
+                    onEdit(EditedCell(index, "idNumber", resExp.resident.idNumber))
+                }),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Text(
+                text = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { 
+                        onEdit(EditedCell(index, "idNumber", resExp.resident.idNumber))
+                    }
+            )
+        }
+    }
+}
+
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
 fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
@@ -71,6 +225,15 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val pageSize = 20
     val dataTableState = rememberPaginatedDataTableState(10, 0, 0)
     var clickedRow by remember { mutableStateOf(-1) }
+
+    // State for tracking edited cells
+    var editingCell by remember { mutableStateOf<EditedCell?>(null) }
+    var editedCells by remember { mutableStateOf(mutableMapOf<Pair<Int, String>, String>()) }
+
+    // Function to check if a row has been modified
+    fun isRowModified(rowIndex: Int): Boolean {
+        return editedCells.any { (key, _) -> key.first == rowIndex }
+    }
 
     LaunchedEffect(searchText, selectedColumn, dataTableState.pageIndex) {
         if (searchText.isEmpty()) {
@@ -172,6 +335,48 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                     )
                 }
 
+                @Composable
+                fun ResidentIdCell(
+                    index: Int,
+                    resExp: ResidentExpanded,
+                    rowBackground: Color
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(rowBackground)
+                            .padding(horizontal = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (editingCell?.rowIndex == index && editingCell?.columnName == "idNumber") {
+                            TextField(
+                                value = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                                onValueChange = { editedCells[index to "idNumber"] = it },
+                                singleLine = true,
+                                colors = TextFieldDefaults.textFieldColors(
+                                    backgroundColor = Color.Transparent
+                                ),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(onDone = { 
+                                    editingCell = EditedCell(index, "idNumber", resExp.resident.idNumber)
+                                }),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Text(
+                                text = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { 
+                                        editingCell = EditedCell(index, "idNumber", resExp.resident.idNumber)
+                                    }
+                            )
+                        }
+                    }
+                }
+
                 ScrollableContainer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -217,6 +422,30 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
                                 Column {
+                                    HeaderCell("Edit")
+                                    Spacer(modifier = Modifier.height(40.dp))
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(80.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Save")
+                                    Spacer(modifier = Modifier.height(40.dp))
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(80.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Reload")
+                                    Spacer(modifier = Modifier.height(40.dp))
+                                }
+                            },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(80.dp)
+                            ) {
+                                Column {
                                     HeaderCell("Delete")
                                     Spacer(modifier = Modifier.height(40.dp))
                                 }
@@ -224,39 +453,178 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                         )
                     ) {
                         state.residents.forEachIndexed { index, resExp ->
+                            val rowBackground = if (isRowModified(index)) Color.Yellow.copy(alpha = 0.2f)
+                                              else Color.LightGray.copy(alpha = 0.1f)
                             row {
-                                onClick = {
-                                    clickedRow = index
-                                    navController.navigate("resident/${resExp.resident.id}?mode=view")
+                                cell {
+                                    ResidentIdCell(
+                                        index = index,
+                                        resExp = resExp,
+                                        rowBackground = rowBackground
+                                    )
+                                }
+                                cell { 
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground)
+                                            .padding(horizontal = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (editingCell?.rowIndex == index && editingCell?.columnName == "firstName") {
+                                            TextField(
+                                                value = editedCells[index to "firstName"] ?: resExp.resident.firstName,
+                                                onValueChange = { editedCells[index to "firstName"] = it },
+                                                singleLine = true,
+                                                colors = TextFieldDefaults.textFieldColors(
+                                                    backgroundColor = Color.Transparent
+                                                ),
+                                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                                keyboardActions = KeyboardActions(onDone = { 
+                                                    editingCell = null 
+                                                }),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        } else {
+                                            Text(
+                                                text = editedCells[index to "firstName"] ?: resExp.resident.firstName,
+                                                style = MaterialTheme.typography.body2,
+                                                color = MaterialTheme.colors.onSurface,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable { 
+                                                        editingCell = EditedCell(index, "firstName", resExp.resident.firstName)
+                                                    }
+                                            )
+                                        }
+                                    }
                                 }
                                 cell {
-                                    TableCell(resExp.resident.idNumber)
+                                    EditableTableCell(
+                                        initialText = resExp.resident.lastName,
+                                        isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "lastName",
+                                        onValueChange = { editedCells[index to "lastName"] = it },
+                                        onEditComplete = { editingCell = EditedCell(index, "lastName", resExp.resident.lastName) },
+                                        background = rowBackground
+                                    )
                                 }
                                 cell {
-                                    TableCell(resExp.resident.firstName)
-                                }
-                                cell {
-                                    TableCell(resExp.resident.lastName)
-                                }
-                                cell {
-                                    TableCell(resExp.resident.dob.format(DateTimeFormatter.ISO_DATE))
+                                    EditableTableCell(
+                                        initialText = resExp.resident.dob.format(DateTimeFormatter.ISO_DATE),
+                                        isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "dob",
+                                        onValueChange = { editedCells[index to "dob"] = it },
+                                        onEditComplete = { editingCell = EditedCell(index, "dob", resExp.resident.dob.format(DateTimeFormatter.ISO_DATE)) },
+                                        background = rowBackground
+                                    )
                                 }
                                 cell {
                                     val age = Period.between(resExp.resident.dob, LocalDate.now()).years
-                                    TableCell(age.toString())
+                                    TableCell(age.toString()) // Age is calculated, not editable
                                 }
                                 cell {
-                                    TableCell(resExp.resident.gender)
+                                    EditableTableCell(
+                                        initialText = resExp.resident.gender,
+                                        isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "gender",
+                                        onValueChange = { editedCells[index to "gender"] = it },
+                                        onEditComplete = { editingCell = EditedCell(index, "gender", resExp.resident.gender) },
+                                        background = rowBackground
+                                    )
                                 }
                                 cell {
-                                    TableCell(resExp.address.fold({ "" }, { it.formatFriendly() }))
+                                    TableCell(resExp.address.fold({ "" }, { it.formatFriendly() })) // Address shown in different view
                                 }
                                 cell {
-                                    TableCell(resExp.dependants.size.toString())
+                                    TableCellWithBackground(resExp.dependants.size.toString(), rowBackground) // Dependants count is read-only
                                 }
                                 cell {
                                     Box(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                navController.navigate("resident/${resExp.resident.id}?mode=update")
+                                            },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = "Edit",
+                                                tint = MaterialTheme.colors.primary
+                                            )
+                                        }
+                                    }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                if (isRowModified(index)) {
+                                                    // Save changes
+                                                    viewModel.processIntent(
+                                                        ResidentViewModel.Intent.SaveResidentChanges(
+                                                            resExp.resident.copy(
+                                                                idNumber = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                                                                firstName = editedCells[index to "firstName"] ?: resExp.resident.firstName,
+                                                                lastName = editedCells[index to "lastName"] ?: resExp.resident.lastName,
+                                                                gender = editedCells[index to "gender"] ?: resExp.resident.gender,
+                                                                dob = editedCells[index to "dob"]?.let { LocalDate.parse(it) } ?: resExp.resident.dob
+                                                            )
+                                                        )
+                                                    )
+                                                    // Clear edited cells for this row
+                                                    editedCells = editedCells.filterNot { it.key.first == index }.toMutableMap()
+                                                }
+                                            },
+                                            enabled = isRowModified(index),
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Done,
+                                                contentDescription = "Save",
+                                                tint = if (isRowModified(index)) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
+                                            )
+                                        }
+                                    }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                if (isRowModified(index)) {
+                                                    // Clear edited cells for this row
+                                                    editedCells = editedCells.filterNot { it.key.first == index }.toMutableMap()
+                                                    editingCell = null
+                                                }
+                                            },
+                                            enabled = isRowModified(index),
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Close,
+                                                contentDescription = "Reload",
+                                                tint = if (isRowModified(index)) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
+                                            )
+                                        }
+                                    }
+                                }
+                                cell {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         IconButton(

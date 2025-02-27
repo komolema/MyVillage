@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import database.dao.ResidentDao
+import models.Resident
 import ui.screens.resident.ResidentState
 import java.util.*
 
@@ -17,6 +18,7 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
         data class LoadResidents(val page: Int) : Intent
         data class Search(val query: String, val page: Int) : Intent
         data class DeleteResident(val id: UUID) : Intent
+        data class SaveResidentChanges(val resident: Resident) : Intent
     }
 
     private val _state = MutableStateFlow(ResidentState())
@@ -27,6 +29,22 @@ class ResidentViewModel(private val residentDao: ResidentDao) {
             is Intent.LoadResidents -> loadResidents(intent.page)
             is Intent.Search -> searchResidents(intent.query, intent.page)
             is Intent.DeleteResident -> deleteResident(intent.id)
+            is Intent.SaveResidentChanges -> saveResidentChanges(intent.resident)
+        }
+    }
+
+    private fun saveResidentChanges(resident: Resident) {
+        CoroutineScope(Dispatchers.IO).launch {
+            // Get the current resident to preserve unchanged fields
+            val currentResident = residentDao.getResidentById(resident.id)
+            if (currentResident != null) {
+                // Update with preserved fields
+                residentDao.updateResident(resident.copy(
+                    email = currentResident.email,
+                    phoneNumber = currentResident.phoneNumber
+                ))
+                loadResidents(0) // Reload the current page
+            }
         }
     }
 
