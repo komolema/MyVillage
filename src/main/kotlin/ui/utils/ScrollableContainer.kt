@@ -5,6 +5,7 @@ import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -23,16 +24,21 @@ fun ScrollableContainer(
     val verticalScrollState = rememberScrollState()
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .matchParentSize()
                 .padding(end = 12.dp, bottom = 12.dp)
                 .horizontalScroll(horizontalScrollState)
                 .verticalScroll(verticalScrollState)
         ) {
-            content()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                content()
+            }
         }
 
         VerticalScrollbar(

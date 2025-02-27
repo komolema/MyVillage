@@ -4,6 +4,7 @@ import ResidentTab
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
@@ -19,8 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ui.components.WindowToolbar
 import ui.screens.resident.tabs.QualificationTab
+import ui.screens.resident.tabs.DependentsTab
+import ui.screens.resident.tabs.ResidenceTab
+import ui.screens.resident.tabs.EmploymentTab
 import viewmodel.ResidentWindowViewModel
 import java.util.*
+
+private fun isTabDisabled(index: Int, mode: WindowMode, viewModel: ResidentWindowViewModel): Boolean {
+    return when {
+        mode == WindowMode.NEW && index > 0 -> true
+        viewModel.state.value.resident == null && index > 0 -> true
+        else -> false
+    }
+}
 
 @Composable
 fun ResidentWindow(
@@ -59,8 +71,17 @@ fun ResidentWindow(
                     tabTitles.forEachIndexed { index, title ->
                         Tab(
                             selected = currentTab.value == index,
-                            onClick = { currentTab.value = index },
-                            text = { Text(title) }
+                            onClick = { if (!isTabDisabled(index, mode, viewModel)) currentTab.value = index },
+                            enabled = !isTabDisabled(index, mode, viewModel),
+                            text = { 
+                                Text(
+                                    text = title,
+                                    color = if (isTabDisabled(index, mode, viewModel)) 
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    else 
+                                        MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         )
                     }
                 }
@@ -77,7 +98,21 @@ fun ResidentWindow(
                             viewModel,
                             mode
                         )
-                        // Add other tabs as needed
+                        2 -> DependentsTab(
+                            residentId,
+                            viewModel,
+                            mode
+                        )
+                        3 -> ResidenceTab(
+                            residentId,
+                            viewModel,
+                            mode
+                        )
+                        4 -> EmploymentTab(
+                            residentId,
+                            viewModel,
+                            mode
+                        )
                     }
                 }
             }
@@ -96,7 +131,7 @@ fun ResidentWindow(
                     Button(
                         onClick = onClose,
                         colors = ButtonDefaults.buttonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
+                            contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Cancel")
@@ -106,12 +141,18 @@ fun ResidentWindow(
 
                     if (mode != WindowMode.VIEW) {
                         Button(
-                            onClick = { /* Handle save */ },
+                            onClick = { 
+                                viewModel.processIntent(
+                                    ResidentWindowViewModel.Intent.UpdateResident(
+                                        residentState = viewModel.state.value.resident
+                                    )
+                                )
+                            },
                             colors = ButtonDefaults.buttonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
+                                containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Icon(Icons.Filled.Add, contentDescription = "Save")
+                            Icon(Icons.Default.Add, contentDescription = "Save")
                             Spacer(Modifier.width(4.dp))
                             Text("Save")
                         }
@@ -128,18 +169,33 @@ fun ResidentWindow(
                                         residentState = viewModel.state.value.resident
                                     )
                                 )
-                            }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
                         ) {
                             Text("Create Resident")
                         }
                     }
 
-                    if (currentTab.value < tabTitles.size - 1) {
+                    if (currentTab.value > 0 && !isTabDisabled(currentTab.value, mode, viewModel)) {
+                        Button(
+                            onClick = { currentTab.value-- },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
+                            Spacer(Modifier.width(4.dp))
+                            Text("Previous")
+                        }
+                    }
+
+                    if (currentTab.value < tabTitles.size - 1 && !isTabDisabled(currentTab.value + 1, mode, viewModel)) {
                         Button(
                             onClick = { currentTab.value++ },
                             colors = ButtonDefaults.buttonColors(
-
-                                contentColor = MaterialTheme.colorScheme.primary
+                                containerColor = MaterialTheme.colorScheme.secondary
                             )
                         ) {
                             Text("Next")

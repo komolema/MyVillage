@@ -10,7 +10,7 @@ import viewmodel.ResidentWindowViewModel
 import java.util.*
 
 @Composable
-fun EmploymentTab(
+fun DependentsTab(
     residentId: UUID?,
     viewModel: ResidentWindowViewModel,
     mode: WindowMode
@@ -21,13 +21,13 @@ fun EmploymentTab(
             .padding(16.dp)
     ) {
         Text(
-            text = "Employment Information",
+            text = "Dependents Information",
             style = MaterialTheme.typography.headlineSmall
         )
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // TODO: Implement employment details form
-        Text("Employment information management will be implemented here")
+        // TODO: Implement dependents list and form
+        Text("Dependents management will be implemented here")
     }
 }
