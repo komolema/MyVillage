@@ -8,14 +8,17 @@ data class ResidentWindowState(
     val qualifications: List<Qualification> = emptyList(),
     val dependants: List<Dependant> = emptyList(),
     val employmentHistory: List<Employment> = emptyList(),
-    var mode: WindowMode = WindowMode.VIEW
+    val mode: WindowMode = WindowMode.VIEW,
+    val saveSuccess: Boolean = false,
+    val error: String? = null
 ) {
-    fun toggleMode() {
-        mode = when (mode) {
+    fun withToggledMode(): ResidentWindowState {
+        val newMode = when (mode) {
             WindowMode.VIEW -> WindowMode.UPDATE
             WindowMode.UPDATE -> WindowMode.VIEW
             else -> mode
         }
+        return this.copy(mode = newMode)
     }
 
     companion object {

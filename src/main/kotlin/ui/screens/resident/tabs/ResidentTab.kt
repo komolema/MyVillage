@@ -28,6 +28,7 @@ import org.jdatepicker.impl.UtilDateModel
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import javax.swing.JFormattedTextField
+import ui.screens.resident.tabs.TabCompletionState
 
 enum class Gender(val displayName: String) {
     MALE("Male"),
@@ -39,7 +40,12 @@ enum class Gender(val displayName: String) {
 }
 
 @Composable
-fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: WindowMode) {
+fun ResidentTab(
+    residentId: UUID?,
+    viewModel: ResidentWindowViewModel,
+    mode: WindowMode,
+    onTabStateChange: (TabCompletionState) -> Unit = {}
+) {
     var residentState by remember { mutableStateOf(Resident.default) }
     val viewModelState by viewModel.state.collectAsStateWithLifecycle()
 
@@ -80,6 +86,33 @@ fun ResidentTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: Win
     LaunchedEffect(viewModelState.resident) {
         if (mode != WindowMode.NEW) {
             residentState = viewModelState.resident
+        }
+    }
+
+    // Function to check form completion
+    fun checkFormCompletion(): TabCompletionState {
+        val requiredFields = listOf(
+            residentState.firstName,
+            residentState.lastName,
+            residentState.idNumber
+        )
+
+        return when {
+            requiredFields.all { it.isNotBlank() } -> TabCompletionState.DONE
+            requiredFields.any { it.isNotBlank() } -> TabCompletionState.IN_PROGRESS
+            else -> TabCompletionState.TODO
+        }
+    }
+
+    // Monitor form changes and update tab state
+    LaunchedEffect(residentState) {
+        onTabStateChange(checkFormCompletion())
+
+        // Only update if not in VIEW mode and there are actual changes
+        if (mode != WindowMode.VIEW && residentState != viewModelState.resident) {
+            viewModel.processIntent(
+                ResidentWindowViewModel.Intent.UpdateResidentState(residentState)
+            )
         }
     }
 

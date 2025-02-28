@@ -62,6 +62,13 @@ dependencies {
     implementation("io.insert-koin:koin-compose:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel-navigation:$koinVersion")
+
+    // Test dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testImplementation("org.mockito:mockito-core:5.3.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }
 
 tasks.withType<Test> {

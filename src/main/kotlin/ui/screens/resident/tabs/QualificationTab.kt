@@ -13,12 +13,32 @@ import models.Qualification
 import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
 import java.util.*
+import ui.screens.resident.tabs.TabCompletionState
 
 @Composable
-fun QualificationTab(residentId: UUID?, viewModel: ResidentWindowViewModel, mode: WindowMode) {
+fun QualificationTab(
+    residentId: UUID?,
+    viewModel: ResidentWindowViewModel,
+    mode: WindowMode,
+    onTabStateChange: (TabCompletionState) -> Unit = {}
+) {
     val qualifications = viewModel.state.collectAsStateWithLifecycle().value.qualifications
     val editableQualification = remember { mutableStateOf(Qualification.default) }
     val dataTableState = rememberPaginatedDataTableState(10, 0, 10)
+
+    // Function to check completion state
+    fun checkCompletionState(): TabCompletionState {
+        return when {
+            qualifications.isNotEmpty() -> TabCompletionState.DONE
+            editableQualification.value.name.isNotBlank() -> TabCompletionState.IN_PROGRESS
+            else -> TabCompletionState.TODO
+        }
+    }
+
+    // Monitor changes and update tab state
+    LaunchedEffect(qualifications, editableQualification.value) {
+        onTabStateChange(checkCompletionState())
+    }
 
     if(mode != WindowMode.NEW && residentId != null) {
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadQualifications(residentId!!))

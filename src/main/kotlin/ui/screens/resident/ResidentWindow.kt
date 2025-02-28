@@ -2,6 +2,7 @@ package ui.screens.resident
 
 import ResidentTab
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -9,10 +10,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabPosition
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -26,9 +32,13 @@ import ui.screens.resident.tabs.EmploymentTab
 import viewmodel.ResidentWindowViewModel
 import java.util.*
 
-private fun isTabDisabled(index: Int, mode: WindowMode, viewModel: ResidentWindowViewModel): Boolean {
+import ui.screens.resident.tabs.TabCompletionState
+import ui.screens.resident.tabs.TabState
+import models.Resident
+
+internal fun isTabDisabled(index: Int, mode: WindowMode, viewModel: ResidentWindowViewModel): Boolean {
     return when {
-        mode == WindowMode.NEW && index > 0 -> true
+        mode == WindowMode.NEW && index > 0 && viewModel.state.value.resident == Resident.default -> true
         viewModel.state.value.resident == null && index > 0 -> true
         else -> false
     }
@@ -41,15 +51,50 @@ fun ResidentWindow(
     onClose: () -> Unit,
     viewModel: ResidentWindowViewModel
 ) {
+    // Load resident data when window opens
+    LaunchedEffect(residentId) {
+        if (residentId != null) {
+            viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(residentId))
+        }
+    }
     val currentTab = remember { mutableStateOf(0) }
     val tabTitles = listOf("Resident", "Qualifications", "Dependents", "Residence", "Employment")
+    val tabStates = remember { mutableStateOf(List(tabTitles.size) { TabState() }) }
+
+    fun getTabColor(state: TabCompletionState): androidx.compose.ui.graphics.Color {
+        return when (state) {
+            TabCompletionState.TODO -> androidx.compose.ui.graphics.Color(0xFFFF6B6B)  // Soft red
+            TabCompletionState.IN_PROGRESS -> androidx.compose.ui.graphics.Color(0xFFFFD93D)  // Soft yellow
+            TabCompletionState.DONE -> androidx.compose.ui.graphics.Color(0xFF6BCB77)  // Soft green
+        }
+    }
+
+    fun updateTabState(index: Int, newState: TabCompletionState) {
+        tabStates.value = tabStates.value.toMutableList().apply {
+            set(index, TabState(newState))
+        }
+    }
 
     Scaffold(
         topBar = {
             WindowToolbar(
-                mode = mode,
-                onToggleEdit = { /* Handle mode toggle */ },
-                onSave = { /* Handle save */ },
+                mode = viewModel.state.value.mode,
+                onToggleEdit = { 
+                    viewModel.processIntent(ResidentWindowViewModel.Intent.ToggleMode)
+                },
+                onSave = { 
+                    val currentState = viewModel.state.value
+                    val currentResident = currentState.resident
+                    if (currentResident != Resident.default) {
+                        viewModel.processIntent(
+                            if (currentState.mode == WindowMode.NEW) {
+                                ResidentWindowViewModel.Intent.CreateResident(currentResident)
+                            } else {
+                                ResidentWindowViewModel.Intent.UpdateResident(currentResident)
+                            }
+                        )
+                    }
+                },
                 onClose = onClose
             )
         }
@@ -62,24 +107,61 @@ fun ResidentWindow(
             Spacer(modifier = Modifier.height(50.dp))
             Divider(thickness = 1.dp)
 
+            // Status messages
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                viewModel.state.value.error?.let { error ->
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+                if (viewModel.state.value.saveSuccess) {
+                    Text(
+                        text = "Changes saved successfully",
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+            }
+
             // Middle section - Tabs and content
             Column(modifier = Modifier.weight(1f)) {
                 TabRow(
                     selectedTabIndex = currentTab.value,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    indicator = { tabPositions ->
+                        if (currentTab.value < tabPositions.size) {
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[currentTab.value]),
+                                color = getTabColor(tabStates.value[currentTab.value].completionState)
+                            )
+                        }
+                    }
                 ) {
                     tabTitles.forEachIndexed { index, title ->
                         Tab(
                             selected = currentTab.value == index,
                             onClick = { if (!isTabDisabled(index, mode, viewModel)) currentTab.value = index },
                             enabled = !isTabDisabled(index, mode, viewModel),
+                            modifier = Modifier.background(
+                                color = getTabColor(tabStates.value[index].completionState).copy(
+                                    alpha = when {
+                                        isTabDisabled(index, mode, viewModel) -> 0.12f
+                                        currentTab.value == index -> 1f
+                                        else -> 0.6f
+                                    }
+                                )
+                            ),
                             text = { 
                                 Text(
                                     text = title,
-                                    color = if (isTabDisabled(index, mode, viewModel)) 
+                                    color = if (isTabDisabled(index, mode, viewModel))
                                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                    else 
-                                        MaterialTheme.colorScheme.onSurface
+                                    else
+                                        MaterialTheme.colorScheme.surface
                                 )
                             }
                         )
@@ -91,27 +173,52 @@ fun ResidentWindow(
                         0 -> ResidentTab(
                             residentId,
                             viewModel,
-                            mode = mode
+                            mode = mode,
+                            onTabStateChange = { state ->
+                                tabStates.value = tabStates.value.toMutableList().apply {
+                                    set(0, TabState(state))
+                                }
+                            }
                         )
                         1 -> QualificationTab(
                             residentId,
                             viewModel,
-                            mode
+                            mode,
+                            onTabStateChange = { state ->
+                                tabStates.value = tabStates.value.toMutableList().apply {
+                                    set(1, TabState(state))
+                                }
+                            }
                         )
                         2 -> DependentsTab(
                             residentId,
                             viewModel,
-                            mode
+                            mode,
+                            onTabStateChange = { state ->
+                                tabStates.value = tabStates.value.toMutableList().apply {
+                                    set(2, TabState(state))
+                                }
+                            }
                         )
                         3 -> ResidenceTab(
                             residentId,
                             viewModel,
-                            mode
+                            mode,
+                            onTabStateChange = { state ->
+                                tabStates.value = tabStates.value.toMutableList().apply {
+                                    set(3, TabState(state))
+                                }
+                            }
                         )
                         4 -> EmploymentTab(
                             residentId,
                             viewModel,
-                            mode
+                            mode,
+                            onTabStateChange = { state ->
+                                tabStates.value = tabStates.value.toMutableList().apply {
+                                    set(4, TabState(state))
+                                }
+                            }
                         )
                     }
                 }
@@ -161,22 +268,6 @@ fun ResidentWindow(
 
                 // Right side buttons
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (mode == WindowMode.NEW) {
-                        Button(
-                            onClick = {
-                                viewModel.processIntent(
-                                    ResidentWindowViewModel.Intent.CreateResident(
-                                        residentState = viewModel.state.value.resident
-                                    )
-                                )
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text("Create Resident")
-                        }
-                    }
 
                     if (currentTab.value > 0 && !isTabDisabled(currentTab.value, mode, viewModel)) {
                         Button(
