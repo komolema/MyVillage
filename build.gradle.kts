@@ -69,6 +69,10 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.3.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(compose.desktop.uiTestJUnit4)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.compose.ui:ui-test:1.5.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4:1.5.1")
 }
 
 tasks.withType<Test> {

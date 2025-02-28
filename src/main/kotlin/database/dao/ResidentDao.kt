@@ -31,12 +31,14 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
     }
 
     private fun searchResidents(query: String, page: Int, pageSize: Int): Query {
-        return Residents.select(
-            (Residents.idNumber like "%$query%") or
-                    (Residents.firstName like "%$query%") or
-                    (Residents.lastName like "%$query%")
-        )
-            .limit(pageSize).offset(start = (page * pageSize).toLong())
+        return Residents.selectAll()
+            .andWhere { 
+                (Residents.idNumber like "%$query%") or
+                (Residents.firstName like "%$query%") or
+                (Residents.lastName like "%$query%")
+            }
+            .limit(pageSize)
+            .offset(start = (page * pageSize).toLong())
     }
 
     override fun search(query: String, page: Int, pageSize: Int): List<Resident> = transaction {
@@ -48,7 +50,8 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
     }
 
     override fun getResidentById(id: UUID): Resident? = transaction {
-        Residents.select(Residents.id eq id)
+        Residents.selectAll()
+            .andWhere { Residents.id eq id }
             .mapNotNull { it.toResident() }
             .singleOrNull()
     }
@@ -60,7 +63,8 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
     }
 
     override fun getResidentExpandedById(id: UUID): ResidentExpanded? = transaction {
-        Residents.select(Residents.id eq id)
+        Residents.selectAll()
+            .andWhere { Residents.id eq id }
             .mapNotNull { it.toResidentExpanded() }
             .singleOrNull()
     }

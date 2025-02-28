@@ -1,3 +1,5 @@
+package ui.screens.resident
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -112,9 +114,11 @@ private fun EditableTableCell(
     isEditing: Boolean,
     onValueChange: (String) -> Unit,
     onEditComplete: () -> Unit,
-    background: Color = MaterialTheme.colors.surface
+    background: Color = MaterialTheme.colors.surface,
+    windowMode: WindowMode = WindowMode.VIEW
 ) {
     var text by remember { mutableStateOf(initialText) }
+    val isEditable = windowMode == WindowMode.UPDATE
 
     Box(
         modifier = Modifier
@@ -123,7 +127,7 @@ private fun EditableTableCell(
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (isEditing) {
+        if (isEditing && isEditable) {
             TextField(
                 value = text,
                 onValueChange = { 
@@ -136,7 +140,8 @@ private fun EditableTableCell(
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { onEditComplete() }),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isEditable
             )
         } else {
             Text(
@@ -145,7 +150,11 @@ private fun EditableTableCell(
                 color = MaterialTheme.colors.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onEditComplete() }
+                    .clickable(enabled = isEditable) { 
+                        if (isEditable) {
+                            onEditComplete()
+                        }
+                    }
             )
         }
     }
@@ -176,7 +185,8 @@ private fun ResidentIdCell(
     rowBackground: Color,
     editingCell: EditedCell?,
     editedCells: MutableMap<Pair<Int, String>, String>,
-    onEdit: (EditedCell) -> Unit
+    onEdit: (EditedCell) -> Unit,
+    windowMode: WindowMode
 ) {
     Box(
         modifier = Modifier
@@ -185,7 +195,8 @@ private fun ResidentIdCell(
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (editingCell?.rowIndex == index && editingCell.columnName == "idNumber") {
+        val isEditable = windowMode == WindowMode.UPDATE
+        if (editingCell?.rowIndex == index && editingCell.columnName == "idNumber" && isEditable) {
             TextField(
                 value = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
                 onValueChange = { editedCells[index to "idNumber"] = it },
@@ -197,7 +208,8 @@ private fun ResidentIdCell(
                 keyboardActions = KeyboardActions(onDone = { 
                     onEdit(EditedCell(index, "idNumber", resExp.resident.idNumber))
                 }),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isEditable
             )
         } else {
             Text(
@@ -206,8 +218,10 @@ private fun ResidentIdCell(
                 color = MaterialTheme.colors.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { 
-                        onEdit(EditedCell(index, "idNumber", resExp.resident.idNumber))
+                    .clickable(enabled = isEditable) { 
+                        if (isEditable) {
+                            onEdit(EditedCell(index, "idNumber", resExp.resident.idNumber))
+                        }
                     }
             )
         }
@@ -216,11 +230,12 @@ private fun ResidentIdCell(
 
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
-fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
+internal fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
     var searchText by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var selectedColumn by remember { mutableStateOf("ID Number") }
+    var windowMode by remember { mutableStateOf(WindowMode.VIEW) }
     val columns = listOf("ID Number", "First Name", "Last Name", "Date of Birth", "Age", "Gender", "Phone Number", "Email")
     val pageSize = 20
     val dataTableState = rememberPaginatedDataTableState(10, 0, 0)
@@ -258,9 +273,36 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     Scaffold(
         topBar = {
             WindowToolbar(
-                mode = WindowMode.VIEW,
-                onToggleEdit = { /* Handle mode toggle */ },
-                onSave = { /* Handle save */ },
+                mode = windowMode,
+                onToggleEdit = { 
+                    windowMode = when (windowMode) {
+                        WindowMode.VIEW -> WindowMode.UPDATE
+                        WindowMode.UPDATE -> WindowMode.VIEW
+                        else -> windowMode
+                    }
+                },
+                onSave = { 
+                    // Save changes and switch back to view mode
+                    if (windowMode == WindowMode.UPDATE) {
+                        // Save all modified rows
+                        state.residents.forEachIndexed { index, resExp ->
+                            if (isRowModified(index)) {
+                                val updatedResident = resExp.resident.copy(
+                                    idNumber = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                                    firstName = editedCells[index to "firstName"] ?: resExp.resident.firstName,
+                                    lastName = editedCells[index to "lastName"] ?: resExp.resident.lastName,
+                                    dob = editedCells[index to "dob"]?.let { LocalDate.parse(it) } ?: resExp.resident.dob,
+                                    gender = editedCells[index to "gender"] ?: resExp.resident.gender
+                                )
+                                viewModel.processIntent(ResidentViewModel.Intent.SaveResidentChanges(updatedResident))
+                            }
+                        }
+                        // Clear editing state
+                        editingCell = null
+                        editedCells.clear()
+                        windowMode = WindowMode.VIEW
+                    }
+                },
                 onClose = { navController.popBackStack() }
             )
         }
@@ -335,47 +377,6 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                     )
                 }
 
-                @Composable
-                fun ResidentIdCell(
-                    index: Int,
-                    resExp: ResidentExpanded,
-                    rowBackground: Color
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(rowBackground)
-                            .padding(horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (editingCell?.rowIndex == index && editingCell?.columnName == "idNumber") {
-                            TextField(
-                                value = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
-                                onValueChange = { editedCells[index to "idNumber"] = it },
-                                singleLine = true,
-                                colors = TextFieldDefaults.textFieldColors(
-                                    backgroundColor = Color.Transparent
-                                ),
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                keyboardActions = KeyboardActions(onDone = { 
-                                    editingCell = EditedCell(index, "idNumber", resExp.resident.idNumber)
-                                }),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
-                            Text(
-                                text = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
-                                style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { 
-                                        editingCell = EditedCell(index, "idNumber", resExp.resident.idNumber)
-                                    }
-                            )
-                        }
-                    }
-                }
 
                 ScrollableContainer(
                     modifier = Modifier
@@ -460,7 +461,17 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                     ResidentIdCell(
                                         index = index,
                                         resExp = resExp,
-                                        rowBackground = rowBackground
+                                        rowBackground = rowBackground,
+                                        editingCell = editingCell,
+                                        editedCells = editedCells,
+                                        onEdit = { cell ->
+                                            // Clear previous edits if switching to a different row
+                                            if (editingCell?.rowIndex != cell.rowIndex) {
+                                                editedCells.clear()
+                                            }
+                                            editingCell = cell
+                                        },
+                                        windowMode = windowMode
                                     )
                                 }
                                 cell { 
@@ -471,7 +482,8 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                             .padding(horizontal = 8.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        if (editingCell?.rowIndex == index && editingCell?.columnName == "firstName") {
+                                        val isEditable = windowMode == WindowMode.UPDATE
+                                        if (editingCell?.rowIndex == index && editingCell?.columnName == "firstName" && isEditable) {
                                             TextField(
                                                 value = editedCells[index to "firstName"] ?: resExp.resident.firstName,
                                                 onValueChange = { editedCells[index to "firstName"] = it },
@@ -483,7 +495,8 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                                 keyboardActions = KeyboardActions(onDone = { 
                                                     editingCell = null 
                                                 }),
-                                                modifier = Modifier.fillMaxWidth()
+                                                modifier = Modifier.fillMaxWidth(),
+                                                enabled = isEditable
                                             )
                                         } else {
                                             Text(
@@ -492,8 +505,10 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                                 color = MaterialTheme.colors.onSurface,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clickable { 
-                                                        editingCell = EditedCell(index, "firstName", resExp.resident.firstName)
+                                                    .clickable(enabled = isEditable) { 
+                                                        if (isEditable) {
+                                                            editingCell = EditedCell(index, "firstName", resExp.resident.firstName)
+                                                        }
                                                     }
                                             )
                                         }
@@ -505,7 +520,8 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                         isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "lastName",
                                         onValueChange = { editedCells[index to "lastName"] = it },
                                         onEditComplete = { editingCell = EditedCell(index, "lastName", resExp.resident.lastName) },
-                                        background = rowBackground
+                                        background = rowBackground,
+                                        windowMode = windowMode
                                     )
                                 }
                                 cell {
@@ -514,7 +530,8 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                         isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "dob",
                                         onValueChange = { editedCells[index to "dob"] = it },
                                         onEditComplete = { editingCell = EditedCell(index, "dob", resExp.resident.dob.format(DateTimeFormatter.ISO_DATE)) },
-                                        background = rowBackground
+                                        background = rowBackground,
+                                        windowMode = windowMode
                                     )
                                 }
                                 cell {
@@ -527,7 +544,8 @@ fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
                                         isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "gender",
                                         onValueChange = { editedCells[index to "gender"] = it },
                                         onEditComplete = { editingCell = EditedCell(index, "gender", resExp.resident.gender) },
-                                        background = rowBackground
+                                        background = rowBackground,
+                                        windowMode = windowMode
                                     )
                                 }
                                 cell {
