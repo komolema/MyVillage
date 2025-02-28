@@ -1,7 +1,7 @@
 package models
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class Resident(
     val id: UUID,
@@ -10,10 +10,9 @@ data class Resident(
     val dob: LocalDate,
     val gender: String,
     val idNumber: String,
-    val phoneNumber: String?,
-    val email: String?
+    val phoneNumber: String? = null,
+    val email: String? = null
 ) {
-
     companion object {
         val default = Resident(
             id = UUID.randomUUID(),

@@ -1,6 +1,6 @@
 package ui.screens.resident
 
-import ResidentTab
+import ui.screens.resident.tabs.ResidentTab
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
@@ -57,6 +57,14 @@ fun ResidentWindow(
             viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(residentId))
         }
     }
+
+    // Close window when save is successful
+    LaunchedEffect(viewModel.state.value.saveSuccess) {
+        if (viewModel.state.value.saveSuccess) {
+            onClose()
+        }
+    }
+
     val currentTab = remember { mutableStateOf(0) }
     val tabTitles = listOf("Resident", "Qualifications", "Dependents", "Residence", "Employment")
     val tabStates = remember { mutableStateOf(List(tabTitles.size) { TabState() }) }
@@ -72,6 +80,12 @@ fun ResidentWindow(
     fun updateTabState(index: Int, newState: TabCompletionState) {
         tabStates.value = tabStates.value.toMutableList().apply {
             set(index, TabState(newState))
+        }
+    }
+
+    LaunchedEffect(viewModel.state.value.saveSuccess) {
+        if (viewModel.state.value.saveSuccess) {
+            onClose()
         }
     }
 

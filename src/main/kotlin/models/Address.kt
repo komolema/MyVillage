@@ -9,28 +9,15 @@ data class Address(
     val suburb: String,
     val town: String,
     val postalCode: String,
-    val geoCoordinates: String?,
-    val landmark: String?
+    val geoCoordinates: String? = null,
+    val landmark: String? = null
 ) {
-    companion object {
-        val default = Address(
-            id = UUID.randomUUID(),
-            line = "",
-            houseNumber = "",
-            suburb = "",
-            town = "",
-            postalCode = "",
-            geoCoordinates = null,
-            landmark = null
-        )
+    fun formatFriendly(): String {
+        return buildString {
+            append("$houseNumber $line")
+            if (suburb.isNotEmpty()) append(", $suburb")
+            if (town.isNotEmpty()) append(", $town")
+            if (postalCode.isNotEmpty()) append(" $postalCode")
+        }
     }
-}
-
-fun Address.formatFriendly(): String {
-    return """
-        $houseNumber $line
-        $suburb
-        $town
-        $postalCode
-    """.trimIndent()
 }

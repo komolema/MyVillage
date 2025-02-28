@@ -1,3 +1,5 @@
+package ui.screens.resident.tabs
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -199,7 +201,7 @@ fun ResidentTab(
             Text("Gender:", modifier = Modifier.weight(1f))
             var expanded by remember { mutableStateOf(false) }
             Box(modifier = Modifier.weight(2f)) {
-                TextField(
+                OutlinedTextField(
                     value = residentState.gender,
                     enabled = mode != WindowMode.VIEW,
                     onValueChange = {},
@@ -208,30 +210,38 @@ fun ResidentTab(
                         .focusOrder(focusRequesters[3]) { next = focusRequesters[4] },
                     readOnly = true,
                     placeholder = { Text("Select gender") },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        disabledTextColor = LocalContentColor.current.copy(alpha = ContentAlpha.high),
+                        disabledBorderColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled),
+                        disabledPlaceholderColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+                    ),
                     trailingIcon = {
                         if (mode != WindowMode.VIEW) {
                             Icon(
                                 imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = if (expanded) "Close gender selection" else "Open gender selection"
+                                contentDescription = if (expanded) "Close gender selection" else "Open gender selection",
+                                modifier = Modifier.clickable { expanded = !expanded }
                             )
                         }
                     }
                 )
-                DropdownMenu(
-                    expanded = expanded && mode != WindowMode.VIEW,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    Gender.values().forEach { gender ->
-                        DropdownMenuItem(
-                            onClick = {
-                                residentState = residentState.copy(gender = gender.displayName)
-                                expanded = false
+                if (mode != WindowMode.VIEW) {
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        Gender.values().forEach { gender ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    residentState = residentState.copy(gender = gender.displayName)
+                                    expanded = false
+                                }
+                            ) {
+                                Text(
+                                    text = gender.displayName,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
-                        ) {
-                            Text(
-                                text = gender.displayName,
-                                modifier = Modifier.fillMaxWidth()
-                            )
                         }
                     }
                 }

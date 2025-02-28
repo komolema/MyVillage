@@ -2,118 +2,165 @@ package database.dao
 
 import database.schema.Addresses
 import database.schema.Residences
-import database.schema.Residents
 import models.Address
 import models.Residence
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.io.File.createTempFile
+import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDate
 import java.util.*
 
 class ResidenceDaoTest {
-
     private val residenceDao = ResidenceDaoImpl()
-    private val dbFile = createTempFile("test", ".db")
-    private val db = Database.connect("jdbc:sqlite:${dbFile.absolutePath}", driver = "org.sqlite.JDBC")
+    private val addressDao = AddressDaoImpl()
 
     @BeforeEach
     fun setup() {
-        transaction(db) {
-            SchemaUtils.drop(Residences, Addresses, Residents)
-            SchemaUtils.create(Residents, Addresses, Residences)
-            commit() // Ensure schema changes are committed
+        Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
+        transaction {
+            SchemaUtils.create(Residences, Addresses)
         }
     }
 
-    @AfterEach
-    fun cleanup() {
-        dbFile.delete() // Clean up the test database file
+    private fun createTestAddress(): Address {
+        return Address(
+            id = UUID.randomUUID(),
+            line = "123 Test Street",
+            houseNumber = "456",
+            suburb = "Test Suburb",
+            town = "Test Town",
+            postalCode = "12345",
+            geoCoordinates = "-25.7461,28.1881",
+            landmark = "Near Test Park"
+        )
+    }
+
+    private fun createTestResidence(residentId: UUID = UUID.randomUUID(), addressId: UUID): Residence {
+        return Residence(
+            id = UUID.randomUUID(),
+            residentId = residentId,
+            addressId = addressId,
+            occupationDate = LocalDate.now().minusMonths(1)
+        )
+    }
+
+    private fun insertTestAddress(address: Address) {
+        addressDao.create(address)
     }
 
     @Test
-    fun testCreateResidence() = transaction(db) {
+    fun testCreateAndGetResidence() = transaction {
         val address = createTestAddress()
-        val residentId = createTestResident()
-        val residence = Residence(UUID.randomUUID(), residentId, address.id, LocalDate.parse("2023-01-01"))
+        insertTestAddress(address)
+
+        val residence = createTestResidence(addressId = address.id)
         val createdResidence = residenceDao.createResidence(residence)
+
         assertNotNull(createdResidence.id)
+        assertEquals(residence.residentId, createdResidence.residentId)
+        assertEquals(residence.addressId, createdResidence.addressId)
     }
 
     @Test
-    fun testGetResidenceById() = transaction(db) {
+    fun testGetResidenceByResidentId() = transaction {
         val address = createTestAddress()
-        val residentId = createTestResident()
-        val residence = Residence(UUID.randomUUID(), residentId, address.id, LocalDate.parse("2023-01-01"))
-        val createdResidence = residenceDao.createResidence(residence)
-        val fetchedResidence = residenceDao.getResidenceById(createdResidence.id)
+        insertTestAddress(address)
+
+        val residentId = UUID.randomUUID()
+        val residence = createTestResidence(residentId = residentId, addressId = address.id)
+        residenceDao.createResidence(residence)
+
+        val fetchedResidence = residenceDao.getResidenceByResidentId(residentId)
         assertNotNull(fetchedResidence)
-        assertEquals(createdResidence.id, fetchedResidence?.id)
+        assertEquals(residence.residentId, fetchedResidence?.residentId)
+        assertEquals(residence.addressId, fetchedResidence?.addressId)
     }
 
     @Test
-    fun testUpdateResidence() = transaction(db) {
+    fun testGetAddressByResidentId() = transaction {
         val address = createTestAddress()
-        val residentId = createTestResident()
-        val residence = Residence(UUID.randomUUID(), residentId, address.id, LocalDate.parse("2023-01-01"))
+        insertTestAddress(address)
+
+        val residentId = UUID.randomUUID()
+        val residence = createTestResidence(residentId = residentId, addressId = address.id)
+        residenceDao.createResidence(residence)
+
+        val fetchedAddress = residenceDao.getAddressByResidentId(residentId)
+        assertNotNull(fetchedAddress)
+        assertEquals(address.line, fetchedAddress?.line)
+        assertEquals(address.houseNumber, fetchedAddress?.houseNumber)
+        assertEquals(address.suburb, fetchedAddress?.suburb)
+    }
+
+    @Test
+    fun testGetAllResidences() = transaction {
+        val address = createTestAddress()
+        insertTestAddress(address)
+
+        val residences = listOf(
+            createTestResidence(addressId = address.id),
+            createTestResidence(addressId = address.id),
+            createTestResidence(addressId = address.id)
+        )
+        residences.forEach { residenceDao.createResidence(it) }
+
+        val allResidences = residenceDao.getAllResidences()
+        assertEquals(residences.size, allResidences.size)
+    }
+
+    @Test
+    fun testUpdateResidence() = transaction {
+        val address = createTestAddress()
+        insertTestAddress(address)
+
+        val residence = createTestResidence(addressId = address.id)
         val createdResidence = residenceDao.createResidence(residence)
-        val updatedResidence = createdResidence.copy(occupationDate = LocalDate.parse("2023-02-01"))
+
+        val newAddress = createTestAddress()
+        insertTestAddress(newAddress)
+
+        val updatedResidence = createdResidence.copy(
+            addressId = newAddress.id,
+            occupationDate = LocalDate.now()
+        )
+
         val updateResult = residenceDao.updateResidence(updatedResidence)
         assertTrue(updateResult)
+
         val fetchedResidence = residenceDao.getResidenceById(createdResidence.id)
-        assertEquals(LocalDate.parse("2023-02-01"), fetchedResidence?.occupationDate)
+        assertEquals(newAddress.id, fetchedResidence?.addressId)
+        assertEquals(updatedResidence.occupationDate, fetchedResidence?.occupationDate)
     }
 
     @Test
-    fun testDeleteResidence() = transaction(db) {
+    fun testDeleteResidence() = transaction {
         val address = createTestAddress()
-        val residentId = createTestResident()
-        val residence = Residence(UUID.randomUUID(), residentId, address.id, LocalDate.parse("2023-01-01"))
+        insertTestAddress(address)
+
+        val residence = createTestResidence(addressId = address.id)
         val createdResidence = residenceDao.createResidence(residence)
+
         val deleteResult = residenceDao.deleteResidence(createdResidence.id)
         assertTrue(deleteResult)
+
         val fetchedResidence = residenceDao.getResidenceById(createdResidence.id)
         assertNull(fetchedResidence)
     }
 
-    private fun createTestResident(): UUID {
-        return Residents.insertAndGetId {
-            it[firstName] = "Test"
-            it[lastName] = "Resident"
-            it[dob] = LocalDate.of(1990, 1, 1)
-            it[gender] = "Male"
-            it[idNumber] = UUID.randomUUID().toString() // Ensure unique ID number
-            it[phoneNumber] = "1234567890"
-            it[email] = "test@example.com"
-        }.value
+    @Test
+    fun testGetNonExistentResidence() = transaction {
+        val nonExistentId = UUID.randomUUID()
+        val residence = residenceDao.getResidenceById(nonExistentId)
+        assertNull(residence)
     }
 
-    private fun createTestAddress(): Address {
-        val addressId = Addresses.insertAndGetId {
-            it[line] = "Test Line"
-            it[houseNumber] = "123"
-            it[suburb] = "Test Suburb"
-            it[town] = "Test Town"
-            it[postalCode] = "12345"
-            it[geoCoordinates] = "0,0"
-            it[landmark] = "Test Landmark"
-        }
-        return Address(
-            id = addressId.value,
-            line = "Test Line",
-            houseNumber = "123",
-            suburb = "Test Suburb",
-            town = "Test Town",
-            postalCode = "12345",
-            geoCoordinates = "0,0",
-            landmark = "Test Landmark"
-        )
+    @Test
+    fun testGetNonExistentAddress() = transaction {
+        val nonExistentId = UUID.randomUUID()
+        val address = residenceDao.getAddressByResidentId(nonExistentId)
+        assertNull(address)
     }
 }

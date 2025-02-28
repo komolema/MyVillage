@@ -11,8 +11,8 @@ val daoModule = module {
     single<AddressDao> { AddressDaoImpl() }
     single { AnimalDao() }
     single<DependantDao> { DependantDaoImpl() }
-    single { EmploymentDao() }
-    single { LeadershipDao() }
+    single<EmploymentDao> { EmploymentDaoImpl() }
+    single<LeadershipDao> { LeadershipDaoImpl() }
     single { ManagedByDao() }
     single { OwnershipDao() }
     single { PaymentDao() }

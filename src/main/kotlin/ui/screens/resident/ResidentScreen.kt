@@ -21,7 +21,7 @@ import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
-import models.formatFriendly
+import models.Address
 import models.expanded.ResidentExpanded
 import ui.components.WindowToolbar
 import ui.screens.resident.WindowMode
@@ -250,24 +250,32 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
         return editedCells.any { (key, _) -> key.first == rowIndex }
     }
 
-    LaunchedEffect(searchText, selectedColumn, dataTableState.pageIndex) {
-        if (searchText.isEmpty()) {
-            viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize))
-        } else {
-            val columnKey = when (selectedColumn) {
-                "ID Number" -> "id"
-                "First Name" -> "firstName"
-                "Last Name" -> "lastName"
-                "Date of Birth" -> "dob"
-                "Age" -> "age"
-                "Gender" -> "gender"
-                "Phone Number" -> "phone"
-                "Email" -> "email"
-                else -> "id"
-            }
-            val searchQuery = "$columnKey:$searchText"
-            viewModel.processIntent(ResidentViewModel.Intent.Search(searchQuery, dataTableState.pageIndex))
+    LaunchedEffect(dataTableState.pageIndex) {
+        viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize))
+    }
+
+    fun performSearch() {
+        val columnKey = when (selectedColumn) {
+            "ID Number" -> "id"
+            "First Name" -> "firstName"
+            "Last Name" -> "lastName"
+            "Date of Birth" -> "dob"
+            "Age" -> "age"
+            "Gender" -> "gender"
+            "Phone Number" -> "phone"
+            "Email" -> "email"
+            else -> "id"
         }
+        val searchQuery = "$columnKey:$searchText"
+        viewModel.processIntent(
+            if (searchText.isEmpty()) ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize)
+            else ResidentViewModel.Intent.Search(searchQuery, dataTableState.pageIndex)
+        )
+    }
+
+    LaunchedEffect(searchText) {
+        kotlinx.coroutines.delay(500) // Add 500ms debounce
+        performSearch()
     }
 
     Scaffold(
@@ -313,70 +321,55 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                 .padding(8.dp)
         ) {
 
-
-            if (state.residents.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.width(200.dp)
                 ) {
-                    ExposedDropdownMenuBox(
+                    TextField(
+                        value = selectedColumn,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
                         expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier.width(200.dp)
+                        onDismissRequest = { expanded = false }
                     ) {
-                        TextField(
-                            value = selectedColumn,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            columns.forEach { column ->
-                                DropdownMenuItem(
-                                    onClick = {
-                                        selectedColumn = column
-                                        expanded = false
-                                    }
-                                ) {
-                                    Text(column)
+                        columns.forEach { column ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedColumn = column
+                                    expanded = false
                                 }
+                            ) {
+                                Text(column)
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    TextField(
-                        value = searchText,
-                        onValueChange = { searchText = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text("Search...") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(
-                            onSearch = {
-                                val columnKey = when (selectedColumn) {
-                                    "ID Number" -> "id"
-                                    "First Name" -> "firstName"
-                                    "Last Name" -> "lastName"
-                                    "Date of Birth" -> "dob"
-                                    "Age" -> "age"
-                                    "Gender" -> "gender"
-                                    "Phone Number" -> "phone"
-                                    "Email" -> "email"
-                                    else -> "id"
-                                }
-                                val searchQuery = "$columnKey:$searchText"
-                                viewModel.processIntent(ResidentViewModel.Intent.Search(searchQuery, dataTableState.pageIndex))
-                            }
-                        )
-                    )
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+                TextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Search...") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = { performSearch() }
+                    )
+                )
+            }
 
+            if (state.residents.isNotEmpty()) {
 
                 ScrollableContainer(
                     modifier = Modifier
@@ -539,17 +532,61 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                     TableCell(age.toString()) // Age is calculated, not editable
                                 }
                                 cell {
-                                    EditableTableCell(
-                                        initialText = resExp.resident.gender,
-                                        isEditing = editingCell?.rowIndex == index && editingCell?.columnName == "gender",
-                                        onValueChange = { editedCells[index to "gender"] = it },
-                                        onEditComplete = { editingCell = EditedCell(index, "gender", resExp.resident.gender) },
-                                        background = rowBackground,
-                                        windowMode = windowMode
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground)
+                                            .padding(horizontal = 8.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        var expanded by remember { mutableStateOf(false) }
+                                        val genderOptions = listOf("Male", "Female", "Other")
+                                        val currentGender = editedCells[index to "gender"] ?: resExp.resident.gender
+
+                                        Column {
+                                            OutlinedButton(
+                                                onClick = { if (windowMode == WindowMode.UPDATE) expanded = true },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                enabled = windowMode == WindowMode.UPDATE
+                                            ) {
+                                                Text(currentGender.ifEmpty { "Select Gender" })
+                                            }
+
+                                            DropdownMenu(
+                                                expanded = expanded,
+                                                onDismissRequest = { expanded = false },
+                                                modifier = Modifier.fillMaxWidth(0.9f)
+                                            ) {
+                                                genderOptions.forEach { gender ->
+                                                    DropdownMenuItem(
+                                                        onClick = {
+                                                            editedCells[index to "gender"] = gender
+                                                            expanded = false
+                                                        }
+                                                    ) {
+                                                        Text(gender)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 cell {
-                                    TableCell(resExp.address.fold({ "" }, { it.formatFriendly() })) // Address shown in different view
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground)
+                                            .padding(horizontal = 8.dp),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Text(
+                                            text = resExp.address.fold(
+                                                { "No address" },
+                                                { it.formatFriendly() }
+                                            ),
+                                            style = MaterialTheme.typography.body2
+                                        )
+                                    }
                                 }
                                 cell {
                                     TableCellWithBackground(resExp.dependants.size.toString(), rowBackground) // Dependants count is read-only

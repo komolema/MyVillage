@@ -1,23 +1,15 @@
-package integration.dao
+package database.dao
 
-import database.dao.ResourceDaoImpl
 import database.schema.Resources
 import models.Resource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
 import java.util.*
 
-/**
- * Integration tests for ResourceDao implementation.
- * Tests CRUD operations, search functionality, and pagination.
- *
- * Uses an in-memory SQLite database that is recreated for each test.
- * Tests focus on resource type and location management.
- */
 class ResourceDaoTest {
     private val resourceDao = ResourceDaoImpl()
 
@@ -29,10 +21,19 @@ class ResourceDaoTest {
         }
     }
 
+    private fun createTestResource(type: String = "Test Type", location: String = "Test Location"): Resource {
+        return Resource(
+            id = UUID.randomUUID(),
+            type = type,
+            location = location
+        )
+    }
+
     @Test
-    fun testCreateResource() {
+    fun testCreateAndGetById() = transaction {
         val resource = createTestResource()
         resourceDao.create(resource)
+        
         val fetchedResource = resourceDao.getById(resource.id)
         assertNotNull(fetchedResource)
         assertEquals(resource.type, fetchedResource?.type)
@@ -40,85 +41,98 @@ class ResourceDaoTest {
     }
 
     @Test
-    fun testGetResourceById() {
-        val resource = createTestResource()
-        resourceDao.create(resource)
-        val fetchedResource = resourceDao.getById(resource.id)
-        assertNotNull(fetchedResource)
-        assertEquals(resource.id, fetchedResource?.id)
-        assertEquals(resource.type, fetchedResource?.type)
-        assertEquals(resource.location, fetchedResource?.location)
+    fun testGetAllWithPagination() = transaction {
+        val resources = (1..15).map { 
+            createTestResource("Type $it", "Location $it")
+        }
+        resources.forEach { resourceDao.create(it) }
+
+        // Test first page
+        val firstPage = resourceDao.getAll(page = 0, pageSize = 5)
+        assertEquals(5, firstPage.size)
+
+        // Test second page
+        val secondPage = resourceDao.getAll(page = 1, pageSize = 5)
+        assertEquals(5, secondPage.size)
+        
+        // Verify no overlap between pages
+        val firstPageIds = firstPage.map { it.id }
+        val secondPageIds = secondPage.map { it.id }
+        assertEquals(0, firstPageIds.intersect(secondPageIds).size)
     }
 
     @Test
-    fun testUpdateResource() {
+    fun testSearch() = transaction {
+        val resources = listOf(
+            createTestResource("Water Resource", "North Lake"),
+            createTestResource("Land Resource", "South Field"),
+            createTestResource("Forest Resource", "West Woods"),
+            createTestResource("Water Resource", "East River")
+        )
+        resources.forEach { resourceDao.create(it) }
+
+        // Test search by type
+        val waterResources = resourceDao.search("Water", page = 0, pageSize = 10)
+        assertEquals(2, waterResources.size)
+        assertTrue(waterResources.all { it.type.contains("Water") })
+
+        // Test search by location
+        val northResources = resourceDao.search("North", page = 0, pageSize = 10)
+        assertEquals(1, northResources.size)
+        assertTrue(northResources.all { it.location.contains("North") })
+
+        // Test pagination in search
+        val allResources = resourceDao.search("Resource", page = 0, pageSize = 2)
+        assertEquals(2, allResources.size)
+    }
+
+    @Test
+    fun testUpdate() = transaction {
         val resource = createTestResource()
         resourceDao.create(resource)
-
+        
         val updatedResource = resource.copy(
             type = "Updated Type",
             location = "Updated Location"
         )
         resourceDao.update(updatedResource)
-
+        
         val fetchedResource = resourceDao.getById(resource.id)
-        assertNotNull(fetchedResource)
-        assertEquals("Updated Type", fetchedResource?.type)
-        assertEquals("Updated Location", fetchedResource?.location)
+        assertEquals(updatedResource.type, fetchedResource?.type)
+        assertEquals(updatedResource.location, fetchedResource?.location)
     }
 
     @Test
-    fun testDeleteResource() {
+    fun testDelete() = transaction {
         val resource = createTestResource()
         resourceDao.create(resource)
-
+        
         resourceDao.delete(resource.id)
-
+        
         val fetchedResource = resourceDao.getById(resource.id)
         assertNull(fetchedResource)
     }
 
     @Test
-    fun testSearchResource() {
-        val resource1 = createTestResource()
-        val resource2 = createTestResource().copy(
-            id = UUID.randomUUID(),
-            type = "Different Type",
-            location = "Different Location"
+    fun testSearchWithEmptyResult() = transaction {
+        val resources = listOf(
+            createTestResource("Water Resource", "North Lake"),
+            createTestResource("Land Resource", "South Field")
         )
+        resources.forEach { resourceDao.create(it) }
 
-        resourceDao.create(resource1)
-        resourceDao.create(resource2)
-
-        val searchResults = resourceDao.search("Test", 0, 10)
-        assertTrue(searchResults.any { it.id == resource1.id })
-        assertFalse(searchResults.any { it.id == resource2.id })
+        val noResults = resourceDao.search("NonExistent", page = 0, pageSize = 10)
+        assertTrue(noResults.isEmpty())
     }
 
     @Test
-    fun testPagination() {
-        val resources = (1..5).map {
-            createTestResource().copy(
-                id = UUID.randomUUID(),
-                type = "Type $it"
-            )
+    fun testPaginationWithEmptyPages() = transaction {
+        val resources = (1..3).map { 
+            createTestResource("Type $it", "Location $it")
         }
         resources.forEach { resourceDao.create(it) }
 
-        val page1 = resourceDao.getAll(0, 2)
-        val page2 = resourceDao.getAll(1, 2)
-        val page3 = resourceDao.getAll(2, 2)
-
-        assertEquals(2, page1.size)
-        assertEquals(2, page2.size)
-        assertEquals(1, page3.size)
-    }
-
-    private fun createTestResource(): Resource {
-        return Resource(
-            id = UUID.randomUUID(),
-            type = "Test Type",
-            location = "Test Location"
-        )
+        val emptyPage = resourceDao.getAll(page = 2, pageSize = 2)
+        assertTrue(emptyPage.isEmpty())
     }
 }

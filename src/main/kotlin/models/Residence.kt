@@ -1,7 +1,7 @@
 package models
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class Residence(
     val id: UUID,

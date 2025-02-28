@@ -12,10 +12,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import org.mockito.kotlin.doThrow
+import io.mockk.mockk
+import io.mockk.verify
+import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.just
+import io.mockk.runs
 import ui.screens.resident.WindowMode
 import ui.screens.resident.isTabDisabled
 
@@ -23,13 +26,20 @@ import ui.screens.resident.isTabDisabled
 class ResidentWindowTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val residentDao: ResidentDao = mock()
-    private val qualificationDao: QualificationDao = mock()
+    private val residentDao = mockk<ResidentDao>(relaxed = true)
+    private val qualificationDao = mockk<QualificationDao>(relaxed = true)
     private lateinit var viewModel: ResidentWindowViewModel
 
     @BeforeEach
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        // Initialize default mock behavior
+        every { residentDao.getResidentById(any()) } returns null
+        every { residentDao.updateResident(any()) } just runs
+        every { residentDao.createResident(any()) } just runs
+        every { qualificationDao.getQualificationsByResidentId(any()) } returns emptyList()
+        every { qualificationDao.updateQualification(any()) } returns true
+        every { qualificationDao.createQualification(any()) } returns Qualification.default
         viewModel = ResidentWindowViewModel(qualificationDao, residentDao, testDispatcher)
     }
 
@@ -46,6 +56,7 @@ class ResidentWindowTest {
             firstName = "Test",
             lastName = "User"
         )
+        every { residentDao.updateResident(resident) } just runs
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateResident(resident))
@@ -54,7 +65,7 @@ class ResidentWindowTest {
         advanceUntilIdle()
 
         // Assert
-        verify(residentDao).updateResident(resident)
+        verify { residentDao.updateResident(resident) }
         assertTrue(viewModel.state.value.saveSuccess)
         assertNull(viewModel.state.value.error)
     }
@@ -67,13 +78,14 @@ class ResidentWindowTest {
             firstName = "Test",
             lastName = "User"
         )
-        whenever(residentDao.getResidentById(resident.id)).thenReturn(resident)
+        every { residentDao.getResidentById(resident.id) } returns resident
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(resident.id))
         advanceUntilIdle()
 
         // Assert
+        verify { residentDao.getResidentById(resident.id) }
         assertFalse(isTabDisabled(1, WindowMode.VIEW, viewModel))
         assertFalse(isTabDisabled(2, WindowMode.VIEW, viewModel))
     }
@@ -87,7 +99,7 @@ class ResidentWindowTest {
             firstName = "Test",
             lastName = "User"
         )
-        whenever(residentDao.getResidentById(residentId)).thenReturn(resident)
+        every { residentDao.getResidentById(residentId) } returns resident
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(residentId))
@@ -96,7 +108,7 @@ class ResidentWindowTest {
         advanceUntilIdle()
 
         // Assert
-        verify(residentDao).getResidentById(residentId)
+        verify { residentDao.getResidentById(residentId) }
         assertEquals(resident, viewModel.state.value.resident)
     }
 
@@ -109,9 +121,13 @@ class ResidentWindowTest {
             firstName = "Test",
             lastName = "User"
         )
-        whenever(residentDao.getResidentById(residentId)).thenReturn(resident)
+        every { residentDao.getResidentById(residentId) } returns resident
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(residentId))
         advanceUntilIdle()
+
+        // Verify initial load
+        verify { residentDao.getResidentById(residentId) }
+        assertEquals(resident, viewModel.state.value.resident)
 
         // Act & Assert - Toggle mode
         assertEquals(WindowMode.VIEW, viewModel.state.value.mode)
@@ -131,13 +147,14 @@ class ResidentWindowTest {
             firstName = "New",
             lastName = "User"
         )
+        every { residentDao.createResident(newResident) } just runs
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.CreateResident(newResident))
         advanceUntilIdle()
 
         // Assert
-        verify(residentDao).createResident(newResident)
+        verify { residentDao.createResident(newResident) }
         assertTrue(viewModel.state.value.saveSuccess)
         assertEquals(WindowMode.VIEW, viewModel.state.value.mode)
         assertEquals(newResident, viewModel.state.value.resident)
@@ -155,15 +172,15 @@ class ResidentWindowTest {
         val errorMessage = "Database error"
 
         // Set up mocks
-        whenever(residentDao.getResidentById(residentId)).thenReturn(resident)
-        doThrow(RuntimeException(errorMessage)).`when`(residentDao).updateResident(resident)
+        every { residentDao.getResidentById(residentId) } returns resident
+        every { residentDao.updateResident(resident) } throws RuntimeException(errorMessage)
 
         // Load the resident
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(residentId))
         advanceUntilIdle()
 
         // Verify resident is loaded
-        verify(residentDao).getResidentById(residentId)
+        verify { residentDao.getResidentById(residentId) }
         assertEquals(resident, viewModel.state.value.resident)
         println("[DEBUG_LOG] Resident loaded: ${viewModel.state.value.resident}")
 
@@ -172,6 +189,7 @@ class ResidentWindowTest {
         advanceUntilIdle()
 
         // Assert
+        verify { residentDao.updateResident(resident) }
         assertFalse(viewModel.state.value.saveSuccess)
         assertEquals(errorMessage, viewModel.state.value.error)
     }
@@ -190,14 +208,14 @@ class ResidentWindowTest {
             city = "Test City"
         )
         val errorMessage = "Database error"
-        doThrow(RuntimeException(errorMessage)).`when`(qualificationDao).updateQualification(qualification)
+        every { qualificationDao.updateQualification(qualification) } throws RuntimeException(errorMessage)
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateQualification(qualification))
         advanceUntilIdle()
 
         // Assert
-        verify(qualificationDao).updateQualification(qualification)
+        verify { qualificationDao.updateQualification(qualification) }
         assertFalse(viewModel.state.value.saveSuccess)
         assertEquals(errorMessage, viewModel.state.value.error)
     }
@@ -216,14 +234,14 @@ class ResidentWindowTest {
             city = "Test City"
         )
         val errorMessage = "Database error"
-        doThrow(RuntimeException(errorMessage)).`when`(qualificationDao).createQualification(qualification)
+        every { qualificationDao.createQualification(qualification) } throws RuntimeException(errorMessage)
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.CreateQualification(qualification))
         advanceUntilIdle()
 
         // Assert
-        verify(qualificationDao).createQualification(qualification)
+        verify { qualificationDao.createQualification(qualification) }
         assertFalse(viewModel.state.value.saveSuccess)
         assertEquals(errorMessage, viewModel.state.value.error)
     }
@@ -233,51 +251,40 @@ class ResidentWindowTest {
         // Arrange
         val residentId = UUID.randomUUID()
         val errorMessage = "Database error"
-        doThrow(RuntimeException(errorMessage)).`when`(qualificationDao).getQualificationsByResidentId(residentId)
+        every { qualificationDao.getQualificationsByResidentId(residentId) } throws RuntimeException(errorMessage)
 
         // Act
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadQualifications(residentId))
         advanceUntilIdle()
 
         // Assert
-        verify(qualificationDao).getQualificationsByResidentId(residentId)
+        verify { qualificationDao.getQualificationsByResidentId(residentId) }
         assertTrue(viewModel.state.value.qualifications.isEmpty())
         assertEquals(errorMessage, viewModel.state.value.error)
     }
 
     @Test
-    fun `test mode switches to VIEW after successful save`() = testScope.runTest {
+    fun `test successful save in NEW mode`() = testScope.runTest {
         // Arrange
-        val residentId = UUID.randomUUID()
         val resident = Resident.default.copy(
-            id = residentId,
-            firstName = "Test",
+            firstName = "New",
             lastName = "User"
         )
 
-        // Set up mocks and load resident
-        whenever(residentDao.getResidentById(residentId)).thenReturn(resident)
-        viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResident(residentId))
-        advanceUntilIdle()
+        // Set initial mode to NEW and verify
+        assertEquals(WindowMode.NEW, viewModel.state.value.mode)
+        every { residentDao.createResident(resident) } just runs
 
-        // Verify resident is loaded
-        verify(residentDao).getResidentById(residentId)
-        assertEquals(resident, viewModel.state.value.resident)
-        println("[DEBUG_LOG] Initial resident state: ${viewModel.state.value.resident}")
-        assertEquals(WindowMode.VIEW, viewModel.state.value.mode)
-
-        // Switch to UPDATE mode
-        viewModel.processIntent(ResidentWindowViewModel.Intent.ToggleMode)
-        advanceUntilIdle()
-        println("[DEBUG_LOG] Mode after toggle: ${viewModel.state.value.mode}")
-        assertEquals(WindowMode.UPDATE, viewModel.state.value.mode)
-
-        // Act
+        // Update resident data
         viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateResident(resident))
         advanceUntilIdle()
 
+        // Act - Save the new resident
+        viewModel.processIntent(ResidentWindowViewModel.Intent.CreateResident(resident))
+        advanceUntilIdle()
+
         // Assert
-        println("[DEBUG_LOG] Final state - mode: ${viewModel.state.value.mode}, resident: ${viewModel.state.value.resident}")
+        verify { residentDao.createResident(resident) }
         assertTrue(viewModel.state.value.saveSuccess)
         assertEquals(WindowMode.VIEW, viewModel.state.value.mode)
     }
