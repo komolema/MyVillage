@@ -1,0 +1,48 @@
+# Tasks
+
+- Design a new generic table based of the one in resident screen
+
+This table is meant to configurable it takes in data structure and renders the table based on the data structure.
+The table should be able to handle the following data
+ - the columns to display
+ - the data model that wil back this table's data fields( you can specify a data class to be used as the model)
+ - the type of component to back a column e.g(TextField, DropDown, Radio Button etc)
+ - the fields of the table are editable, the table should be able to handle the editing of the fields
+ - each row in the table has an edit button that will perform some action to edit the row in different screen or composable component
+ - this table composable will be used in the dependants, qualification tabs of the resident screen
+
+- Dependants tab implementation
+
+Implement the table in the dependants tab of the resident screen
+
+Implement a form in the tab next to the table that will be used to add a dependant to the table. The form should have the following fields
+All fields in the Dependant data class. Recommend any form best practices. But adding a dependant should add the data to the table
+next to the form, and you should see it in the table
+
+- Qualifications tab implementation
+
+Implement the table in the qualifications tab of the resident screen
+
+Implement a form in the tab next to the table that will be used to add a qualification to the table. The form should have the following fields
+All fields in the Qualification data class. Recommend any form best practices. But adding a qualification should add the data to the table
+
+
+# Constraints
+
+- The table should be configurable
+- The table should be able to handle the editing of the fields
+- The table should be able to handle the addition of a new row
+- The table should be able to handle the deletion of a row
+- The table should be able to handle the editing of a row
+
+# Test Cases
+
+- The table should be able to handle the editing of the fields
+- The table should be able to handle the addition of a new row
+- The table should be able to handle the deletion of a row
+- The table should be able to handle the editing of a row
+
+- write any other test cases you think are necessary
+
+
+

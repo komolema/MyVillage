@@ -1,5 +1,6 @@
 package viewmodel
 
+import database.dao.DependantDao
 import database.dao.QualificationDao
 import database.dao.ResidentDao
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import models.Dependant
 import models.Qualification
 import models.Resident
 import ui.screens.resident.ResidentWindowState
@@ -18,6 +20,7 @@ import java.util.UUID
 class ResidentWindowViewModel(
     val qualificationDao: QualificationDao,
     val residentDao: ResidentDao,
+    val dependantDao: DependantDao,
     private val initialMode: WindowMode = WindowMode.VIEW,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
@@ -26,8 +29,13 @@ class ResidentWindowViewModel(
     sealed interface Intent {
         data class LoadResident(val residentId: UUID) : Intent
         data class LoadQualifications(val residentId: UUID) : Intent
+        data class LoadDependants(val residentId: UUID) : Intent
         data class CreateQualification(val newQualification: Qualification) : Intent
         data class UpdateQualification(val updatedQualification: Qualification) : Intent
+        data class DeleteQualification(val qualificationId: UUID) : Intent
+        data class CreateDependant(val newDependant: Dependant) : Intent
+        data class UpdateDependant(val updatedDependant: Dependant) : Intent
+        data class DeleteDependant(val dependantId: UUID) : Intent
         data class CreateResident(val residentState: Resident) : Intent
         data class UpdateResident(val residentState: Resident) : Intent
         data class UpdateResidentState(val residentState: Resident) : Intent
@@ -42,12 +50,119 @@ class ResidentWindowViewModel(
         when (intent) {
             is Intent.LoadResident -> loadResident(intent.residentId)
             is Intent.LoadQualifications -> loadQualifications(intent.residentId)
+            is Intent.LoadDependants -> loadDependants(intent.residentId)
             is Intent.CreateQualification -> createQualification(intent.newQualification)
             is Intent.UpdateQualification -> updateQualification(intent.updatedQualification)
+            is Intent.DeleteQualification -> deleteQualification(intent.qualificationId)
+            is Intent.CreateDependant -> createDependant(intent.newDependant)
+            is Intent.UpdateDependant -> updateDependant(intent.updatedDependant)
+            is Intent.DeleteDependant -> deleteDependant(intent.dependantId)
             is Intent.CreateResident -> createResident(intent.residentState)
             is Intent.UpdateResident -> updateResident(intent.residentState)
             is Intent.ToggleMode -> toggleMode()
             is Intent.UpdateResidentState -> processUpdateResidentState(intent.residentState)
+        }
+    }
+
+    private fun deleteQualification(qualificationId: UUID) {
+        viewModelScope.launch {
+            try {
+                qualificationDao.deleteQualification(qualificationId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        qualifications = currentState.qualifications.filter { it.id != qualificationId },
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to delete qualification: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun loadDependants(residentId: UUID) {
+        viewModelScope.launch {
+            try {
+                val dependants = dependantDao.getDependantsByResidentId(residentId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        dependants = dependants,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to load dependants: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun createDependant(newDependant: Dependant) {
+        viewModelScope.launch {
+            try {
+                val createdDependant = dependantDao.createDependant(newDependant)
+                _state.update { currentState ->
+                    currentState.copy(
+                        dependants = currentState.dependants + createdDependant,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to create dependant: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateDependant(updatedDependant: Dependant) {
+        viewModelScope.launch {
+            try {
+                val savedDependant = dependantDao.updateDependant(updatedDependant)
+                _state.update { currentState ->
+                    currentState.copy(
+                        dependants = currentState.dependants.map { 
+                            if (it.id == savedDependant.id) savedDependant else it 
+                        },
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to update dependant: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun deleteDependant(dependantId: UUID) {
+        viewModelScope.launch {
+            try {
+                dependantDao.deleteDependant(dependantId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        dependants = currentState.dependants.filter { it.id != dependantId },
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to delete dependant: ${e.message}"
+                    )
+                }
+            }
         }
     }
 

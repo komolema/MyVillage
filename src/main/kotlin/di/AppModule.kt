@@ -24,7 +24,7 @@ val daoModule = module {
 
 val viewModelModule = module {
     factory { ResidentViewModel(get()) }
-    factory { ResidentWindowViewModel(get(), get()) }
+    factory { ResidentWindowViewModel(get(), get(), get()) }
 }
 
 val appModule = listOf(daoModule, viewModelModule)

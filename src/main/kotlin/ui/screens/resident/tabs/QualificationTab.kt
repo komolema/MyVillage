@@ -1,17 +1,24 @@
 package ui.screens.resident.tabs
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.seanproctor.datatable.DataColumn
-import com.seanproctor.datatable.paging.BasicPaginatedDataTable
-import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import com.seanproctor.datatable.TableColumnWidth
 import models.Qualification
+import ui.components.DatePicker
+import ui.components.table.GenericTable
+import ui.components.table.TableCellType
+import ui.components.table.TableColumn
+import ui.components.table.TableConfig
 import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
+import viewmodel.ResidentWindowViewModel.Intent
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 import ui.screens.resident.tabs.TabCompletionState
 
@@ -22,78 +29,236 @@ fun QualificationTab(
     mode: WindowMode,
     onTabStateChange: (TabCompletionState) -> Unit = {}
 ) {
-    val qualifications = viewModel.state.collectAsStateWithLifecycle().value.qualifications
-    val editableQualification = remember { mutableStateOf(Qualification.default) }
-    val dataTableState = rememberPaginatedDataTableState(10, 0, 10)
+    var qualifications by remember { mutableStateOf(emptyList<Qualification>()) }
+    var selectedQualification by remember { mutableStateOf<Qualification?>(null) }
+    var showAddForm by remember { mutableStateOf(false) }
+    val dateFormatter = DateTimeFormatter.ISO_DATE
 
-    // Function to check completion state
-    fun checkCompletionState(): TabCompletionState {
-        return when {
-            qualifications.isNotEmpty() -> TabCompletionState.DONE
-            editableQualification.value.name.isNotBlank() -> TabCompletionState.IN_PROGRESS
-            else -> TabCompletionState.TODO
+    // Load qualifications when residentId changes
+    LaunchedEffect(residentId) {
+        if (residentId != null) {
+            viewModel.processIntent(Intent.LoadQualifications(residentId))
         }
     }
 
-    // Monitor changes and update tab state
-    LaunchedEffect(qualifications, editableQualification.value) {
-        onTabStateChange(checkCompletionState())
-    }
-
-    if(mode != WindowMode.NEW && residentId != null) {
-        viewModel.processIntent(ResidentWindowViewModel.Intent.LoadQualifications(residentId!!))
-    }
-
-    Row(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
-            TextField(
-                label = { Text("Qualification") },
-                value = editableQualification.value.name,
-                enabled = mode != WindowMode.VIEW,
-                onValueChange = { editableQualification.value = editableQualification.value.copy(name = it) }
-            )
-
-            // Add other fields as needed
-
-            if (mode == WindowMode.NEW) {
-                Button(onClick = {
-                    viewModel.processIntent(ResidentWindowViewModel.Intent.CreateQualification(editableQualification.value))
-                }) {
-                    Text("Create Qualification")
-                }
-            } else if (mode == WindowMode.UPDATE) {
-                Button(onClick = {
-                    viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateQualification(editableQualification.value))
-                }) {
-                    Text("Update Qualification")
-                }
-            }
+    // Collect state updates
+    LaunchedEffect(Unit) {
+        viewModel.state.collect { state ->
+            qualifications = state.qualifications
         }
+    }
 
-        BasicPaginatedDataTable(
-            state = dataTableState,
-            columns = listOf(
-                DataColumn { Text("Name") },
-                DataColumn { Text("Institution") },
-                DataColumn { Text("Start Date") },
-                DataColumn { Text("End Date") },
-                DataColumn { Text("NQF Level") },
-                DataColumn { Text("City") }
-            )
+    // Update tab state based on data
+    LaunchedEffect(qualifications) {
+        onTabStateChange(
+            if (qualifications.isEmpty()) TabCompletionState.TODO
+            else TabCompletionState.DONE
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            qualifications.forEach { qualification ->
-                row {
-                    onClick = {
-                        editableQualification.value = qualification
-                    }
-                    cell { Text(qualification.name) }
-                    cell { Text(qualification.institution) }
-                    cell { Text(qualification.startDate.toString()) }
-                    cell { Text(qualification.endDate.toString()) }
-                    cell { Text(qualification.nqfLevel.toString()) }
-                    cell { Text(qualification.city) }
-                }
+            Text(
+                text = "Qualifications Information",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Button(
+                onClick = { showAddForm = true },
+                enabled = mode == WindowMode.UPDATE
+            ) {
+                Text("Add Qualification")
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Qualifications table
+        GenericTable(
+            items = qualifications,
+            config = TableConfig(
+                columns = listOf(
+                    TableColumn(
+                        title = "Name",
+                        width = TableColumnWidth.Fixed(150.dp),
+                        getValue = { it.name },
+                        setValue = { qual, value -> qual.copy(name = value) }
+                    ),
+                    TableColumn(
+                        title = "Institution",
+                        width = TableColumnWidth.Fixed(150.dp),
+                        getValue = { it.institution },
+                        setValue = { qual, value -> qual.copy(institution = value) }
+                    ),
+                    TableColumn(
+                        title = "NQF Level",
+                        width = TableColumnWidth.Fixed(100.dp),
+                        type = TableCellType.NUMBER,
+                        getValue = { it.nqfLevel.toString() },
+                        setValue = { qual, value -> qual.copy(nqfLevel = value.toIntOrNull() ?: 0) }
+                    ),
+                    TableColumn(
+                        title = "Start Date",
+                        width = TableColumnWidth.Fixed(120.dp),
+                        type = TableCellType.DATE,
+                        getValue = { it.startDate.format(dateFormatter) },
+                        setValue = { qual, value -> 
+                            qual.copy(startDate = LocalDate.parse(value, dateFormatter))
+                        }
+                    ),
+                    TableColumn(
+                        title = "End Date",
+                        width = TableColumnWidth.Fixed(120.dp),
+                        type = TableCellType.DATE,
+                        getValue = { it.endDate?.format(dateFormatter) ?: "" },
+                        setValue = { qual, value -> 
+                            qual.copy(endDate = if (value.isBlank()) null else LocalDate.parse(value, dateFormatter))
+                        }
+                    ),
+                    TableColumn(
+                        title = "City",
+                        width = TableColumnWidth.Fixed(150.dp),
+                        getValue = { it.city },
+                        setValue = { qual, value -> qual.copy(city = value) }
+                    )
+                ),
+                isEditable = mode == WindowMode.UPDATE,
+                onEdit = { selectedQualification = it },
+                onDelete = { qualification ->
+                    if (residentId != null) {
+                        // TODO: Add DeleteQualification intent and handler
+                        // viewModel.processIntent(Intent.DeleteQualification(qualification.id))
+                    }
+                },
+                onSave = { updatedQualification ->
+                    if (residentId != null) {
+                        viewModel.processIntent(Intent.UpdateQualification(updatedQualification))
+                    }
+                }
+            ),
+            modifier = Modifier.weight(1f)
+        )
     }
+
+    if (showAddForm || selectedQualification != null) {
+        QualificationFormDialog(
+            qualification = selectedQualification,
+            onDismiss = {
+                showAddForm = false
+                selectedQualification = null
+            },
+            onSave = { newQualification ->
+                if (residentId != null) {
+                    val qualificationWithResidentId = newQualification.copy(residentId = residentId)
+                    viewModel.processIntent(
+                        if (selectedQualification != null)
+                            Intent.UpdateQualification(qualificationWithResidentId)
+                        else
+                            Intent.CreateQualification(qualificationWithResidentId)
+                    )
+                }
+                showAddForm = false
+                selectedQualification = null
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QualificationFormDialog(
+    qualification: Qualification?,
+    onDismiss: () -> Unit,
+    onSave: (Qualification) -> Unit
+) {
+    var name by remember { mutableStateOf(qualification?.name ?: "") }
+    var institution by remember { mutableStateOf(qualification?.institution ?: "") }
+    var nqfLevel by remember { mutableStateOf(qualification?.nqfLevel?.toString() ?: "") }
+    var startDate by remember { mutableStateOf(qualification?.startDate ?: LocalDate.now()) }
+    var endDate by remember { mutableStateOf(qualification?.endDate) }
+    var city by remember { mutableStateOf(qualification?.city ?: "") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(if (qualification == null) "Add Qualification" else "Edit Qualification")
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = institution,
+                    onValueChange = { institution = it },
+                    label = { Text("Institution") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = nqfLevel,
+                    onValueChange = { 
+                        if (it.isEmpty() || it.toIntOrNull() != null) {
+                            nqfLevel = it
+                        }
+                    },
+                    label = { Text("NQF Level") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Start Date")
+                DatePicker(
+                    date = startDate,
+                    onDateSelected = { startDate = it }
+                )
+                Text("End Date (Optional)")
+                DatePicker(
+                    date = endDate,
+                    onDateSelected = { endDate = it }
+                )
+                OutlinedTextField(
+                    value = city,
+                    onValueChange = { city = it },
+                    label = { Text("City") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val newQualification = (qualification ?: Qualification.default).copy(
+                        name = name,
+                        institution = institution,
+                        nqfLevel = nqfLevel.toIntOrNull() ?: 0,
+                        startDate = startDate,
+                        endDate = endDate,
+                        city = city
+                    )
+                    onSave(newQualification)
+                },
+                enabled = name.isNotBlank() && institution.isNotBlank() && 
+                         nqfLevel.isNotBlank() && city.isNotBlank()
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
