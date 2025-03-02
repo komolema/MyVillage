@@ -233,10 +233,7 @@ private fun ResidentIdCell(
 internal fun ResidentScreen(navController: NavController, viewModel: ResidentViewModel) {
     val state by viewModel.state.collectAsState()
     var searchText by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    var selectedColumn by remember { mutableStateOf("ID Number") }
     var windowMode by remember { mutableStateOf(WindowMode.VIEW) }
-    val columns = listOf("ID Number", "First Name", "Last Name", "Date of Birth", "Age", "Gender", "Phone Number", "Email")
     val pageSize = 20
     val dataTableState = rememberPaginatedDataTableState(10, 0, 0)
     var clickedRow by remember { mutableStateOf(-1) }
@@ -255,21 +252,9 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
     }
 
     fun performSearch() {
-        val columnKey = when (selectedColumn) {
-            "ID Number" -> "id"
-            "First Name" -> "firstName"
-            "Last Name" -> "lastName"
-            "Date of Birth" -> "dob"
-            "Age" -> "age"
-            "Gender" -> "gender"
-            "Phone Number" -> "phone"
-            "Email" -> "email"
-            else -> "id"
-        }
-        val searchQuery = "$columnKey:$searchText"
         viewModel.processIntent(
             if (searchText.isEmpty()) ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize)
-            else ResidentViewModel.Intent.Search(searchQuery, dataTableState.pageIndex)
+            else ResidentViewModel.Intent.Search(searchText, dataTableState.pageIndex)
         )
     }
 
@@ -327,40 +312,11 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier.width(200.dp)
-                ) {
-                    TextField(
-                        value = selectedColumn,
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        columns.forEach { column ->
-                            DropdownMenuItem(
-                                onClick = {
-                                    selectedColumn = column
-                                    expanded = false
-                                }
-                            ) {
-                                Text(column)
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.width(16.dp))
                 TextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Search...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search by ID number, name or other details...") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(
@@ -409,7 +365,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                             DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("Last Name") },
                             DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("Date of Birth") },
                             DataColumn(width = TableColumnWidth.Fixed(80.dp)) { HeaderCell("Age") },
-                            DataColumn(width = TableColumnWidth.Fixed(100.dp)) { HeaderCell("Gender") },
+                            DataColumn(width = TableColumnWidth.Fixed(150.dp)) { HeaderCell("Gender") },
                             DataColumn(width = TableColumnWidth.Flex(1f)) { HeaderCell("Address") },
                             DataColumn(width = TableColumnWidth.Fixed(100.dp)) { HeaderCell("Dependants") },
                             DataColumn(

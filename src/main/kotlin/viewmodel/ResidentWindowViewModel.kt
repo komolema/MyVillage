@@ -18,6 +18,7 @@ import java.util.UUID
 class ResidentWindowViewModel(
     val qualificationDao: QualificationDao,
     val residentDao: ResidentDao,
+    private val initialMode: WindowMode = WindowMode.VIEW,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     private val viewModelScope = CoroutineScope(dispatcher)
@@ -34,7 +35,7 @@ class ResidentWindowViewModel(
         object ToggleMode : Intent
     }
 
-    private val _state = MutableStateFlow(ResidentWindowState())
+    private val _state = MutableStateFlow(ResidentWindowState(mode = initialMode))
     val state: StateFlow<ResidentWindowState> = _state
 
     fun processIntent(intent: Intent) {

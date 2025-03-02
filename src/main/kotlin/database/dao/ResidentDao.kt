@@ -30,12 +30,12 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
             .map { it.toResident() }
     }
 
-    private fun searchResidents(query: String, page: Int, pageSize: Int): Query {
+    private fun searchResidents(searchTerm: String, page: Int, pageSize: Int): Query {
         return Residents.selectAll()
             .andWhere { 
-                (Residents.idNumber like "%$query%") or
-                (Residents.firstName like "%$query%") or
-                (Residents.lastName like "%$query%")
+                (Residents.firstName like "%$searchTerm%") or
+                (Residents.lastName like "%$searchTerm%") or
+                (Residents.idNumber like "%$searchTerm%")
             }
             .limit(pageSize)
             .offset(start = (page * pageSize).toLong())

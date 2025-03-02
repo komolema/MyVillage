@@ -40,7 +40,7 @@ class ResidentWindowTest {
         every { qualificationDao.getQualificationsByResidentId(any()) } returns emptyList()
         every { qualificationDao.updateQualification(any()) } returns true
         every { qualificationDao.createQualification(any()) } returns Qualification.default
-        viewModel = ResidentWindowViewModel(qualificationDao, residentDao, testDispatcher)
+        viewModel = ResidentWindowViewModel(qualificationDao, residentDao, dispatcher = testDispatcher)
     }
 
     @AfterEach
@@ -265,27 +265,30 @@ class ResidentWindowTest {
 
     @Test
     fun `test successful save in NEW mode`() = testScope.runTest {
+        // Create a new ViewModel instance with NEW mode
+        val newViewModel = ResidentWindowViewModel(qualificationDao, residentDao, initialMode = WindowMode.NEW, dispatcher = testDispatcher)
+
         // Arrange
         val resident = Resident.default.copy(
             firstName = "New",
             lastName = "User"
         )
 
-        // Set initial mode to NEW and verify
-        assertEquals(WindowMode.NEW, viewModel.state.value.mode)
+        // Verify initial mode is NEW
+        assertEquals(WindowMode.NEW, newViewModel.state.value.mode)
         every { residentDao.createResident(resident) } just runs
 
         // Update resident data
-        viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateResident(resident))
+        newViewModel.processIntent(ResidentWindowViewModel.Intent.UpdateResident(resident))
         advanceUntilIdle()
 
         // Act - Save the new resident
-        viewModel.processIntent(ResidentWindowViewModel.Intent.CreateResident(resident))
+        newViewModel.processIntent(ResidentWindowViewModel.Intent.CreateResident(resident))
         advanceUntilIdle()
 
         // Assert
         verify { residentDao.createResident(resident) }
-        assertTrue(viewModel.state.value.saveSuccess)
-        assertEquals(WindowMode.VIEW, viewModel.state.value.mode)
+        assertTrue(newViewModel.state.value.saveSuccess)
+        assertEquals(WindowMode.VIEW, newViewModel.state.value.mode)
     }
 }
