@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlinx.coroutines.test.runTest
 
 /**
  * Integration tests for cross-DAO interactions and relationships.
@@ -37,22 +38,26 @@ class CrossDaoTest {
     }
 
     @Test
-    fun testResidentWithDependants() {
+    fun testResidentWithDependants() = runTest {
         // Create a resident
         val resident = createTestResident()
         residentDao.createResident(resident)
+        val createdResident = residentDao.getResidentById(resident.id)
+        assertNotNull(createdResident)
 
         // Create dependants for the resident
-        val dependant1 = createTestDependant(resident.id)
-        val dependant2 = createTestDependant(resident.id)
-        dependantDao.create(dependant1)
-        dependantDao.create(dependant2)
+        createdResident?.let { resident ->
+            val dependant1 = createTestDependant(resident.id)
+            val dependant2 = createTestDependant(resident.id)
+            dependantDao.createDependant(dependant1)
+            dependantDao.createDependant(dependant2)
 
-        // Verify dependants are correctly associated
-        val dependants = dependantDao.getDependentsByResidentId(resident.id)
+            // Verify dependants are correctly associated
+            val dependants = dependantDao.getDependantsByResidentId(resident.id)
         assertEquals(2, dependants.size)
-        assertTrue(dependants.any { it.id == dependant1.id })
-        assertTrue(dependants.any { it.id == dependant2.id })
+            assertTrue(dependants.any { it.id == dependant1.id })
+            assertTrue(dependants.any { it.id == dependant2.id })
+        }
 
         // Verify expanded resident includes dependants
         val expandedResident = residentDao.getResidentExpandedById(resident.id)
@@ -61,7 +66,7 @@ class CrossDaoTest {
     }
 
     @Test
-    fun testResidentWithAddress() {
+    fun testResidentWithAddress() = runTest {
         // Create an address
         val address = createTestAddress()
         addressDao.create(address)
@@ -77,21 +82,21 @@ class CrossDaoTest {
     }
 
     @Test
-    fun testCascadingDelete() {
+    fun testCascadingDelete() = runTest {
         // Create a resident with dependants
         val resident = createTestResident()
         residentDao.createResident(resident)
 
         val dependant1 = createTestDependant(resident.id)
         val dependant2 = createTestDependant(resident.id)
-        dependantDao.create(dependant1)
-        dependantDao.create(dependant2)
+        dependantDao.createDependant(dependant1)
+        dependantDao.createDependant(dependant2)
 
         // Delete the resident
         residentDao.delete(resident.id)
 
         // Verify dependants are also deleted
-        val remainingDependants = dependantDao.getDependentsByResidentId(resident.id)
+        val remainingDependants = dependantDao.getDependantsByResidentId(resident.id)
         assertTrue(remainingDependants.isEmpty())
     }
 

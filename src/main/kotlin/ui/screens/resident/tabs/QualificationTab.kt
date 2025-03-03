@@ -42,9 +42,14 @@ fun QualificationTab(
     }
 
     // Collect state updates
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel) {
         viewModel.state.collect { state ->
             qualifications = state.qualifications
+            // Close dialogs when state updates (indicating successful save)
+            if (showAddForm || selectedQualification != null) {
+                showAddForm = false
+                selectedQualification = null
+            }
         }
     }
 

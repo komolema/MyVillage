@@ -4,6 +4,7 @@ import viewmodel.ResidentWindowViewModel
 import java.time.LocalDate
 import database.dao.ResidentDao
 import database.dao.QualificationDao
+import database.dao.DependantDao
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +29,7 @@ class ResidentWindowTest {
     private val testScope = TestScope(testDispatcher)
     private val residentDao = mockk<ResidentDao>(relaxed = true)
     private val qualificationDao = mockk<QualificationDao>(relaxed = true)
+    private val dependantDao = mockk<DependantDao>(relaxed = true)
     private lateinit var viewModel: ResidentWindowViewModel
 
     @BeforeEach
@@ -40,7 +42,8 @@ class ResidentWindowTest {
         every { qualificationDao.getQualificationsByResidentId(any()) } returns emptyList()
         every { qualificationDao.updateQualification(any()) } returns true
         every { qualificationDao.createQualification(any()) } returns Qualification.default
-        viewModel = ResidentWindowViewModel(qualificationDao, residentDao, dispatcher = testDispatcher)
+        coEvery { dependantDao.getDependantsByResidentId(any()) } returns emptyList()
+        viewModel = ResidentWindowViewModel(qualificationDao, residentDao, dependantDao, dispatcher = testDispatcher)
     }
 
     @AfterEach
@@ -266,7 +269,7 @@ class ResidentWindowTest {
     @Test
     fun `test successful save in NEW mode`() = testScope.runTest {
         // Create a new ViewModel instance with NEW mode
-        val newViewModel = ResidentWindowViewModel(qualificationDao, residentDao, initialMode = WindowMode.NEW, dispatcher = testDispatcher)
+        val newViewModel = ResidentWindowViewModel(qualificationDao, residentDao, dependantDao, initialMode = WindowMode.NEW, dispatcher = testDispatcher)
 
         // Arrange
         val resident = Resident.default.copy(

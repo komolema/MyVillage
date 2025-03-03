@@ -1,0 +1,8 @@
+Fix the following bugs in the code
+
+1. The date picker that pops up in the qualification tab does not reflect the date numbers that you type out in the year,month and day fields
+2. The add qualification popup does not save to the database
+3. The table in the Qualification tab does not display the saved data
+4. The dependant popup does not add the data
+4. The Gender drop down in the dependant popup does not show the genders
+4. Make sure adding dependant adds it to the table

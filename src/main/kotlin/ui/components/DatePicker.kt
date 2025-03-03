@@ -69,12 +69,12 @@ private fun DatePickerDialog(
                 // Year selection
                 OutlinedTextField(
                     value = selectedYear.toString(),
-                    onValueChange = { 
-                        val year = it.toIntOrNull()
-                        if (year != null && year in 1900..2100) {
-                            selectedYear = year
+                    onValueChange = { newValue -> 
+                        if (newValue.isEmpty() || (newValue.toIntOrNull() != null && newValue.length <= 4)) {
+                            selectedYear = newValue.toIntOrNull() ?: selectedYear
                         }
                     },
+                    isError = selectedYear !in 1900..2100,
                     label = { Text("Year") },
                     singleLine = true
                 )
@@ -83,12 +83,12 @@ private fun DatePickerDialog(
                 // Month selection
                 OutlinedTextField(
                     value = selectedMonth.toString(),
-                    onValueChange = { 
-                        val month = it.toIntOrNull()
-                        if (month != null && month in 1..12) {
-                            selectedMonth = month
+                    onValueChange = { newValue -> 
+                        if (newValue.isEmpty() || (newValue.toIntOrNull() != null && newValue.length <= 2)) {
+                            selectedMonth = newValue.toIntOrNull() ?: selectedMonth
                         }
                     },
+                    isError = selectedMonth !in 1..12,
                     label = { Text("Month") },
                     singleLine = true
                 )
@@ -97,27 +97,33 @@ private fun DatePickerDialog(
                 // Day selection
                 OutlinedTextField(
                     value = selectedDay.toString(),
-                    onValueChange = { 
-                        val day = it.toIntOrNull()
-                        if (day != null && day in 1..31) {
-                            selectedDay = day
+                    onValueChange = { newValue -> 
+                        if (newValue.isEmpty() || (newValue.toIntOrNull() != null && newValue.length <= 2)) {
+                            selectedDay = newValue.toIntOrNull() ?: selectedDay
                         }
                     },
+                    isError = selectedDay !in 1..31,
                     label = { Text("Day") },
                     singleLine = true
                 )
             }
         },
         confirmButton = {
+            val isValidYear = selectedYear in 1900..2100
+            val isValidMonth = selectedMonth in 1..12
+            val maxDays = when (selectedMonth) {
+                2 -> if (selectedYear % 4 == 0 && (selectedYear % 100 != 0 || selectedYear % 400 == 0)) 29 else 28
+                4, 6, 9, 11 -> 30
+                else -> 31
+            }
+            val isValidDay = selectedDay in 1..maxDays
+
             TextButton(
                 onClick = {
-                    try {
-                        val date = LocalDate.of(selectedYear, selectedMonth, selectedDay)
-                        onDateSelected(date)
-                    } catch (e: Exception) {
-                        // Invalid date, do nothing
-                    }
-                }
+                    val date = LocalDate.of(selectedYear, selectedMonth, selectedDay)
+                    onDateSelected(date)
+                },
+                enabled = isValidYear && isValidMonth && isValidDay
             ) {
                 Text("OK")
             }

@@ -108,10 +108,12 @@ class ResidentWindowViewModel(
         viewModelScope.launch {
             try {
                 val createdDependant = dependantDao.createDependant(newDependant)
+                val updatedDependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
                 _state.update { currentState ->
                     currentState.copy(
-                        dependants = currentState.dependants + createdDependant,
-                        error = null
+                        dependants = updatedDependants,
+                        error = null,
+                        saveSuccess = true
                     )
                 }
             } catch (e: Exception) {
@@ -128,12 +130,12 @@ class ResidentWindowViewModel(
         viewModelScope.launch {
             try {
                 val savedDependant = dependantDao.updateDependant(updatedDependant)
+                val updatedDependants = dependantDao.getDependantsByResidentId(savedDependant.residentId)
                 _state.update { currentState ->
                     currentState.copy(
-                        dependants = currentState.dependants.map { 
-                            if (it.id == savedDependant.id) savedDependant else it 
-                        },
-                        error = null
+                        dependants = updatedDependants,
+                        error = null,
+                        saveSuccess = true
                     )
                 }
             } catch (e: Exception) {
@@ -222,12 +224,17 @@ class ResidentWindowViewModel(
     private fun updateQualification(updatedQualification: Qualification) {
         viewModelScope.launch {
             try {
-                qualificationDao.updateQualification(updatedQualification)
-                _state.update { currentState ->
-                    currentState.copy(
-                        error = null,
-                        saveSuccess = true
-                    )
+                if (qualificationDao.updateQualification(updatedQualification)) {
+                    val updatedQualifications = qualificationDao.getQualificationsByResidentId(updatedQualification.residentId)
+                    _state.update { currentState ->
+                        currentState.copy(
+                            qualifications = updatedQualifications,
+                            error = null,
+                            saveSuccess = true
+                        )
+                    }
+                } else {
+                    throw Exception("Failed to update qualification")
                 }
             } catch (e: Exception) {
                 _state.update { currentState ->
@@ -243,9 +250,11 @@ class ResidentWindowViewModel(
     private fun createQualification(newQualification: Qualification) {
         viewModelScope.launch {
             try {
-                qualificationDao.createQualification(newQualification)
+                val createdQualification = qualificationDao.createQualification(newQualification)
+                val updatedQualifications = qualificationDao.getQualificationsByResidentId(createdQualification.residentId)
                 _state.update { currentState ->
                     currentState.copy(
+                        qualifications = updatedQualifications,
                         error = null,
                         saveSuccess = true
                     )

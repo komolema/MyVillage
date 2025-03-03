@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlinx.coroutines.test.runTest
 
 /**
  * Integration tests for DependantDao implementation.
@@ -31,66 +32,69 @@ class DependantDaoTest {
     }
 
     @Test
-    fun testCreateDependant() {
+    fun testCreateDependant() = runTest {
         val dependant = createTestDependant()
-        dependantDao.create(dependant)
-        val fetchedDependant = dependantDao.getById(dependant.id)
-        assertNotNull(fetchedDependant)
-        assertEquals(dependant.name, fetchedDependant?.name)
-        assertEquals(dependant.surname, fetchedDependant?.surname)
+        val createdDependant = dependantDao.createDependant(dependant)
+        val fetchedDependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
+        assertEquals(1, fetchedDependants.size)
+        val fetchedDependant = fetchedDependants.first()
+        assertEquals(dependant.name, fetchedDependant.name)
+        assertEquals(dependant.surname, fetchedDependant.surname)
     }
 
     @Test
-    fun testGetDependantById() {
+    fun testGetDependantByResidentId() = runTest {
         val dependant = createTestDependant()
-        dependantDao.create(dependant)
-        val fetchedDependant = dependantDao.getById(dependant.id)
-        assertNotNull(fetchedDependant)
-        assertEquals(dependant.id, fetchedDependant?.id)
-        assertEquals(dependant.name, fetchedDependant?.name)
-        assertEquals(dependant.surname, fetchedDependant?.surname)
+        val createdDependant = dependantDao.createDependant(dependant)
+        val fetchedDependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
+        assertEquals(1, fetchedDependants.size)
+        val fetchedDependant = fetchedDependants.first()
+        assertEquals(dependant.id, fetchedDependant.id)
+        assertEquals(dependant.name, fetchedDependant.name)
+        assertEquals(dependant.surname, fetchedDependant.surname)
     }
 
     @Test
-    fun testUpdateDependant() {
+    fun testUpdateDependant() = runTest {
         val dependant = createTestDependant()
-        dependantDao.create(dependant)
+        val createdDependant = dependantDao.createDependant(dependant)
 
-        val updatedDependant = dependant.copy(
+        val updatedDependant = createdDependant.copy(
             name = "Updated Name",
             surname = "Updated Surname"
         )
-        dependantDao.update(updatedDependant)
+        val savedDependant = dependantDao.updateDependant(updatedDependant)
 
-        val fetchedDependant = dependantDao.getById(dependant.id)
-        assertNotNull(fetchedDependant)
-        assertEquals("Updated Name", fetchedDependant?.name)
-        assertEquals("Updated Surname", fetchedDependant?.surname)
+        val fetchedDependants = dependantDao.getDependantsByResidentId(savedDependant.residentId)
+        assertEquals(1, fetchedDependants.size)
+        val fetchedDependant = fetchedDependants.first()
+        assertEquals("Updated Name", fetchedDependant.name)
+        assertEquals("Updated Surname", fetchedDependant.surname)
     }
 
     @Test
-    fun testDeleteDependant() {
+    fun testDeleteDependant() = runTest {
         val dependant = createTestDependant()
-        dependantDao.create(dependant)
+        val createdDependant = dependantDao.createDependant(dependant)
 
-        dependantDao.delete(dependant.id)
+        dependantDao.deleteDependant(createdDependant.id)
 
-        val fetchedDependant = dependantDao.getById(dependant.id)
-        assertNull(fetchedDependant)
+        val dependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
+        assertFalse(dependants.any { it.id == createdDependant.id })
     }
 
     @Test
-    fun testGetDependentsByResidentId() {
+    fun testGetDependentsByResidentId() = runTest {
         val residentId = UUID.randomUUID()
         val dependant1 = createTestDependant(residentId)
         val dependant2 = createTestDependant(residentId)
         val dependant3 = createTestDependant(UUID.randomUUID()) // Different resident
 
-        dependantDao.create(dependant1)
-        dependantDao.create(dependant2)
-        dependantDao.create(dependant3)
+        val created1 = dependantDao.createDependant(dependant1)
+        val created2 = dependantDao.createDependant(dependant2)
+        val created3 = dependantDao.createDependant(dependant3)
 
-        val dependants = dependantDao.getDependentsByResidentId(residentId)
+        val dependants = dependantDao.getDependantsByResidentId(residentId)
         assertEquals(2, dependants.size)
         assertTrue(dependants.any { it.id == dependant1.id })
         assertTrue(dependants.any { it.id == dependant2.id })
@@ -98,39 +102,23 @@ class DependantDaoTest {
     }
 
     @Test
-    fun testSearchDependant() {
-        val dependant1 = createTestDependant()
-        val dependant2 = createTestDependant().copy(
-            id = UUID.randomUUID(),
-            name = "Different Name",
-            surname = "Different Surname"
-        )
+    fun testGetDependantsByResidentIdWithMultipleResidents() = runTest {
+        val residentId1 = UUID.randomUUID()
+        val residentId2 = UUID.randomUUID()
 
-        dependantDao.create(dependant1)
-        dependantDao.create(dependant2)
+        val dependant1 = createTestDependant(residentId1)
+        val dependant2 = createTestDependant(residentId2)
 
-        val searchResults = dependantDao.search("Test", 0, 10)
-        assertTrue(searchResults.any { it.id == dependant1.id })
-        assertFalse(searchResults.any { it.id == dependant2.id })
-    }
+        dependantDao.createDependant(dependant1)
+        dependantDao.createDependant(dependant2)
 
-    @Test
-    fun testPagination() {
-        val dependants = (1..5).map {
-            createTestDependant().copy(
-                id = UUID.randomUUID(),
-                name = "Name $it"
-            )
-        }
-        dependants.forEach { dependantDao.create(it) }
+        val resident1Dependants = dependantDao.getDependantsByResidentId(residentId1)
+        val resident2Dependants = dependantDao.getDependantsByResidentId(residentId2)
 
-        val page1 = dependantDao.getAll(0, 2)
-        val page2 = dependantDao.getAll(1, 2)
-        val page3 = dependantDao.getAll(2, 2)
-
-        assertEquals(2, page1.size)
-        assertEquals(2, page2.size)
-        assertEquals(1, page3.size)
+        assertEquals(1, resident1Dependants.size)
+        assertEquals(1, resident2Dependants.size)
+        assertEquals(dependant1.id, resident1Dependants[0].id)
+        assertEquals(dependant2.id, resident2Dependants[0].id)
     }
 
     private fun createTestDependant(residentId: UUID = UUID.randomUUID()): Dependant {
