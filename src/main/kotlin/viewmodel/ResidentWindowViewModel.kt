@@ -129,8 +129,8 @@ class ResidentWindowViewModel(
     private fun updateDependant(updatedDependant: Dependant) {
         viewModelScope.launch {
             try {
-                val savedDependant = dependantDao.updateDependant(updatedDependant)
-                val updatedDependants = dependantDao.getDependantsByResidentId(savedDependant.residentId)
+                dependantDao.updateDependant(updatedDependant)
+                val updatedDependants = dependantDao.getDependantsByResidentId(updatedDependant.residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         dependants = updatedDependants,

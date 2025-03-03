@@ -2,20 +2,18 @@ package di
 
 import database.dao.*
 import org.koin.core.context.GlobalContext.get
-import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import viewmodel.*
 
 val daoModule = module {
     single<AddressDao> { AddressDaoImpl() }
-    single { AnimalDao() }
+    single<AnimalDao> { AnimalDaoImpl() }
     single<DependantDao> { DependantDaoImpl() }
     single<EmploymentDao> { EmploymentDaoImpl() }
     single<LeadershipDao> { LeadershipDaoImpl() }
-    single { ManagedByDao() }
-    single { OwnershipDao() }
-    single { PaymentDao() }
+    single<ManagedByDao> { ManagedByDaoImpl() }
+    single<OwnershipDao> { OwnershipDaoImpl() }
+    single<PaymentDao> { PaymentDaoImpl() }
     single<QualificationDao> { QualificationDaoImpl() }
     single<ResidenceDao> { ResidenceDaoImpl() }
     single<ResidentDao> { ResidentDaoImpl(get(), get()) }

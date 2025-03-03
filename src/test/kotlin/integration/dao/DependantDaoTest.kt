@@ -2,9 +2,11 @@ package integration.dao
 
 import database.dao.DependantDaoImpl
 import database.schema.Dependants
+import database.schema.Residents
 import models.Dependant
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -23,10 +25,23 @@ class DependantDaoTest {
 
     @BeforeEach
     fun setup() {
-        Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
+        println("[DEBUG_LOG] Setting up test database")
+        // Use shared cache to maintain connection across transactions
+        val db = Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", driver = "org.sqlite.JDBC")
+        println("[DEBUG_LOG] Database connection established: ${db.url}")
+
         transaction {
+            println("[DEBUG_LOG] Creating database schema")
+            SchemaUtils.drop(Dependants)
+            SchemaUtils.drop(Residents)
+            println("[DEBUG_LOG] Dropped existing tables")
+
+            SchemaUtils.create(Residents)
+            println("[DEBUG_LOG] Created Residents table")
             SchemaUtils.create(Dependants)
+            println("[DEBUG_LOG] Created Dependants table")
         }
+        println("[DEBUG_LOG] Database setup completed")
     }
 
     @Test

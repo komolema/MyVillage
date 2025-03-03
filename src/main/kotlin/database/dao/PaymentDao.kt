@@ -4,6 +4,7 @@ import database.schema.Payments
 import models.Payment
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -14,7 +15,6 @@ interface PaymentDao {
     fun getPaymentById(id: UUID): Payment?
     fun getAllPayments(): List<Payment>
     fun getPaymentsByDate(date: LocalDate): List<Payment>
-    fun getPaymentsByDateRange(startDate: LocalDate, endDate: LocalDate): List<Payment>
     fun getPaymentsByMethod(method: String): List<Payment>
     fun updatePayment(payment: Payment): Boolean
     fun deletePayment(id: UUID): Boolean
@@ -47,11 +47,6 @@ class PaymentDaoImpl : PaymentDao {
             .map { it.toPayment() }
     }
 
-    override fun getPaymentsByDateRange(startDate: LocalDate, endDate: LocalDate): List<Payment> = transaction {
-        Payments.select { 
-            (Payments.date >= startDate) and (Payments.date <= endDate)
-        }.map { it.toPayment() }
-    }
 
     override fun getPaymentsByMethod(method: String): List<Payment> = transaction {
         Payments.select(Payments.method eq method)

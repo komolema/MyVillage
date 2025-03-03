@@ -4,7 +4,9 @@ import database.schema.Dependants
 import models.Dependant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.statements.StatementType
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
 interface DependantDao {
@@ -18,6 +20,24 @@ interface DependantDao {
 
 class DependantDaoImpl : DependantDao {
     override fun createDependant(dependant: Dependant): Dependant = transaction {
+        println("[DEBUG_LOG] Starting createDependant transaction")
+        println("[DEBUG_LOG] Verifying database state...")
+
+        // Verify the Dependants table exists and is accessible
+        try {
+            val tableExists = Dependants.exists()
+            println("[DEBUG_LOG] Dependants table exists: $tableExists")
+
+            if (!tableExists) {
+                println("[DEBUG_LOG] Attempting to create Dependants table")
+                SchemaUtils.create(Dependants)
+            }
+        } catch (e: Exception) {
+            println("[DEBUG_LOG] Error checking table existence: ${e.message}")
+            throw e
+        }
+
+        println("[DEBUG_LOG] Inserting new dependant with residentId: ${dependant.residentId}")
         val id = Dependants.insertAndGetId {
             it[residentId] = dependant.residentId
             it[idNumber] = dependant.idNumber
@@ -25,23 +45,39 @@ class DependantDaoImpl : DependantDao {
             it[surname] = dependant.surname
             it[gender] = dependant.gender
         }
+        println("[DEBUG_LOG] Insert successful, new id: ${id.value}")
+
         dependant.copy(id = id.value)
     }
 
     override fun getDependantById(id: UUID): Dependant? = transaction {
-        Dependants.select(Dependants.id eq id)
-            .map { it.toDependant() }
-            .singleOrNull()
+        println("[DEBUG_LOG] Getting dependant by id: $id")
+        val query = Dependants.select { Dependants.id eq id }
+        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
+        query.map { row ->
+            println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
+            row.toDependant()
+        }.singleOrNull()
     }
 
     override fun getDependantsByResidentId(residentId: UUID): List<Dependant> = transaction {
-        Dependants.select(Dependants.residentId eq residentId)
-            .map { it.toDependant() }
+        println("[DEBUG_LOG] Querying dependants for residentId: $residentId")
+        val query = Dependants.select { Dependants.residentId eq residentId }
+        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
+        query.map { row ->
+            println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
+            row.toDependant()
+        }
     }
 
     override fun getAllDependants(): List<Dependant> = transaction {
-        Dependants.selectAll()
-            .map { it.toDependant() }
+        println("[DEBUG_LOG] Getting all dependants")
+        val query = Dependants.selectAll()
+        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
+        query.map { row ->
+            println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
+            row.toDependant()
+        }
     }
 
     override fun updateDependant(dependant: Dependant): Boolean = transaction {
@@ -66,6 +102,8 @@ class DependantDaoImpl : DependantDao {
             name = this[Dependants.name],
             surname = this[Dependants.surname],
             gender = this[Dependants.gender]
-        )
+        ).also {
+            println("[DEBUG_LOG] Converting row to Dependant: id=${this[Dependants.id]}, residentId=${this[Dependants.residentId]}")
+        }
     }
 }
