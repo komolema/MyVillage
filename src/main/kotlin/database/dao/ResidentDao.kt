@@ -8,15 +8,17 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 
 interface ResidentDao {
     fun getAll(page: Int, pageSize: Int): List<Resident>
     fun search(query: String, page: Int, pageSize: Int): List<Resident>
-    fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded>
+    suspend fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded>
     fun getResidentById(id: UUID): Resident?
-    fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded>
-    fun getResidentExpandedById(id: UUID): ResidentExpanded?
+    suspend fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded>
+    suspend fun getResidentExpandedById(id: UUID): ResidentExpanded?
     fun createResident(residentState: Resident)
     fun updateResident(residentState: Resident)
     fun delete(id: UUID)
@@ -45,9 +47,13 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
         searchResidents(query, page, pageSize).map { it.toResident() }
     }
 
-    override fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
-        searchResidents(query, page, pageSize).map { it.toResidentExpanded() }
-    }
+    override suspend fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded> = 
+        withContext(Dispatchers.IO) {
+            val rows = transaction {
+                searchResidents(query, page, pageSize).toList()
+            }
+            rows.map { row -> row.toResidentExpanded() }
+        }
 
     override fun getResidentById(id: UUID): Resident? = transaction {
         Residents.selectAll()
@@ -56,18 +62,25 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
             .singleOrNull()
     }
 
-    override fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = transaction {
-        Residents.selectAll()
-            .limit(pageSize).offset(start = (0 * pageSize).toLong())
-            .map { it.toResidentExpanded() }
-    }
+    override suspend fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = 
+        withContext(Dispatchers.IO) {
+            val rows = transaction {
+                Residents.selectAll()
+                    .limit(pageSize).offset(start = (0 * pageSize).toLong())
+                    .toList()
+            }
+            rows.map { row -> row.toResidentExpanded() }
+        }
 
-    override fun getResidentExpandedById(id: UUID): ResidentExpanded? = transaction {
-        Residents.selectAll()
-            .andWhere { Residents.id eq id }
-            .mapNotNull { it.toResidentExpanded() }
-            .singleOrNull()
-    }
+    override suspend fun getResidentExpandedById(id: UUID): ResidentExpanded? = 
+        withContext(Dispatchers.IO) {
+            val row = transaction {
+                Residents.selectAll()
+                    .andWhere { Residents.id eq id }
+                    .firstOrNull()
+            }
+            row?.let { it.toResidentExpanded() }
+        }
 
     override fun createResident(residentState: Resident) {
         transaction {
@@ -118,29 +131,32 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
         )
     }
 
-    private fun ResultRow.toResidentExpanded(): ResidentExpanded {
+    private suspend fun ResultRow.toResidentExpanded(): ResidentExpanded {
         val resident = this.toResident()
-        val address = residenceDao.getAddressByResidentId(resident.id).toOption()
-        val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
-        val dependents = dependantDao.getDependentsByResidentId(resident.id)
-        return ResidentExpanded(
-            resident = resident,
-            address = address,
-            residence = residence,
-            dependants = dependents
-        )
+        return withContext(Dispatchers.IO) {
+            val address = residenceDao.getAddressByResidentId(resident.id).toOption()
+            val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
+            val dependants = dependantDao.getDependantsByResidentId(resident.id)
+            ResidentExpanded(
+                resident = resident,
+                address = address,
+                residence = residence,
+                dependants = dependants
+            )
+        }
     }
 
-    fun mapResidentToExpanded(resident: Resident): ResidentExpanded {
-        val address = residenceDao.getAddressByResidentId(resident.id).toOption()
-        val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
-        val dependents = dependantDao.getDependentsByResidentId(resident.id)
-        return ResidentExpanded(
-            resident = resident,
-            address = address,
-            residence = residence,
-            dependants = dependents
-        )
-    }
+    suspend fun mapResidentToExpanded(resident: Resident): ResidentExpanded =
+        withContext(Dispatchers.IO) {
+            val address = residenceDao.getAddressByResidentId(resident.id).toOption()
+            val residence = residenceDao.getResidenceByResidentId(resident.id).toOption()
+            val dependants = dependantDao.getDependantsByResidentId(resident.id)
+            ResidentExpanded(
+                resident = resident,
+                address = address,
+                residence = residence,
+                dependants = dependants
+            )
+        }
 
 }

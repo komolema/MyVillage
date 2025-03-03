@@ -1,11 +1,15 @@
 package ui.screens.resident.tabs
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
 import com.seanproctor.datatable.TableColumnWidth
 import models.Dependant
 import ui.components.table.GenericTable
@@ -190,23 +194,32 @@ private fun DependantFormDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 var expanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it }
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
                         value = gender,
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Gender") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        trailingIcon = { 
+                            IconButton(onClick = { expanded = !expanded }) {
+                                Icon(
+                                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                    contentDescription = "Toggle dropdown"
+                                )
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    ExposedDropdownMenu(
+                    DropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .align(Alignment.TopStart)
                     ) {
-                        listOf("Male", "Female", "Other").forEach { option ->
+                        Dependant.VALID_GENDERS.forEach { option ->
                             DropdownMenuItem(
                                 text = { Text(option) },
                                 onClick = {

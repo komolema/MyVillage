@@ -10,15 +10,13 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlinx.coroutines.test.runTest
 
 /**
  * Integration tests for DependantDao implementation.
- * Tests CRUD operations, search functionality, pagination, and resident-dependant relationships.
+ * Tests CRUD operations, search functionality, and resident-dependant relationships.
  *
  * Uses an in-memory SQLite database that is recreated for each test.
- * Special focus on testing the relationship between residents and their dependants,
- * including the getDependentsByResidentId functionality.
+ * Special focus on testing the relationship between residents and their dependants.
  */
 class DependantDaoTest {
     private val dependantDao = DependantDaoImpl()
@@ -32,103 +30,143 @@ class DependantDaoTest {
     }
 
     @Test
-    fun testCreateDependant() = runTest {
-        val dependant = createTestDependant()
-        val createdDependant = dependantDao.createDependant(dependant)
-        val fetchedDependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
-        assertEquals(1, fetchedDependants.size)
-        val fetchedDependant = fetchedDependants.first()
-        assertEquals(dependant.name, fetchedDependant.name)
-        assertEquals(dependant.surname, fetchedDependant.surname)
+    fun testCreateDependant() {
+        transaction {
+            val dependant = createTestDependant()
+            val createdDependant = dependantDao.createDependant(dependant)
+
+            assertNotNull(createdDependant.id)
+            assertEquals(dependant.name, createdDependant.name)
+            assertEquals(dependant.surname, createdDependant.surname)
+            assertEquals(dependant.gender, createdDependant.gender)
+
+            val fetchedDependant = dependantDao.getDependantById(createdDependant.id)
+            assertNotNull(fetchedDependant)
+            assertEquals(createdDependant.name, fetchedDependant?.name)
+            assertEquals(createdDependant.surname, fetchedDependant?.surname)
+        }
     }
 
     @Test
-    fun testGetDependantByResidentId() = runTest {
-        val dependant = createTestDependant()
-        val createdDependant = dependantDao.createDependant(dependant)
-        val fetchedDependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
-        assertEquals(1, fetchedDependants.size)
-        val fetchedDependant = fetchedDependants.first()
-        assertEquals(dependant.id, fetchedDependant.id)
-        assertEquals(dependant.name, fetchedDependant.name)
-        assertEquals(dependant.surname, fetchedDependant.surname)
+    fun testGetDependantById() {
+        transaction {
+            val dependant = createTestDependant()
+            val createdDependant = dependantDao.createDependant(dependant)
+
+            val fetchedDependant = dependantDao.getDependantById(createdDependant.id)
+            assertNotNull(fetchedDependant)
+            assertEquals(createdDependant.name, fetchedDependant?.name)
+            assertEquals(createdDependant.surname, fetchedDependant?.surname)
+            assertEquals(createdDependant.gender, fetchedDependant?.gender)
+        }
     }
 
     @Test
-    fun testUpdateDependant() = runTest {
-        val dependant = createTestDependant()
-        val createdDependant = dependantDao.createDependant(dependant)
+    fun testGetAllDependants() {
+        transaction {
+            val dependants = listOf(
+                createTestDependant(),
+                createTestDependant(),
+                createTestDependant()
+            )
+            dependants.forEach { dependantDao.createDependant(it) }
 
-        val updatedDependant = createdDependant.copy(
-            name = "Updated Name",
-            surname = "Updated Surname"
-        )
-        val savedDependant = dependantDao.updateDependant(updatedDependant)
-
-        val fetchedDependants = dependantDao.getDependantsByResidentId(savedDependant.residentId)
-        assertEquals(1, fetchedDependants.size)
-        val fetchedDependant = fetchedDependants.first()
-        assertEquals("Updated Name", fetchedDependant.name)
-        assertEquals("Updated Surname", fetchedDependant.surname)
+            val fetchedDependants = dependantDao.getAllDependants()
+            assertEquals(dependants.size, fetchedDependants.size)
+        }
     }
 
     @Test
-    fun testDeleteDependant() = runTest {
-        val dependant = createTestDependant()
-        val createdDependant = dependantDao.createDependant(dependant)
+    fun testGetDependantsByResidentId() {
+        transaction {
+            val residentId = UUID.randomUUID()
+            val dependant1 = createTestDependant(residentId)
+            val dependant2 = createTestDependant(residentId)
+            val dependant3 = createTestDependant(UUID.randomUUID()) // Different resident
 
-        dependantDao.deleteDependant(createdDependant.id)
+            dependantDao.createDependant(dependant1)
+            dependantDao.createDependant(dependant2)
+            dependantDao.createDependant(dependant3)
 
-        val dependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
-        assertFalse(dependants.any { it.id == createdDependant.id })
+            val dependants = dependantDao.getDependantsByResidentId(residentId)
+            assertEquals(2, dependants.size)
+            assertTrue(dependants.any { it.id == dependant1.id })
+            assertTrue(dependants.any { it.id == dependant2.id })
+            assertFalse(dependants.any { it.id == dependant3.id })
+        }
     }
 
     @Test
-    fun testGetDependentsByResidentId() = runTest {
-        val residentId = UUID.randomUUID()
-        val dependant1 = createTestDependant(residentId)
-        val dependant2 = createTestDependant(residentId)
-        val dependant3 = createTestDependant(UUID.randomUUID()) // Different resident
+    fun testUpdateDependant() {
+        transaction {
+            val dependant = createTestDependant()
+            val createdDependant = dependantDao.createDependant(dependant)
 
-        val created1 = dependantDao.createDependant(dependant1)
-        val created2 = dependantDao.createDependant(dependant2)
-        val created3 = dependantDao.createDependant(dependant3)
+            val updatedDependant = createdDependant.copy(
+                name = "Updated Name",
+                surname = "Updated Surname"
+            )
+            val updateResult = dependantDao.updateDependant(updatedDependant)
+            assertTrue(updateResult)
 
-        val dependants = dependantDao.getDependantsByResidentId(residentId)
-        assertEquals(2, dependants.size)
-        assertTrue(dependants.any { it.id == dependant1.id })
-        assertTrue(dependants.any { it.id == dependant2.id })
-        assertFalse(dependants.any { it.id == dependant3.id })
+            val fetchedDependant = dependantDao.getDependantById(createdDependant.id)
+            assertNotNull(fetchedDependant)
+            assertEquals("Updated Name", fetchedDependant?.name)
+            assertEquals("Updated Surname", fetchedDependant?.surname)
+        }
     }
 
     @Test
-    fun testGetDependantsByResidentIdWithMultipleResidents() = runTest {
-        val residentId1 = UUID.randomUUID()
-        val residentId2 = UUID.randomUUID()
+    fun testDeleteDependant() {
+        transaction {
+            val dependant = createTestDependant()
+            val createdDependant = dependantDao.createDependant(dependant)
 
-        val dependant1 = createTestDependant(residentId1)
-        val dependant2 = createTestDependant(residentId2)
+            val deleteResult = dependantDao.deleteDependant(createdDependant.id)
+            assertTrue(deleteResult)
 
-        dependantDao.createDependant(dependant1)
-        dependantDao.createDependant(dependant2)
-
-        val resident1Dependants = dependantDao.getDependantsByResidentId(residentId1)
-        val resident2Dependants = dependantDao.getDependantsByResidentId(residentId2)
-
-        assertEquals(1, resident1Dependants.size)
-        assertEquals(1, resident2Dependants.size)
-        assertEquals(dependant1.id, resident1Dependants[0].id)
-        assertEquals(dependant2.id, resident2Dependants[0].id)
+            val fetchedDependant = dependantDao.getDependantById(createdDependant.id)
+            assertNull(fetchedDependant)
+        }
     }
 
-    private fun createTestDependant(residentId: UUID = UUID.randomUUID()): Dependant {
+    @Test
+    fun testInvalidGenderValue() {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            Dependant(
+                id = UUID.randomUUID(),
+                residentId = UUID.randomUUID(),
+                idNumber = "TEST123",
+                name = "Test Name",
+                surname = "Test Surname",
+                gender = "Invalid"
+            )
+        }
+        assertTrue(exception.message?.contains("Invalid gender value") == true)
+    }
+
+    @Test
+    fun testValidGenderValues() {
+        transaction {
+            Dependant.VALID_GENDERS.forEach { gender ->
+                val dependant = createTestDependant(gender = gender)
+                val createdDependant = dependantDao.createDependant(dependant)
+                assertEquals(gender, createdDependant.gender)
+            }
+        }
+    }
+
+    private fun createTestDependant(
+        residentId: UUID = UUID.randomUUID(),
+        gender: String = Dependant.VALID_GENDERS.first()
+    ): Dependant {
         return Dependant(
             id = UUID.randomUUID(),
             residentId = residentId,
             idNumber = "TEST123",
             name = "Test Name",
             surname = "Test Surname",
-            gender = "M"
+            gender = gender
         )
     }
 }

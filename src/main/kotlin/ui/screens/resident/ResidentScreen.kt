@@ -21,11 +21,9 @@ import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
-import models.Address
 import models.expanded.ResidentExpanded
 import ui.components.WindowToolbar
-import ui.screens.resident.WindowMode
-import ui.utils.ScrollableContainer
+import ui.components.ScrollableContainer
 import viewmodel.ResidentViewModel
 import java.time.LocalDate
 import java.time.Period
