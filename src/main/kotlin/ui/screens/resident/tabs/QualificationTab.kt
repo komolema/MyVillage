@@ -137,8 +137,7 @@ fun QualificationTab(
                 onEdit = { selectedQualification = it },
                 onDelete = { qualification ->
                     if (residentId != null) {
-                        // TODO: Add DeleteQualification intent and handler
-                        // viewModel.processIntent(Intent.DeleteQualification(qualification.id))
+                        viewModel.processIntent(Intent.DeleteQualification(qualification.id))
                     }
                 },
                 onSave = { updatedQualification ->

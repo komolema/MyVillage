@@ -1,7 +1,7 @@
 package database.dao
 
 import arrow.core.toOption
-import database.schema.Residents
+import database.schema.*
 import models.Resident
 import models.expanded.ResidentExpanded
 import org.jetbrains.exposed.sql.*
@@ -114,6 +114,26 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
 
     override fun delete(id: UUID) {
         transaction {
+            // Delete qualifications first
+            Qualifications.deleteWhere { Qualifications.residentId eq id }
+
+            // Delete dependants
+            Dependants.deleteWhere { Dependants.residentId eq id }
+
+            // Get residence to find address
+            val residence = Residences.select ( Residences.residentId eq id )
+                .map { row -> row[Residences.addressId] }
+                .singleOrNull()
+
+            // Delete residence
+            Residences.deleteWhere { Residences.residentId eq id }
+
+            // Delete address if found
+            if (residence != null) {
+                Addresses.deleteWhere { Addresses.id eq residence }
+            }
+
+            // Finally delete resident
             Residents.deleteWhere { Residents.id eq id }
         }
     }

@@ -22,15 +22,37 @@ interface ResidenceDao {
 class ResidenceDaoImpl : ResidenceDao {
 
     override fun getResidenceByResidentId(residentId: UUID): Residence? = transaction {
-        Residences.select(Residences.residentId eq residentId)
-            .mapNotNull { it.toResidence() }
-            .singleOrNull()
+        Residences.selectAll()
+            .where { Residences.residentId eq residentId }
+            .limit(1)
+            .firstOrNull()?.let { row ->
+                Residence(
+                    id = row[Residences.id].value,
+                    residentId = row[Residences.residentId],
+                    addressId = row[Residences.addressId],
+                    occupationDate = row[Residences.occupationDate]
+                )
+            }
     }
 
     override fun getAddressByResidentId(residentId: UUID): Address? = transaction {
-        (Residences innerJoin Addresses).select(Residences.residentId eq residentId)
-            .mapNotNull { it.toAddress() }
-            .singleOrNull()
+        (Addresses innerJoin Residences)
+            .selectAll()
+            .where { Residences.residentId eq residentId }
+            .andWhere { Residences.addressId eq Addresses.id }
+            .limit(1)
+            .firstOrNull()?.let { row ->
+                Address(
+                    id = row[Addresses.id].value,
+                    line = row[Addresses.line],
+                    houseNumber = row[Addresses.houseNumber],
+                    suburb = row[Addresses.suburb],
+                    town = row[Addresses.town],
+                    postalCode = row[Addresses.postalCode],
+                    geoCoordinates = row[Addresses.geoCoordinates],
+                    landmark = row[Addresses.landmark]
+                )
+            }
     }
 
     override fun getAllResidences(): List<Residence> = transaction {

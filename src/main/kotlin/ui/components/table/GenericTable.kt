@@ -89,7 +89,7 @@ fun <T> GenericTable(
                                 Icon(Icons.Default.Edit, "Edit")
                             }
                             IconButton(onClick = { config.onDelete?.invoke(item) }) {
-                                Icon(Icons.Default.Delete, "Delete")
+                                Icon(Icons.Default.Delete, "Delete", tint = Color.Red)
                             }
                         }
                     }
