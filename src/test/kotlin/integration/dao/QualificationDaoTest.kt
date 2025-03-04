@@ -60,12 +60,12 @@ class QualificationDaoTest {
         assertTrue(qualifications.isEmpty())
     }
 
-    private fun createTestQualification(): Qualification {
+    private fun createTestQualification(name: String = "Test Qualification", institution: String = "Test Institution"): Qualification {
         return Qualification(
             id = UUID.randomUUID(),
             residentId = UUID.randomUUID(),
-            name = "Test Qualification",
-            institution = "Test Institution",
+            name = name,
+            institution = institution,
             startDate = LocalDate.parse("2023-01-01"),
             endDate = LocalDate.parse("2023-12-31"),
             nqfLevel = 5,

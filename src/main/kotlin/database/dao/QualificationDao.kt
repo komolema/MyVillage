@@ -16,8 +16,13 @@ interface QualificationDao {
 
 class QualificationDaoImpl : QualificationDao {
     override fun getQualificationsByResidentId(residentId: UUID): List<Qualification> = transaction {
-        Qualifications.select ( Qualifications.residentId eq residentId )
-            .map { it.toQualification() }
+        println("[DEBUG_LOG] Querying qualifications for residentId: $residentId")
+        val query = Qualifications.selectAll().where { Qualifications.residentId eq residentId }
+        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
+        query.map { row ->
+            println("[DEBUG_LOG] Row data: id=${row[Qualifications.id]}, name=${row[Qualifications.name]}")
+            row.toQualification()
+        }
     }
 
     override fun createQualification(qualification: Qualification): Qualification = transaction {
