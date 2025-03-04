@@ -4,7 +4,6 @@ import database.schema.Dependants
 import models.Dependant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.statements.StatementType
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
@@ -52,7 +51,7 @@ class DependantDaoImpl : DependantDao {
 
     override fun getDependantById(id: UUID): Dependant? = transaction {
         println("[DEBUG_LOG] Getting dependant by id: $id")
-        val query = Dependants.select { Dependants.id eq id }
+        val query = Dependants.select ( Dependants.id eq id )
         println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
         query.map { row ->
             println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
@@ -62,7 +61,7 @@ class DependantDaoImpl : DependantDao {
 
     override fun getDependantsByResidentId(residentId: UUID): List<Dependant> = transaction {
         println("[DEBUG_LOG] Querying dependants for residentId: $residentId")
-        val query = Dependants.select { Dependants.residentId eq residentId }
+        val query = Dependants.selectAll().where { Dependants.residentId eq residentId }
         println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
         query.map { row ->
             println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")

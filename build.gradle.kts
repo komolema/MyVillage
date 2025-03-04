@@ -70,10 +70,11 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.h2database:h2:2.2.224")
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform()
+    useJUnit()
 }
 
 compose.desktop {
