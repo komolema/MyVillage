@@ -20,4 +20,17 @@ data class Address(
             if (postalCode.isNotEmpty()) append(" $postalCode")
         }
     }
+
+    companion object {
+        val default = Address(
+            id = UUID.randomUUID(),
+            line = "",
+            houseNumber = "",
+            suburb = "",
+            town = "",
+            postalCode = "",
+            geoCoordinates = null,
+            landmark = null
+        )
+    }
 }

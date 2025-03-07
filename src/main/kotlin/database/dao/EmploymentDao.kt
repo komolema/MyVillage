@@ -1,59 +1,59 @@
 package database.dao
 
-import database.schema.Jobs
-import models.Job
+import database.schema.EmploymentTable
+import models.Employment
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 interface EmploymentDao {
-    fun createJob(job: Job): Job
-    fun getJobsByResidentId(residentId: UUID): List<Job>
-    fun updateJob(job: Job): Boolean
-    fun deleteJob(jobId: UUID): Boolean
+    fun createEmployment(employment: Employment): Employment
+    fun getEmploymentByResidentId(residentId: UUID): List<Employment>
+    fun updateEmployment(employment: Employment): Boolean
+    fun deleteEmployment(employmentId: UUID): Boolean
 }
 
 class EmploymentDaoImpl : EmploymentDao {
-    override fun createJob(job: Job): Job = transaction {
-        Jobs.insert {
-            it[id] = job.id
-            it[residentId] = job.residentId
-            it[employer] = job.employer
-            it[role] = job.role
-            it[startDate] = job.startDate
-            it[endDate] = job.endDate
+    override fun createEmployment(employment: Employment): Employment = transaction {
+        EmploymentTable.insert {
+            it[id] = employment.id
+            it[residentId] = employment.residentId
+            it[employer] = employment.employer
+            it[role] = employment.role
+            it[startDate] = employment.startDate
+            it[endDate] = employment.endDate
         }
-        job
+        employment
     }
 
-    override fun getJobsByResidentId(residentId: UUID): List<Job> = transaction {
-        Jobs.selectAll()
-            .where { Jobs.residentId eq residentId }
+    override fun getEmploymentByResidentId(residentId: UUID): List<Employment> = transaction {
+        EmploymentTable.selectAll()
+            .where { EmploymentTable.residentId eq residentId }
             .map { row ->
-                Job(
-                    id = row[Jobs.id].value,
-                    residentId = row[Jobs.residentId],
-                    employer = row[Jobs.employer],
-                    role = row[Jobs.role],
-                    startDate = row[Jobs.startDate],
-                    endDate = row[Jobs.endDate]
+                Employment(
+                    id = row[EmploymentTable.id].value,
+                    residentId = row[EmploymentTable.residentId],
+                    employer = row[EmploymentTable.employer],
+                    role = row[EmploymentTable.role],
+                    startDate = row[EmploymentTable.startDate],
+                    endDate = row[EmploymentTable.endDate]
                 )
             }
     }
 
-    override fun updateJob(job: Job): Boolean = transaction {
-        val updatedRows = Jobs.update({ Jobs.id eq job.id }) {
-            it[employer] = job.employer
-            it[role] = job.role
-            it[startDate] = job.startDate
-            it[endDate] = job.endDate
+    override fun updateEmployment(employment: Employment): Boolean = transaction {
+        val updatedRows = EmploymentTable.update({ EmploymentTable.id eq employment.id }) {
+            it[employer] = employment.employer
+            it[role] = employment.role
+            it[startDate] = employment.startDate
+            it[endDate] = employment.endDate
         }
         updatedRows > 0
     }
 
-    override fun deleteJob(jobId: UUID): Boolean = transaction {
-        val deletedRows = Jobs.deleteWhere { Jobs.id eq jobId }
+    override fun deleteEmployment(employmentId: UUID): Boolean = transaction {
+        val deletedRows = EmploymentTable.deleteWhere { EmploymentTable.id eq employmentId }
         deletedRows > 0
     }
 }

@@ -22,7 +22,14 @@ val daoModule = module {
 
 val viewModelModule = module {
     factory { ResidentViewModel(get()) }
-    factory { ResidentWindowViewModel(get(), get(), get()) }
+    factory { ResidentWindowViewModel(
+        qualificationDao = get(),
+        residentDao = get(),
+        dependantDao = get(),
+        residenceDao = get(),
+        addressDao = get(),
+        employmentDao = get()
+    ) }
 }
 
 val appModule = listOf(daoModule, viewModelModule)

@@ -19,7 +19,7 @@ object DatabaseConfig {
                 Residents,
                 Addresses,
                 Qualifications,
-                Jobs,
+                EmploymentTable,
                 Animals,
                 Dependants,
                 Leadership,

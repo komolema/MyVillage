@@ -1,8 +1,11 @@
 package viewmodel
 
 import database.dao.DependantDao
+import database.dao.EmploymentDao
 import database.dao.QualificationDao
 import database.dao.ResidentDao
+import database.dao.ResidenceDao
+import database.dao.AddressDao
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,8 +14,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import models.Dependant
+import models.Employment
 import models.Qualification
 import models.Resident
+import models.Residence
+import models.Address
 import ui.screens.resident.ResidentWindowState
 import ui.screens.resident.WindowMode
 import java.util.UUID
@@ -21,6 +27,9 @@ class ResidentWindowViewModel(
     val qualificationDao: QualificationDao,
     val residentDao: ResidentDao,
     val dependantDao: DependantDao,
+    val residenceDao: ResidenceDao,
+    val addressDao: AddressDao,
+    val employmentDao: EmploymentDao,
     private val initialMode: WindowMode = WindowMode.VIEW,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
@@ -30,15 +39,23 @@ class ResidentWindowViewModel(
         data class LoadResident(val residentId: UUID) : Intent
         data class LoadQualifications(val residentId: UUID) : Intent
         data class LoadDependants(val residentId: UUID) : Intent
+        data class LoadEmployment(val residentId: UUID) : Intent
         data class CreateQualification(val newQualification: Qualification) : Intent
         data class UpdateQualification(val updatedQualification: Qualification) : Intent
         data class DeleteQualification(val qualificationId: UUID) : Intent
         data class CreateDependant(val newDependant: Dependant) : Intent
         data class UpdateDependant(val updatedDependant: Dependant) : Intent
         data class DeleteDependant(val dependantId: UUID) : Intent
+        data class CreateEmployment(val newEmployment: Employment) : Intent
+        data class UpdateEmployment(val updatedEmployment: Employment) : Intent
+        data class DeleteEmployment(val employmentId: UUID) : Intent
         data class CreateResident(val residentState: Resident) : Intent
         data class UpdateResident(val residentState: Resident) : Intent
         data class UpdateResidentState(val residentState: Resident) : Intent
+        data class LoadResidence(val residentId: UUID) : Intent
+        data class CreateResidence(val residence: Residence, val address: Address) : Intent
+        data class UpdateResidence(val residence: Residence, val address: Address) : Intent
+        data class DeleteResidence(val residenceId: UUID, val addressId: UUID) : Intent
 
         object ToggleMode : Intent
     }
@@ -61,6 +78,114 @@ class ResidentWindowViewModel(
             is Intent.UpdateResident -> updateResident(intent.residentState)
             is Intent.ToggleMode -> toggleMode()
             is Intent.UpdateResidentState -> processUpdateResidentState(intent.residentState)
+            is Intent.LoadResidence -> loadResidence(intent.residentId)
+            is Intent.CreateResidence -> createResidence(intent.residence, intent.address)
+            is Intent.UpdateResidence -> updateResidence(intent.residence, intent.address)
+            is Intent.DeleteResidence -> deleteResidence(intent.residenceId, intent.addressId)
+            is Intent.LoadEmployment -> loadEmployment(intent.residentId)
+            is Intent.CreateEmployment -> createEmployment(intent.newEmployment)
+            is Intent.UpdateEmployment -> updateEmployment(intent.updatedEmployment)
+            is Intent.DeleteEmployment -> deleteEmployment(intent.employmentId)
+        }
+    }
+
+    private fun loadResidence(residentId: UUID) {
+        viewModelScope.launch {
+            try {
+                val residence = residenceDao.getResidenceByResidentId(residentId)
+                val address = if (residence != null) {
+                    addressDao.getById(residence.addressId)
+                } else null
+
+                _state.update { currentState ->
+                    currentState.copy(
+                        residence = residence ?: Residence.default,
+                        address = address ?: Address.default,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to load residence: ${e.message}"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun createResidence(residence: Residence, address: Address) {
+        viewModelScope.launch {
+            try {
+                addressDao.create(address)
+                residenceDao.createResidence(residence)
+
+                _state.update { currentState ->
+                    currentState.copy(
+                        residence = residence,
+                        address = address,
+                        error = null,
+                        saveSuccess = true
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to create residence: ${e.message}",
+                        saveSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateResidence(residence: Residence, address: Address) {
+        viewModelScope.launch {
+            try {
+                addressDao.update(address)
+                residenceDao.updateResidence(residence)
+
+                _state.update { currentState ->
+                    currentState.copy(
+                        residence = residence,
+                        address = address,
+                        error = null,
+                        saveSuccess = true
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to update residence: ${e.message}",
+                        saveSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun deleteResidence(residenceId: UUID, addressId: UUID) {
+        viewModelScope.launch {
+            try {
+                residenceDao.deleteResidence(residenceId)
+                addressDao.delete(addressId)
+
+                _state.update { currentState ->
+                    currentState.copy(
+                        residence = Residence.default,
+                        address = Address.default,
+                        error = null,
+                        saveSuccess = true
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to delete residence: ${e.message}",
+                        saveSuccess = false
+                    )
+                }
+            }
         }
     }
 
@@ -307,6 +432,93 @@ class ResidentWindowViewModel(
                     currentState.copy(
                         error = e.message ?: "Failed to load resident",
                         saveSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun loadEmployment(residentId: UUID) {
+        viewModelScope.launch {
+            try {
+                val employment = employmentDao.getEmploymentByResidentId(residentId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        employmentHistory = employment,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to load employment history: ${e.message}",
+                        employmentHistory = emptyList()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun createEmployment(newEmployment: Employment) {
+        viewModelScope.launch {
+            try {
+                val createdEmployment = employmentDao.createEmployment(newEmployment)
+                val updatedEmployment = employmentDao.getEmploymentByResidentId(createdEmployment.residentId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        employmentHistory = updatedEmployment,
+                        error = null,
+                        saveSuccess = true
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to create employment record: ${e.message}",
+                        saveSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateEmployment(updatedEmployment: Employment) {
+        viewModelScope.launch {
+            try {
+                employmentDao.updateEmployment(updatedEmployment)
+                val updatedHistory = employmentDao.getEmploymentByResidentId(updatedEmployment.residentId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        employmentHistory = updatedHistory,
+                        error = null,
+                        saveSuccess = true
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to update employment record: ${e.message}",
+                        saveSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun deleteEmployment(employmentId: UUID) {
+        viewModelScope.launch {
+            try {
+                employmentDao.deleteEmployment(employmentId)
+                _state.update { currentState ->
+                    currentState.copy(
+                        employmentHistory = currentState.employmentHistory.filter { it.id != employmentId },
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { currentState ->
+                    currentState.copy(
+                        error = "Failed to delete employment record: ${e.message}"
                     )
                 }
             }
