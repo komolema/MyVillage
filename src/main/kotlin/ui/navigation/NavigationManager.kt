@@ -1,12 +1,11 @@
 package ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
@@ -22,12 +21,17 @@ import java.util.*
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val navigationService = remember { NavigationService.create(navController) }
     val residentViewModel: ResidentViewModel = koinInject()
     val residentWindowViewModel: ResidentWindowViewModel = koinInject()
 
-    NavHost(navController = navController, startDestination = "dashboard") {
-        composable("dashboard") { DashboardScreen(navController) }
-        composable("resident") { ResidentScreen(navController, residentViewModel) }
+    NavHost(navController = navController, startDestination = NavigationRoute.Dashboard.route) {
+        composable(NavigationRoute.Dashboard.route) { 
+            DashboardScreen(navigationService.navController) 
+        }
+        composable(NavigationRoute.Resident.route) { 
+            ResidentScreen(navigationService.navController, residentViewModel) 
+        }
         composable("resident/{residentId}?mode={mode}") { backStackEntry ->
             val residentId = backStackEntry.arguments?.getString("residentId")?.let {
                 if (it.isNotEmpty()) {
@@ -37,11 +41,24 @@ fun AppNavigation() {
                 }
             }
             val mode = WindowMode.valueOf(backStackEntry.arguments?.getString("mode")?.uppercase() ?: "VIEW")
-            ResidentWindow(residentId, mode, { navController.popBackStack() }, residentWindowViewModel)
+            ResidentWindow(
+                residentId, 
+                mode, 
+                { navigationService.navigateBack() }, 
+                residentWindowViewModel
+            )
         }
-        composable("animal") { AnimalScreen(navController) }
-        composable("resource") { ResourceScreen(navController) }
-        composable("admin") { AdminScreen(navController) }
-        composable("settings") { SettingsScreen(navController) }
+        composable(NavigationRoute.Animal.route) { 
+            AnimalScreen(navigationService.navController) 
+        }
+        composable(NavigationRoute.Resource.route) { 
+            ResourceScreen(navigationService.navController) 
+        }
+        composable(NavigationRoute.Admin.route) { 
+            AdminScreen(navigationService.navController) 
+        }
+        composable(NavigationRoute.Settings.route) { 
+            SettingsScreen(navigationService.navController) 
+        }
     }
 }

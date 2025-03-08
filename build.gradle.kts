@@ -71,6 +71,8 @@ dependencies {
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.h2database:h2:2.2.224")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.9.0")
 }
 
 tasks.withType<Test> {
