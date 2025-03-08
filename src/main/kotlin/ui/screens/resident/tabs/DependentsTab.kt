@@ -21,6 +21,8 @@ import viewmodel.ResidentWindowViewModel
 import viewmodel.ResidentWindowViewModel.Intent
 import java.util.*
 import ui.screens.resident.tabs.TabCompletionState
+import localization.LocaleManager
+import localization.StringResourcesManager
 
 @Composable
 fun DependentsTab(
@@ -32,6 +34,12 @@ fun DependentsTab(
     var dependants by remember { mutableStateOf(emptyList<Dependant>()) }
     var selectedDependant by remember { mutableStateOf<Dependant?>(null) }
     var showAddForm by remember { mutableStateOf(false) }
+    val strings = remember { mutableStateOf(StringResourcesManager.getCurrentStringResources()) }
+
+    // Update strings when locale changes
+    LaunchedEffect(LocaleManager.getCurrentLocale()) {
+        strings.value = StringResourcesManager.getCurrentStringResources()
+    }
 
     // Load dependants when residentId changes
     LaunchedEffect(residentId) {
@@ -65,14 +73,14 @@ fun DependentsTab(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Dependents Information",
+                text = strings.value.dependentsInformation,
                 style = MaterialTheme.typography.headlineSmall
             )
             Button(
                 onClick = { showAddForm = true },
                 enabled = mode == WindowMode.UPDATE
             ) {
-                Text("Add Dependent")
+                Text(strings.value.addDependent)
             }
         }
 
@@ -84,28 +92,28 @@ fun DependentsTab(
             config = TableConfig(
                 columns = listOf(
                     TableColumn(
-                        title = "ID Number",
+                        title = strings.value.idNumber,
                         width = TableColumnWidth.Fixed(150.dp),
                         getValue = { it.idNumber },
                         setValue = { dep, value -> dep.copy(idNumber = value) }
                     ),
                     TableColumn(
-                        title = "Name",
+                        title = strings.value.name,
                         width = TableColumnWidth.Fixed(150.dp),
                         getValue = { it.name },
                         setValue = { dep, value -> dep.copy(name = value) }
                     ),
                     TableColumn(
-                        title = "Surname",
+                        title = strings.value.surname,
                         width = TableColumnWidth.Fixed(150.dp),
                         getValue = { it.surname },
                         setValue = { dep, value -> dep.copy(surname = value) }
                     ),
                     TableColumn(
-                        title = "Gender",
+                        title = strings.value.gender,
                         width = TableColumnWidth.Fixed(100.dp),
                         type = TableCellType.DROPDOWN,
-                        options = listOf("Male", "Female", "Other"),
+                        options = listOf(strings.value.genderMale, strings.value.genderFemale, strings.value.genderOther),
                         getValue = { it.gender },
                         setValue = { dep, value -> dep.copy(gender = value) }
                     )
@@ -158,6 +166,12 @@ private fun DependantFormDialog(
     onDismiss: () -> Unit,
     onSave: (Dependant) -> Unit
 ) {
+    val strings = remember { mutableStateOf(StringResourcesManager.getCurrentStringResources()) }
+
+    // Update strings when locale changes
+    LaunchedEffect(LocaleManager.getCurrentLocale()) {
+        strings.value = StringResourcesManager.getCurrentStringResources()
+    }
     var idNumber by remember { mutableStateOf(dependant?.idNumber ?: "") }
     var name by remember { mutableStateOf(dependant?.name ?: "") }
     var surname by remember { mutableStateOf(dependant?.surname ?: "") }
@@ -166,7 +180,7 @@ private fun DependantFormDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(if (dependant == null) "Add Dependent" else "Edit Dependent")
+            Text(if (dependant == null) strings.value.addDependent else strings.value.editDependent)
         },
         text = {
             Column(
@@ -178,19 +192,19 @@ private fun DependantFormDialog(
                 OutlinedTextField(
                     value = idNumber,
                     onValueChange = { idNumber = it },
-                    label = { Text("ID Number") },
+                    label = { Text(strings.value.idNumber) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(strings.value.name) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = surname,
                     onValueChange = { surname = it },
-                    label = { Text("Surname") },
+                    label = { Text(strings.value.surname) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 var expanded by remember { mutableStateOf(false) }
@@ -201,12 +215,12 @@ private fun DependantFormDialog(
                         value = gender,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Gender") },
+                        label = { Text(strings.value.gender) },
                         trailingIcon = { 
                             IconButton(onClick = { expanded = !expanded }) {
                                 Icon(
                                     imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                    contentDescription = "Toggle dropdown"
+                                    contentDescription = strings.value.toggleDropdown
                                 )
                             }
                         },
@@ -245,12 +259,12 @@ private fun DependantFormDialog(
                 },
                 enabled = idNumber.isNotBlank() && name.isNotBlank() && surname.isNotBlank() && gender.isNotBlank()
             ) {
-                Text("Save")
+                Text(strings.value.save)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(strings.value.cancel)
             }
         }
     )

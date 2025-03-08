@@ -74,7 +74,7 @@ dependencies {
 }
 
 tasks.withType<Test> {
-    useJUnit()
+    useJUnitPlatform()
 }
 
 compose.desktop {

@@ -1,5 +1,7 @@
 import models.Qualification
 import models.Resident
+import models.Residence
+import models.Address
 import viewmodel.ResidentWindowViewModel
 import java.time.LocalDate
 import database.dao.ResidentDao
@@ -281,6 +283,98 @@ class ResidentWindowTest {
         verify { qualificationDao.getQualificationsByResidentId(residentId) }
         assertTrue(viewModel.state.value.qualifications.isEmpty())
         assertEquals(errorMessage, viewModel.state.value.error)
+    }
+
+    @Test
+    fun `test residence creation functionality`() = testScope.runTest {
+        // Given
+        val residentId = UUID.randomUUID()
+        val addressId = UUID.randomUUID()
+        val residence = Residence(
+            id = UUID.randomUUID(),
+            residentId = residentId,
+            addressId = addressId,
+            occupationDate = LocalDate.now()
+        )
+        val address = Address(
+            id = addressId,
+            line = "123 Test St",
+            houseNumber = "123",
+            suburb = "Test Suburb",
+            town = "Test Town",
+            postalCode = "12345",
+            geoCoordinates = null,
+            landmark = null
+        )
+
+        coEvery { residenceDao.createResidence(any()) } returns residence
+        coEvery { addressDao.create(any()) } just runs
+
+        // When
+        viewModel.processIntent(ResidentWindowViewModel.Intent.CreateResidence(residence, address))
+
+        // Then
+        coVerify { residenceDao.createResidence(residence) }
+        coVerify { addressDao.create(address) }
+        assertEquals(residence, viewModel.state.value.residence)
+        assertEquals(address, viewModel.state.value.address)
+        assertTrue(viewModel.state.value.saveSuccess)
+    }
+
+    @Test
+    fun `test residence update functionality`() = testScope.runTest {
+        // Given
+        val residentId = UUID.randomUUID()
+        val addressId = UUID.randomUUID()
+        val residence = Residence(
+            id = UUID.randomUUID(),
+            residentId = residentId,
+            addressId = addressId,
+            occupationDate = LocalDate.now()
+        )
+        val address = Address(
+            id = addressId,
+            line = "123 Test St",
+            houseNumber = "123",
+            suburb = "Test Suburb",
+            town = "Test Town",
+            postalCode = "12345",
+            geoCoordinates = null,
+            landmark = null
+        )
+
+        coEvery { residenceDao.updateResidence(any()) } returns true
+        coEvery { addressDao.update(any()) } just runs
+
+        // When
+        viewModel.processIntent(ResidentWindowViewModel.Intent.UpdateResidence(residence, address))
+
+        // Then
+        coVerify { residenceDao.updateResidence(residence) }
+        coVerify { addressDao.update(address) }
+        assertEquals(residence, viewModel.state.value.residence)
+        assertEquals(address, viewModel.state.value.address)
+        assertTrue(viewModel.state.value.saveSuccess)
+    }
+
+    @Test
+    fun `test residence deletion functionality`() = testScope.runTest {
+        // Given
+        val residentId = UUID.randomUUID()
+        val addressId = UUID.randomUUID()
+        val residenceId = UUID.randomUUID()
+
+        coEvery { residenceDao.deleteResidence(any()) } returns true
+        coEvery { addressDao.delete(any()) } just runs
+
+        // When
+        viewModel.processIntent(ResidentWindowViewModel.Intent.DeleteResidence(residenceId, addressId))
+
+        // Then
+        coVerify { residenceDao.deleteResidence(residenceId) }
+        coVerify { addressDao.delete(addressId) }
+        assertNull(viewModel.state.value.residence)
+        assertNull(viewModel.state.value.address)
     }
 
     @Test

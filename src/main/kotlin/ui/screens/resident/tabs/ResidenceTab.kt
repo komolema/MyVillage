@@ -2,26 +2,25 @@ package ui.screens.resident.tabs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import com.seanproctor.datatable.TableColumnWidth
 import models.Residence
 import models.Address
-import ui.components.table.GenericTable
-import ui.components.table.TableCellType
-import ui.components.table.TableColumn
-import ui.components.table.TableConfig
+import ui.components.DatePicker
 import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
 import viewmodel.ResidentWindowViewModel.Intent
 import java.util.*
 import ui.screens.resident.tabs.TabCompletionState
+import java.time.LocalDate
+import localization.LocaleManager
+import localization.StringResourcesManager
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResidenceTab(
     residentId: UUID?,
@@ -29,28 +28,31 @@ fun ResidenceTab(
     mode: WindowMode,
     onTabStateChange: (TabCompletionState) -> Unit = {}
 ) {
-    var showAddForm by remember { mutableStateOf(false) }
-    var selectedResidence by remember { mutableStateOf<Residence?>(null) }
-    var selectedAddress by remember { mutableStateOf<Address?>(null) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var currentResidence by remember { mutableStateOf<Residence?>(null) }
+    var currentAddress by remember { mutableStateOf<Address?>(null) }
+    val strings = remember { mutableStateOf(StringResourcesManager.getCurrentStringResources()) }
 
-    // Load residence when residentId changes
+    // Update strings when locale changes
+    LaunchedEffect(LocaleManager.getCurrentLocale()) {
+        strings.value = StringResourcesManager.getCurrentStringResources()
+    }
+
     LaunchedEffect(residentId) {
         if (residentId != null) {
             viewModel.processIntent(Intent.LoadResidence(residentId))
         }
     }
 
-    // Collect state updates
-    val state by viewModel.state.collectAsState()
-    val residence = state.residence
-    val address = state.address
-
-    // Update tab state based on data
-    LaunchedEffect(residence) {
-        onTabStateChange(
-            if (residence == Residence.default) TabCompletionState.TODO
-            else TabCompletionState.DONE
-        )
+    LaunchedEffect(Unit) {
+        viewModel.state.collect { state ->
+            currentResidence = state.residence
+            currentAddress = state.address
+            onTabStateChange(when {
+                currentResidence != null && currentAddress != null -> TabCompletionState.DONE
+                else -> TabCompletionState.TODO
+            })
+        }
     }
 
     Column(
@@ -58,94 +60,139 @@ fun ResidenceTab(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Residence Information",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Button(
-                onClick = { showAddForm = true },
-                enabled = mode == WindowMode.UPDATE && residence == Residence.default
-            ) {
-                Text("Add Residence")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Residence and Address display
-        if (residence != Residence.default && address != Address.default) {
+        if (currentResidence != null && currentAddress != null) {
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
                 ) {
                     Text(
-                        text = "Current Address",
-                        style = MaterialTheme.typography.titleMedium
+                        text = strings.value.residenceInformation,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = address.formatFriendly())
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Occupation Date: ${residence.occupationDate}")
-                    
-                    if (mode == WindowMode.UPDATE) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
+
+                    // Address fields
+                    OutlinedTextField(
+                        value = currentAddress!!.line,
+                        onValueChange = {},
+                        label = { Text(strings.value.street) },
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = currentAddress!!.houseNumber,
+                        onValueChange = {},
+                        label = { Text(strings.value.houseNumber) },
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = currentAddress!!.suburb,
+                        onValueChange = {},
+                        label = { Text(strings.value.suburb) },
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = currentAddress!!.town,
+                        onValueChange = {},
+                        label = { Text(strings.value.town) },
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = currentAddress!!.postalCode,
+                        onValueChange = {},
+                        label = { Text(strings.value.postalCode) },
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+
+                    // Optional fields
+                    if (currentAddress!!.geoCoordinates != null) {
+                        OutlinedTextField(
+                            value = currentAddress!!.geoCoordinates!!,
+                            onValueChange = {},
+                            label = { Text(strings.value.geoCoordinates) },
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        )
+                    }
+
+                    if (currentAddress!!.landmark != null) {
+                        OutlinedTextField(
+                            value = currentAddress!!.landmark!!,
+                            onValueChange = {},
+                            label = { Text(strings.value.landmark) },
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        )
+                    }
+
+                    // Occupation Date
+                    OutlinedTextField(
+                        value = currentResidence!!.occupationDate.toString(),
+                        onValueChange = {},
+                        label = { Text(strings.value.occupationDate) },
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+
+                    // Action buttons
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Button(
+                            onClick = { showEditDialog = true },
+                            enabled = mode == WindowMode.UPDATE
                         ) {
-                            Button(
-                                onClick = {
-                                    selectedResidence = residence
-                                    selectedAddress = address
-                                    showAddForm = true
-                                }
-                            ) {
-                                Text("Edit")
-                            }
+                            Icon(Icons.Default.Edit, contentDescription = strings.value.edit)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Button(
-                                onClick = {
-                                    viewModel.processIntent(
-                                        Intent.DeleteResidence(residence.id, address.id)
-                                    )
-                                }
-                            ) {
-                                Text("Delete")
-                            }
+                            Text(strings.value.edit)
+                        }
+
+                        Button(
+                            onClick = {
+                                viewModel.processIntent(Intent.DeleteResidence(currentResidence!!.id, currentAddress!!.id))
+                            },
+                            enabled = mode == WindowMode.UPDATE,
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = strings.value.delete)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(strings.value.delete)
                         }
                     }
                 }
             }
+        } else {
+            Text(
+                text = strings.value.noResidenceInfo,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
 
-    if (showAddForm) {
+    if (showEditDialog) {
         ResidenceFormDialog(
-            residence = selectedResidence,
-            address = selectedAddress,
-            onDismiss = {
-                showAddForm = false
-                selectedResidence = null
-                selectedAddress = null
-            },
-            onSave = { newResidence, newAddress ->
-                if (selectedResidence != null) {
-                    viewModel.processIntent(
-                        Intent.UpdateResidence(newResidence, newAddress)
-                    )
-                } else {
-                    viewModel.processIntent(
-                        Intent.CreateResidence(newResidence, newAddress)
-                    )
-                }
-                showAddForm = false
-                selectedResidence = null
-                selectedAddress = null
+            residence = currentResidence,
+            address = currentAddress,
+            onDismiss = { showEditDialog = false },
+            onSave = { residence, address ->
+                viewModel.processIntent(Intent.UpdateResidence(residence, address))
+                showEditDialog = false
             }
         )
     }
@@ -159,76 +206,126 @@ fun ResidenceFormDialog(
     onDismiss: () -> Unit,
     onSave: (Residence, Address) -> Unit
 ) {
+    val strings = remember { mutableStateOf(StringResourcesManager.getCurrentStringResources()) }
+
+    // Update strings when locale changes
+    LaunchedEffect(LocaleManager.getCurrentLocale()) {
+        strings.value = StringResourcesManager.getCurrentStringResources()
+    }
     var line by remember { mutableStateOf(address?.line ?: "") }
     var houseNumber by remember { mutableStateOf(address?.houseNumber ?: "") }
     var suburb by remember { mutableStateOf(address?.suburb ?: "") }
     var town by remember { mutableStateOf(address?.town ?: "") }
     var postalCode by remember { mutableStateOf(address?.postalCode ?: "") }
-    var occupationDate by remember { mutableStateOf(residence?.occupationDate ?: java.time.LocalDate.now()) }
+    var geoCoordinates by remember { mutableStateOf(address?.geoCoordinates ?: "") }
+    var landmark by remember { mutableStateOf(address?.landmark ?: "") }
+    var occupationDate by remember { mutableStateOf(residence?.occupationDate ?: LocalDate.now()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (residence == null) "Add Residence" else "Edit Residence") },
+        title = { Text(strings.value.editResidence) },
         text = {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 OutlinedTextField(
                     value = line,
                     onValueChange = { line = it },
-                    label = { Text("Street") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text(strings.value.street) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = houseNumber,
                     onValueChange = { houseNumber = it },
-                    label = { Text("House Number") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text(strings.value.houseNumber) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = suburb,
                     onValueChange = { suburb = it },
-                    label = { Text("Suburb") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text(strings.value.suburb) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = town,
                     onValueChange = { town = it },
-                    label = { Text("Town") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text(strings.value.town) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = postalCode,
                     onValueChange = { postalCode = it },
-                    label = { Text("Postal Code") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text(strings.value.postalCode) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = geoCoordinates,
+                    onValueChange = { geoCoordinates = it },
+                    label = { Text("${strings.value.geoCoordinates} (${strings.value.optional})") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = landmark,
+                    onValueChange = { landmark = it },
+                    label = { Text("${strings.value.landmark} (${strings.value.optional})") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+
+                DatePicker(
+                    date = occupationDate,
+                    onDateSelected = { occupationDate = it },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                 )
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    val newAddress = (address ?: Address.default).copy(
+                    val updatedAddress = address?.copy(
                         line = line,
                         houseNumber = houseNumber,
                         suburb = suburb,
                         town = town,
-                        postalCode = postalCode
+                        postalCode = postalCode,
+                        geoCoordinates = geoCoordinates.takeIf { it.isNotEmpty() },
+                        landmark = landmark.takeIf { it.isNotEmpty() }
+                    ) ?: Address(
+                        id = UUID.randomUUID(),
+                        line = line,
+                        houseNumber = houseNumber,
+                        suburb = suburb,
+                        town = town,
+                        postalCode = postalCode,
+                        geoCoordinates = geoCoordinates.takeIf { it.isNotEmpty() },
+                        landmark = landmark.takeIf { it.isNotEmpty() }
                     )
-                    val newResidence = (residence ?: Residence.default).copy(
+
+                    val updatedResidence = residence?.copy(
+                        occupationDate = occupationDate
+                    ) ?: Residence(
+                        id = UUID.randomUUID(),
+                        residentId = UUID.randomUUID(), // This should be set properly
+                        addressId = updatedAddress.id,
                         occupationDate = occupationDate
                     )
-                    onSave(newResidence, newAddress)
+
+                    onSave(updatedResidence, updatedAddress)
                 }
             ) {
-                Text("Save")
+                Text(strings.value.save)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(strings.value.cancel)
             }
         }
     )

@@ -35,6 +35,8 @@ import java.util.*
 import ui.screens.resident.tabs.TabCompletionState
 import ui.screens.resident.tabs.TabState
 import models.Resident
+import localization.StringResourcesManager
+import localization.LocaleManager
 
 internal fun isTabDisabled(index: Int, mode: WindowMode, viewModel: ResidentWindowViewModel): Boolean {
     return when {
@@ -65,8 +67,20 @@ fun ResidentWindow(
         }
     }
 
+    val strings = remember { mutableStateOf(StringResourcesManager.getCurrentStringResources()) }
     val currentTab = remember { mutableStateOf(0) }
-    val tabTitles = listOf("Resident", "Qualifications", "Dependents", "Residence", "Employment")
+
+    // Update strings when locale changes
+    LaunchedEffect(LocaleManager.getCurrentLocale()) {
+        strings.value = StringResourcesManager.getCurrentStringResources()
+    }
+    val tabTitles = listOf(
+        strings.value.resident,
+        strings.value.qualifications,
+        strings.value.dependents,
+        strings.value.residence,
+        strings.value.employment
+    )
     val tabStates = remember { mutableStateOf(List(tabTitles.size) { TabState() }) }
 
     fun getTabColor(state: TabCompletionState): androidx.compose.ui.graphics.Color {
@@ -98,15 +112,32 @@ fun ResidentWindow(
                 },
                 onSave = { 
                     val currentState = viewModel.state.value
-                    val currentResident = currentState.resident
-                    if (currentResident != Resident.default) {
-                        viewModel.processIntent(
-                            if (currentState.mode == WindowMode.NEW) {
-                                ResidentWindowViewModel.Intent.CreateResident(currentResident)
-                            } else {
-                                ResidentWindowViewModel.Intent.UpdateResident(currentResident)
+                    when (currentTab.value) {
+                        0 -> { // Resident tab
+                            val currentResident = currentState.resident
+                            if (currentResident != Resident.default) {
+                                viewModel.processIntent(
+                                    if (currentState.mode == WindowMode.NEW) {
+                                        ResidentWindowViewModel.Intent.CreateResident(currentResident)
+                                    } else {
+                                        ResidentWindowViewModel.Intent.UpdateResident(currentResident)
+                                    }
+                                )
                             }
-                        )
+                        }
+                        3 -> { // Residence tab
+                            val currentResidence = currentState.residence
+                            val currentAddress = currentState.address
+                            if (currentResidence != null && currentAddress != null) {
+                                viewModel.processIntent(
+                                    if (currentState.mode == WindowMode.NEW) {
+                                        ResidentWindowViewModel.Intent.CreateResidence(currentResidence, currentAddress)
+                                    } else {
+                                        ResidentWindowViewModel.Intent.UpdateResidence(currentResidence, currentAddress)
+                                    }
+                                )
+                            }
+                        }
                     }
                 },
                 onClose = onClose
@@ -132,7 +163,7 @@ fun ResidentWindow(
                 }
                 if (viewModel.state.value.saveSuccess) {
                     Text(
-                        text = "Changes saved successfully",
+                        text = strings.value.changesSaved,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -255,9 +286,9 @@ fun ResidentWindow(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Icon(Icons.Default.Close, contentDescription = "Cancel")
+                        Icon(Icons.Default.Close, contentDescription = strings.value.contentDescCancel)
                         Spacer(Modifier.width(4.dp))
-                        Text("Cancel")
+                        Text(strings.value.cancel)
                     }
 
                     if (mode != WindowMode.VIEW) {
@@ -273,9 +304,9 @@ fun ResidentWindow(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Save")
+                            Icon(Icons.Default.Add, contentDescription = strings.value.contentDescSave)
                             Spacer(Modifier.width(4.dp))
-                            Text("Save")
+                            Text(strings.value.save)
                         }
                     }
                 }
@@ -290,9 +321,9 @@ fun ResidentWindow(
                                 containerColor = MaterialTheme.colorScheme.secondary
                             )
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = strings.value.contentDescPrevious)
                             Spacer(Modifier.width(4.dp))
-                            Text("Previous")
+                            Text(strings.value.previous)
                         }
                     }
 
@@ -303,9 +334,9 @@ fun ResidentWindow(
                                 containerColor = MaterialTheme.colorScheme.secondary
                             )
                         ) {
-                            Text("Next")
+                            Text(strings.value.next)
                             Spacer(Modifier.width(4.dp))
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = strings.value.contentDescNext)
                         }
                     }
                 }
