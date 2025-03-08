@@ -3,8 +3,8 @@ package ui.screens.resident
 import models.*
 
 data class ResidentWindowState(
-    val residence: Residence = Residence.default,
-    val address: Address = Address.default,
+    val residence: Residence? = null,
+    val address: Address? = null,
     val resident: Resident = Resident.default,
     val qualifications: List<Qualification> = emptyList(),
     val dependants: List<Dependant> = emptyList(),

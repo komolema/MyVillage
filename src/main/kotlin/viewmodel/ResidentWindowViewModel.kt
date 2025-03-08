@@ -99,8 +99,8 @@ class ResidentWindowViewModel(
 
                 _state.update { currentState ->
                     currentState.copy(
-                        residence = residence ?: Residence.default,
-                        address = address ?: Address.default,
+                        residence = residence,
+                        address = address,
                         error = null
                     )
                 }
@@ -172,8 +172,8 @@ class ResidentWindowViewModel(
 
                 _state.update { currentState ->
                     currentState.copy(
-                        residence = Residence.default,
-                        address = Address.default,
+                        residence = null,
+                        address = null,
                         error = null,
                         saveSuccess = true
                     )

@@ -177,11 +177,27 @@ fun ResidenceTab(
                 }
             }
         } else {
-            Text(
-                text = strings.value.noResidenceInfo,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(16.dp)
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = strings.value.noResidenceInfo,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                if (mode == WindowMode.UPDATE) {
+                    Button(
+                        onClick = { showEditDialog = true },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Add Residence")
+                    }
+                }
+            }
         }
     }
 
@@ -191,7 +207,12 @@ fun ResidenceTab(
             address = currentAddress,
             onDismiss = { showEditDialog = false },
             onSave = { residence, address ->
-                viewModel.processIntent(Intent.UpdateResidence(residence, address))
+                if (currentResidence == null) {
+                    val newResidence = residence.copy(residentId = residentId ?: return@ResidenceFormDialog)
+                    viewModel.processIntent(Intent.CreateResidence(newResidence, address))
+                } else {
+                    viewModel.processIntent(Intent.UpdateResidence(residence, address))
+                }
                 showEditDialog = false
             }
         )
