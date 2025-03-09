@@ -3,13 +3,17 @@ package integration.dao
 import database.dao.AddressDaoImpl
 import database.schema.Addresses
 import models.Address
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.File
 import java.util.*
+import kotlin.io.createTempFile
 
 /**
  * Integration tests for AddressDao implementation.
@@ -20,11 +24,58 @@ import java.util.*
 class AddressDaoTest {
     private val addressDao = AddressDaoImpl()
 
+    companion object {
+        private lateinit var db: Database
+        private val dbFile = createTempFile("test_db", ".db")
+
+        @JvmStatic
+        @BeforeAll
+        fun setupClass() {
+            println("[DEBUG_LOG] Setting up test class")
+            println("[DEBUG_LOG] Using test database at: ${dbFile.absolutePath}")
+
+            // Create a single database connection for all tests
+            db = Database.connect(
+                url = "jdbc:sqlite:${dbFile.absolutePath}",
+                driver = "org.sqlite.JDBC"
+            )
+            println("[DEBUG_LOG] Database connected")
+
+            // Initialize schema once for all tests
+            transaction(db) {
+                println("[DEBUG_LOG] Creating schema")
+                SchemaUtils.create(Addresses)
+                commit()
+
+                // Verify schema creation
+                val tableExists = exec("SELECT name FROM sqlite_master WHERE type='table' AND name='Addresses'") { 
+                    it.next()
+                }
+                println("[DEBUG_LOG] Schema creation verified: $tableExists")
+            }
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun tearDownClass() {
+            println("[DEBUG_LOG] Cleaning up test class")
+            dbFile.delete()
+            println("[DEBUG_LOG] Test database deleted")
+        }
+    }
+
     @BeforeEach
     fun setup() {
-        Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
-        transaction {
-            SchemaUtils.create(Addresses)
+        println("[DEBUG_LOG] Setting up test")
+        transaction(db) {
+            // Clear all data before each test
+            exec("DELETE FROM Addresses")
+            commit()
+            println("[DEBUG_LOG] Tables cleared")
+
+            // Verify table is empty
+            val count = Addresses.selectAll().count()
+            println("[DEBUG_LOG] Table row count: $count")
         }
     }
 
@@ -92,6 +143,54 @@ class AddressDaoTest {
         val searchResults = addressDao.search("Test", 0, 10)
         assertTrue(searchResults.any { it.id == address1.id })
         assertFalse(searchResults.any { it.id == address2.id })
+    }
+
+    @Test
+    fun testGetByIdNonExistent() {
+        val nonExistentId = UUID.randomUUID()
+        val fetchedAddress = addressDao.getById(nonExistentId)
+        assertNull(fetchedAddress, "Fetching non-existent address should return null")
+    }
+
+    @Test
+    fun testGetByIdWithNullFields() {
+        val addressWithNulls = Address(
+            id = UUID.randomUUID(),
+            line = "Test Line",
+            houseNumber = "123",
+            suburb = "Test Suburb",
+            town = "Test Town",
+            postalCode = "12345",
+            geoCoordinates = null,
+            landmark = null
+        )
+
+        addressDao.create(addressWithNulls)
+        val fetchedAddress = addressDao.getById(addressWithNulls.id)
+
+        assertNotNull(fetchedAddress, "Address should be retrieved")
+        assertEquals(addressWithNulls.id, fetchedAddress?.id)
+        assertNull(fetchedAddress?.geoCoordinates, "GeoCoordinates should be null")
+        assertNull(fetchedAddress?.landmark, "Landmark should be null")
+    }
+
+    @Test
+    fun testGetByIdWithMultipleAddresses() {
+        // Create multiple addresses
+        val address1 = createTestAddress()
+        val address2 = createTestAddress().copy(id = UUID.randomUUID(), line = "Another Line")
+        val address3 = createTestAddress().copy(id = UUID.randomUUID(), line = "Yet Another Line")
+
+        addressDao.create(address1)
+        addressDao.create(address2)
+        addressDao.create(address3)
+
+        // Verify we can get the correct address
+        val fetchedAddress = addressDao.getById(address2.id)
+
+        assertNotNull(fetchedAddress, "Address should be retrieved")
+        assertEquals(address2.id, fetchedAddress?.id)
+        assertEquals("Another Line", fetchedAddress?.line)
     }
 
     @Test

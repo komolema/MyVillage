@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
 /**
@@ -42,14 +43,6 @@ interface AddressDao {
     fun getById(id: UUID): Address?
 
     /**
-     * Retrieves an address by its associated resident ID.
-     *
-     * @param residentId The UUID of the resident
-     * @return The address if found, null otherwise
-     */
-    fun getByResidentId(residentId: UUID): Address?
-
-    /**
      * Creates a new address record.
      *
      * @param address The address to create
@@ -76,30 +69,26 @@ class AddressDaoImpl : AddressDao {
         Addresses.selectAll()
             .limit(pageSize)
             .offset(start = (page * pageSize).toLong())
-            .map { it.toAddress() }
+            .map { row -> row.toAddress() }
     }
 
     override fun search(query: String, page: Int, pageSize: Int): List<Address> = transaction {
-        Addresses.select(
-            (Addresses.line like "%$query%") or
-            (Addresses.suburb like "%$query%") or
-            (Addresses.town like "%$query%") or
-            (Addresses.postalCode like "%$query%")
-        )
+        val searchPattern = "%$query%"
+        Addresses.selectAll()
+            .where { 
+                (Addresses.line like searchPattern) or
+                (Addresses.suburb like searchPattern)
+            }
             .limit(pageSize)
             .offset(start = (page * pageSize).toLong())
-            .map { it.toAddress() }
+            .map { row -> row.toAddress() }
     }
 
     override fun getById(id: UUID): Address? = transaction {
-        Addresses.select(Addresses.id eq id)
-            .mapNotNull { it.toAddress() }
-            .singleOrNull()
-    }
-
-    override fun getByResidentId(residentId: UUID): Address? = transaction {
-        Addresses.select(Addresses.id eq residentId)
-            .mapNotNull { it.toAddress() }
+        Addresses.selectAll()
+            .where { Addresses.id eq id }
+            .limit(1)
+            .map { row -> row.toAddress() }
             .singleOrNull()
     }
 
@@ -136,8 +125,9 @@ class AddressDaoImpl : AddressDao {
     }
 
     private fun ResultRow.toAddress(): Address {
+        val entityId = this[Addresses.id] as EntityID<UUID>
         return Address(
-            id = this[Addresses.id].value,
+            id = entityId.value,
             line = this[Addresses.line],
             houseNumber = this[Addresses.houseNumber],
             suburb = this[Addresses.suburb],
