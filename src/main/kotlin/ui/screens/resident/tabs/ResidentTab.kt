@@ -31,13 +31,23 @@ import java.text.SimpleDateFormat
 import java.time.ZoneId
 import javax.swing.JFormattedTextField
 import ui.screens.resident.tabs.TabCompletionState
+import localization.LocaleManager
+import localization.StringResourcesManager
+import localization.StringResources
 
-enum class Gender(val displayName: String) {
-    MALE("Male"),
-    FEMALE("Female");
+enum class Gender {
+    MALE,
+    FEMALE;
+
+    fun getDisplayName(strings: StringResources): String {
+        return when (this) {
+            MALE -> strings.genderMaleDisplay
+            FEMALE -> strings.genderFemaleDisplay
+        }
+    }
 
     companion object {
-        fun fromString(value: String?): Gender? = values().find { it.displayName == value }
+        fun fromString(value: String?, strings: StringResources): Gender? = values().find { it.getDisplayName(strings) == value }
     }
 }
 
@@ -50,6 +60,12 @@ fun ResidentTab(
 ) {
     var residentState by remember { mutableStateOf(Resident.default) }
     val viewModelState by viewModel.state.collectAsStateWithLifecycle()
+    val strings = remember { mutableStateOf(StringResourcesManager.getCurrentStringResources()) }
+
+    // Update strings when locale changes
+    LaunchedEffect(LocaleManager.getCurrentLocale()) {
+        strings.value = StringResourcesManager.getCurrentStringResources()
+    }
 
     // Error states
     var emailError by remember { mutableStateOf<String?>(null) }
@@ -60,20 +76,20 @@ fun ResidentTab(
     fun validateEmail(email: String?): Boolean {
         return if (email.isNullOrBlank()) true
         else email.matches(Regex("^[A-Za-z0-9+_.-]+@(.+)\$")).also { isValid ->
-            emailError = if (isValid) null else "Invalid email format"
+            emailError = if (isValid) null else strings.value.invalidEmailFormat
         }
     }
 
     fun validatePhone(phone: String?): Boolean {
         return if (phone.isNullOrBlank()) true
         else phone.matches(Regex("^\\+?[0-9]{10,15}$")).also { isValid ->
-            phoneError = if (isValid) null else "Invalid phone number format"
+            phoneError = if (isValid) null else strings.value.invalidPhoneFormat
         }
     }
 
     fun validateIdNumber(id: String): Boolean {
         return id.matches(Regex("^[0-9]{13}$")).also { isValid ->
-            idNumberError = if (isValid) null else "ID number must be 13 digits"
+            idNumberError = if (isValid) null else strings.value.idNumberMustBe13Digits
         }
     }
 
@@ -123,7 +139,7 @@ fun ResidentTab(
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("First Name:", modifier = Modifier.weight(1f))
+            Text(strings.value.firstNameLabel, modifier = Modifier.weight(1f))
             TextField(
                 value = residentState.firstName,
                 enabled = mode != WindowMode.VIEW,
@@ -131,13 +147,13 @@ fun ResidentTab(
                 modifier = Modifier.weight(2f).focusOrder(focusRequesters[0]) { next = focusRequesters[1] },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { focusRequesters[1].requestFocus() }),
-                placeholder = { Text("Enter first name") },
+                placeholder = { Text(strings.value.enterFirstName) },
                 singleLine = true
             )
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("Last Name:", modifier = Modifier.weight(1f))
+            Text(strings.value.lastNameLabel, modifier = Modifier.weight(1f))
             TextField(
                 value = residentState.lastName,
                 enabled = mode != WindowMode.VIEW,
@@ -145,13 +161,13 @@ fun ResidentTab(
                 modifier = Modifier.weight(2f).focusOrder(focusRequesters[1]) { next = focusRequesters[2] },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { focusRequesters[2].requestFocus() }),
-                placeholder = { Text("Enter last name") },
+                placeholder = { Text(strings.value.enterLastName) },
                 singleLine = true
             )
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("Date of Birth:", modifier = Modifier.weight(1f))
+            Text(strings.value.dateOfBirthLabel, modifier = Modifier.weight(1f))
             Box(modifier = Modifier.weight(2f)) {
                 TextField(
                     value = SimpleDateFormat("dd MMMM yyyy").format(Date.from(residentState.dob.atStartOfDay(ZoneId.systemDefault()).toInstant())),
@@ -159,7 +175,7 @@ fun ResidentTab(
                     onValueChange = {},
                     modifier = Modifier.fillMaxWidth().focusOrder(focusRequesters[2]) { next = focusRequesters[3] },
                     readOnly = true,
-                    placeholder = { Text("Select date of birth") }
+                    placeholder = { Text(strings.value.selectDateOfBirth) }
                 )
                 if (mode != WindowMode.VIEW) {
                     SwingPanel(
@@ -168,10 +184,10 @@ fun ResidentTab(
                                 value = Date.from(residentState.dob.atStartOfDay(ZoneId.systemDefault()).toInstant())
                             }
                             val properties = Properties().apply {
-                                put("text.today", "Today")
-                                put("text.month", "Month")
-                                put("text.year", "Year")
-                                put("text.select", "Select date")
+                                put("text.today", strings.value.today)
+                                put("text.month", strings.value.month)
+                                put("text.year", strings.value.year)
+                                put("text.select", strings.value.selectDate)
                             }
                             val datePanel = JDatePanelImpl(model, properties)
                             val datePicker = JDatePickerImpl(datePanel, DateLabelFormatter())
@@ -198,7 +214,7 @@ fun ResidentTab(
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("Gender:", modifier = Modifier.weight(1f))
+            Text(strings.value.genderLabel, modifier = Modifier.weight(1f))
             var expanded by remember { mutableStateOf(false) }
             Box(modifier = Modifier.weight(2f)) {
                 OutlinedTextField(
@@ -209,7 +225,7 @@ fun ResidentTab(
                         .clickable(enabled = mode != WindowMode.VIEW) { expanded = true }
                         .focusOrder(focusRequesters[3]) { next = focusRequesters[4] },
                     readOnly = true,
-                    placeholder = { Text("Select gender") },
+                    placeholder = { Text(strings.value.selectGenderPlaceholder) },
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         disabledTextColor = LocalContentColor.current.copy(alpha = ContentAlpha.high),
                         disabledBorderColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled),
@@ -219,7 +235,7 @@ fun ResidentTab(
                         if (mode != WindowMode.VIEW) {
                             Icon(
                                 imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = if (expanded) "Close gender selection" else "Open gender selection",
+                                contentDescription = if (expanded) strings.value.closeGenderSelection else strings.value.openGenderSelection,
                                 modifier = Modifier.clickable { expanded = !expanded }
                             )
                         }
@@ -233,12 +249,12 @@ fun ResidentTab(
                         Gender.values().forEach { gender ->
                             DropdownMenuItem(
                                 onClick = {
-                                    residentState = residentState.copy(gender = gender.displayName)
+                                    residentState = residentState.copy(gender = gender.getDisplayName(strings.value))
                                     expanded = false
                                 }
                             ) {
                                 Text(
-                                    text = gender.displayName,
+                                    text = gender.getDisplayName(strings.value),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -249,7 +265,7 @@ fun ResidentTab(
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("ID Number:", modifier = Modifier.weight(1f))
+            Text(strings.value.idNumberLabel, modifier = Modifier.weight(1f))
             Column(modifier = Modifier.weight(2f)) {
                 TextField(
                     value = residentState.idNumber,
@@ -262,7 +278,7 @@ fun ResidentTab(
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { focusRequesters[4].requestFocus() }),
                     isError = idNumberError != null,
-                    placeholder = { Text("Enter 13-digit ID number") }
+                    placeholder = { Text(strings.value.enterIdNumber) }
                 )
                 if (idNumberError != null) {
                     Text(
@@ -276,7 +292,7 @@ fun ResidentTab(
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("Phone Number:", modifier = Modifier.weight(1f))
+            Text(strings.value.phoneNumberLabel, modifier = Modifier.weight(1f))
             Column(modifier = Modifier.weight(2f)) {
                 TextField(
                     value = residentState.phoneNumber ?: "",
@@ -289,7 +305,7 @@ fun ResidentTab(
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { focusRequesters[5].requestFocus() }),
                     isError = phoneError != null,
-                    placeholder = { Text("Enter phone number (e.g., +27123456789)") }
+                    placeholder = { Text(strings.value.enterPhoneNumber) }
                 )
                 if (phoneError != null) {
                     Text(
@@ -303,7 +319,7 @@ fun ResidentTab(
         }
 
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("Email:", modifier = Modifier.weight(1f))
+            Text(strings.value.emailLabel, modifier = Modifier.weight(1f))
             Column(modifier = Modifier.weight(2f)) {
                 TextField(
                     value = residentState.email ?: "",
@@ -316,7 +332,7 @@ fun ResidentTab(
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { focusRequesters[6].requestFocus() }),
                     isError = emailError != null,
-                    placeholder = { Text("Enter email address") }
+                    placeholder = { Text(strings.value.enterEmail) }
                 )
                 if (emailError != null) {
                     Text(

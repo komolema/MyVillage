@@ -21,6 +21,45 @@ interface StringResources {
     val searchPlaceholder: String
     val addNewResident: String
 
+    // Form field labels
+    val firstNameLabel: String
+    val lastNameLabel: String
+    val dateOfBirthLabel: String
+    val genderLabel: String
+    val idNumberLabel: String
+    val phoneNumberLabel: String
+    val emailLabel: String
+
+    // Form placeholders
+    val enterFirstName: String
+    val enterLastName: String
+    val selectDateOfBirth: String
+    val selectGenderPlaceholder: String
+    val enterIdNumber: String
+    val enterPhoneNumber: String
+    val enterEmail: String
+
+    // Validation errors
+    val invalidEmailFormat: String
+    val invalidPhoneFormat: String
+    val idNumberMustBe13Digits: String
+
+    // Date picker
+    val today: String
+    val month: String
+    val year: String
+    val selectDate: String
+
+    // Gender dropdown
+    val closeGenderSelection: String
+    val openGenderSelection: String
+    val genderMaleDisplay: String
+    val genderFemaleDisplay: String
+
+    // Residence
+    val proofOfAddress: String
+    val addResidence: String
+
     // Navigation
     val next: String
     val previous: String
@@ -46,6 +85,10 @@ interface StringResources {
     val animal: String
     val resource: String
     val admin: String
+    val adminScreen: String
+    val generatedDocuments: String
+    val viewGeneratedDocuments: String
+    val generatedDocumentsList: String
 
     // Resident strings
     val resident: String
@@ -94,6 +137,49 @@ class EnglishStringResources : StringResources {
     override val animal = "Animal"
     override val resource = "Resource"
     override val admin = "Admin"
+    override val adminScreen = "Admin Screen"
+    override val generatedDocuments = "Generated Documents"
+    override val viewGeneratedDocuments = "View Generated Documents"
+    override val generatedDocumentsList = "Generated Documents List"
+
+    // Form field labels
+    override val firstNameLabel = "First Name:"
+    override val lastNameLabel = "Last Name:"
+    override val dateOfBirthLabel = "Date of Birth:"
+    override val genderLabel = "Gender:"
+    override val idNumberLabel = "ID Number:"
+    override val phoneNumberLabel = "Phone Number:"
+    override val emailLabel = "Email:"
+
+    // Form placeholders
+    override val enterFirstName = "Enter first name"
+    override val enterLastName = "Enter last name"
+    override val selectDateOfBirth = "Select date of birth"
+    override val selectGenderPlaceholder = "Select gender"
+    override val enterIdNumber = "Enter 13-digit ID number"
+    override val enterPhoneNumber = "Enter phone number (e.g., +27123456789)"
+    override val enterEmail = "Enter email address"
+
+    // Validation errors
+    override val invalidEmailFormat = "Invalid email format"
+    override val invalidPhoneFormat = "Invalid phone number format"
+    override val idNumberMustBe13Digits = "ID number must be 13 digits"
+
+    // Date picker
+    override val today = "Today"
+    override val month = "Month"
+    override val year = "Year"
+    override val selectDate = "Select date"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Close gender selection"
+    override val openGenderSelection = "Open gender selection"
+    override val genderMaleDisplay = "Male"
+    override val genderFemaleDisplay = "Female"
+
+    // Residence
+    override val proofOfAddress = "Proof of Address"
+    override val addResidence = "Add Residence"
 
     // Common strings
     override val add = "Add"
@@ -179,6 +265,49 @@ class SetswanaStringResources : StringResources {
     override val animal = "Phologolo"
     override val resource = "Motswedi"
     override val admin = "Motsamaisi"
+    override val adminScreen = "Skrine ya Motsamaisi"
+    override val generatedDocuments = "Dikwalo tse di Tlhagisitsweng"
+    override val viewGeneratedDocuments = "Lebelela Dikwalo tse di Tlhagisitsweng"
+    override val generatedDocumentsList = "Lenane la Dikwalo tse di Tlhagisitsweng"
+
+    // Form field labels
+    override val firstNameLabel = "Leina la Ntlha:"
+    override val lastNameLabel = "Sefane:"
+    override val dateOfBirthLabel = "Letsatsi la Matsalo:"
+    override val genderLabel = "Bong:"
+    override val idNumberLabel = "Nomoro ya ID:"
+    override val phoneNumberLabel = "Nomoro ya Mogala:"
+    override val emailLabel = "Imeile:"
+
+    // Form placeholders
+    override val enterFirstName = "Tsenya leina la ntlha"
+    override val enterLastName = "Tsenya sefane"
+    override val selectDateOfBirth = "Tlhopha letsatsi la matsalo"
+    override val selectGenderPlaceholder = "Tlhopha bong"
+    override val enterIdNumber = "Tsenya nomoro ya ID ya dinomoro tse 13"
+    override val enterPhoneNumber = "Tsenya nomoro ya mogala (sk., +27123456789)"
+    override val enterEmail = "Tsenya aterese ya imeile"
+
+    // Validation errors
+    override val invalidEmailFormat = "Sebopego sa imeile se sa siamang"
+    override val invalidPhoneFormat = "Sebopego sa nomoro ya mogala se sa siamang"
+    override val idNumberMustBe13Digits = "Nomoro ya ID e tshwanetse go nna dinomoro tse 13"
+
+    // Date picker
+    override val today = "Gompieno"
+    override val month = "Kgwedi"
+    override val year = "Ngwaga"
+    override val selectDate = "Tlhopha letlha"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Tswala tlhopho ya bong"
+    override val openGenderSelection = "Bula tlhopho ya bong"
+    override val genderMaleDisplay = "Monna"
+    override val genderFemaleDisplay = "Mosadi"
+
+    // Residence
+    override val proofOfAddress = "Bopaki jwa Aterese"
+    override val addResidence = "Oketsa Bonno"
 
     // Common strings
     override val add = "Oketsa"
@@ -264,6 +393,49 @@ class XhosaStringResources : StringResources {
     override val animal = "Isilwanyana"
     override val resource = "Izixhobo"
     override val admin = "Umlawuli"
+    override val adminScreen = "Iskrini Somlawuli"
+    override val generatedDocuments = "Amaxwebhu Akhiqiziweyo"
+    override val viewGeneratedDocuments = "Jonga Amaxwebhu Akhiqiziweyo"
+    override val generatedDocumentsList = "Uluhlu Lwamaxwebhu Akhiqiziweyo"
+
+    // Form field labels
+    override val firstNameLabel = "Igama:"
+    override val lastNameLabel = "Ifani:"
+    override val dateOfBirthLabel = "Umhla wokuzalwa:"
+    override val genderLabel = "Isini:"
+    override val idNumberLabel = "Inombolo yesazisi:"
+    override val phoneNumberLabel = "Inombolo yefowuni:"
+    override val emailLabel = "I-imeyile:"
+
+    // Form placeholders
+    override val enterFirstName = "Faka igama"
+    override val enterLastName = "Faka ifani"
+    override val selectDateOfBirth = "Khetha umhla wokuzalwa"
+    override val selectGenderPlaceholder = "Khetha isini"
+    override val enterIdNumber = "Faka inombolo yesazisi enezinombolo ezili-13"
+    override val enterPhoneNumber = "Faka inombolo yefowuni (umz., +27123456789)"
+    override val enterEmail = "Faka idilesi ye-imeyile"
+
+    // Validation errors
+    override val invalidEmailFormat = "Ifomathi ye-imeyile engasebenziyo"
+    override val invalidPhoneFormat = "Ifomathi yenombolo yefowuni engasebenziyo"
+    override val idNumberMustBe13Digits = "Inombolo yesazisi kufuneka ibe nezinombolo ezili-13"
+
+    // Date picker
+    override val today = "Namhlanje"
+    override val month = "Inyanga"
+    override val year = "Unyaka"
+    override val selectDate = "Khetha umhla"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Vala ukukhetha isini"
+    override val openGenderSelection = "Vula ukukhetha isini"
+    override val genderMaleDisplay = "Indoda"
+    override val genderFemaleDisplay = "Umfazi"
+
+    // Residence
+    override val proofOfAddress = "Ubungqina bedilesi"
+    override val addResidence = "Yongeza Indawo yokuhlala"
 
     // Common strings
     override val add = "Yongeza"
@@ -349,6 +521,49 @@ class SepediStringResources : StringResources {
     override val animal = "Phoofolo"
     override val resource = "Mothopo"
     override val admin = "Molaodi"
+    override val adminScreen = "Skrini ya Molaodi"
+    override val generatedDocuments = "Ditokumente tše di Hlamilwego"
+    override val viewGeneratedDocuments = "Lebelela Ditokumente tše di Hlamilwego"
+    override val generatedDocumentsList = "Lenaneo la Ditokumente tše di Hlamilwego"
+
+    // Form field labels
+    override val firstNameLabel = "Leina la Mathomo:"
+    override val lastNameLabel = "Sefane:"
+    override val dateOfBirthLabel = "Letšatšikgwedi la Matswalo:"
+    override val genderLabel = "Bong:"
+    override val idNumberLabel = "Nomoro ya ID:"
+    override val phoneNumberLabel = "Nomoro ya Mogala:"
+    override val emailLabel = "Imeile:"
+
+    // Form placeholders
+    override val enterFirstName = "Tsenya leina la mathomo"
+    override val enterLastName = "Tsenya sefane"
+    override val selectDateOfBirth = "Kgetha letšatšikgwedi la matswalo"
+    override val selectGenderPlaceholder = "Kgetha bong"
+    override val enterIdNumber = "Tsenya nomoro ya ID ya dinomoro tše 13"
+    override val enterPhoneNumber = "Tsenya nomoro ya mogala (mohlala, +27123456789)"
+    override val enterEmail = "Tsenya aterese ya imeile"
+
+    // Validation errors
+    override val invalidEmailFormat = "Sebopego sa imeile se sa nepagalang"
+    override val invalidPhoneFormat = "Sebopego sa nomoro ya mogala se sa nepagalang"
+    override val idNumberMustBe13Digits = "Nomoro ya ID e swanetše go ba le dinomoro tše 13"
+
+    // Date picker
+    override val today = "Lehono"
+    override val month = "Kgwedi"
+    override val year = "Ngwaga"
+    override val selectDate = "Kgetha letšatšikgwedi"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Tswalela kgetho ya bong"
+    override val openGenderSelection = "Bula kgetho ya bong"
+    override val genderMaleDisplay = "Monna"
+    override val genderFemaleDisplay = "Mosadi"
+
+    // Residence
+    override val proofOfAddress = "Bohlatse bja Aterese"
+    override val addResidence = "Oketša Bodulo"
 
     // Common strings
     override val add = "Oketša"
@@ -434,6 +649,49 @@ class ShonaStringResources : StringResources {
     override val animal = "Mhuka"
     override val resource = "Zvekushandisa"
     override val admin = "Mutongi"
+    override val adminScreen = "Chiongororo cheMutongi"
+    override val generatedDocuments = "Magwaro Akagadzirwa"
+    override val viewGeneratedDocuments = "Ona Magwaro Akagadzirwa"
+    override val generatedDocumentsList = "Rondedzero yeMagwaro Akagadzirwa"
+
+    // Form field labels
+    override val firstNameLabel = "Zita Rokutanga:"
+    override val lastNameLabel = "Zita Rokupedzisira:"
+    override val dateOfBirthLabel = "Zuva Rokuberekwa:"
+    override val genderLabel = "Mhando:"
+    override val idNumberLabel = "Nhamba yeID:"
+    override val phoneNumberLabel = "Nhamba yeFoni:"
+    override val emailLabel = "Imeyili:"
+
+    // Form placeholders
+    override val enterFirstName = "Isa zita rokutanga"
+    override val enterLastName = "Isa zita rokupedzisira"
+    override val selectDateOfBirth = "Sarudza zuva rokuberekwa"
+    override val selectGenderPlaceholder = "Sarudza mhando"
+    override val enterIdNumber = "Isa nhamba yeID ine nhamba 13"
+    override val enterPhoneNumber = "Isa nhamba yefoni (mufananidzo, +27123456789)"
+    override val enterEmail = "Isa kero yeimeyili"
+
+    // Validation errors
+    override val invalidEmailFormat = "Fomati yeimeyili isina kukodzera"
+    override val invalidPhoneFormat = "Fomati yenhamba yefoni isina kukodzera"
+    override val idNumberMustBe13Digits = "Nhamba yeID inofanira kuva nenhamba 13"
+
+    // Date picker
+    override val today = "Nhasi"
+    override val month = "Mwedzi"
+    override val year = "Gore"
+    override val selectDate = "Sarudza zuva"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Vhara kusarudza mhando"
+    override val openGenderSelection = "Vhura kusarudza mhando"
+    override val genderMaleDisplay = "Murume"
+    override val genderFemaleDisplay = "Mukadzi"
+
+    // Residence
+    override val proofOfAddress = "Umbowo weKero"
+    override val addResidence = "Wedzera Nzvimbo Yekugara"
 
     // Common strings
     override val add = "Wedzera"
@@ -519,6 +777,49 @@ class SwahiliStringResources : StringResources {
     override val animal = "Mnyama"
     override val resource = "Rasilimali"
     override val admin = "Msimamizi"
+    override val adminScreen = "Skrini ya Msimamizi"
+    override val generatedDocuments = "Nyaraka Zilizozalishwa"
+    override val viewGeneratedDocuments = "Tazama Nyaraka Zilizozalishwa"
+    override val generatedDocumentsList = "Orodha ya Nyaraka Zilizozalishwa"
+
+    // Form field labels
+    override val firstNameLabel = "Jina la Kwanza:"
+    override val lastNameLabel = "Jina la Mwisho:"
+    override val dateOfBirthLabel = "Tarehe ya Kuzaliwa:"
+    override val genderLabel = "Jinsia:"
+    override val idNumberLabel = "Nambari ya Kitambulisho:"
+    override val phoneNumberLabel = "Nambari ya Simu:"
+    override val emailLabel = "Barua pepe:"
+
+    // Form placeholders
+    override val enterFirstName = "Ingiza jina la kwanza"
+    override val enterLastName = "Ingiza jina la mwisho"
+    override val selectDateOfBirth = "Chagua tarehe ya kuzaliwa"
+    override val selectGenderPlaceholder = "Chagua jinsia"
+    override val enterIdNumber = "Ingiza nambari ya kitambulisho yenye tarakimu 13"
+    override val enterPhoneNumber = "Ingiza nambari ya simu (mfano, +27123456789)"
+    override val enterEmail = "Ingiza anwani ya barua pepe"
+
+    // Validation errors
+    override val invalidEmailFormat = "Muundo batili wa barua pepe"
+    override val invalidPhoneFormat = "Muundo batili wa nambari ya simu"
+    override val idNumberMustBe13Digits = "Nambari ya kitambulisho lazima iwe na tarakimu 13"
+
+    // Date picker
+    override val today = "Leo"
+    override val month = "Mwezi"
+    override val year = "Mwaka"
+    override val selectDate = "Chagua tarehe"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Funga uchaguzi wa jinsia"
+    override val openGenderSelection = "Fungua uchaguzi wa jinsia"
+    override val genderMaleDisplay = "Mwanaume"
+    override val genderFemaleDisplay = "Mwanamke"
+
+    // Residence
+    override val proofOfAddress = "Uthibitisho wa Anwani"
+    override val addResidence = "Ongeza Makazi"
 
     // Common strings
     override val add = "Ongeza"
@@ -604,6 +905,49 @@ class AmharicStringResources : StringResources {
     override val animal = "እንስሳ"
     override val resource = "ሀብት"
     override val admin = "አስተዳዳሪ"
+    override val adminScreen = "የአስተዳዳሪ ማያ"
+    override val generatedDocuments = "የተፈጠሩ ሰነዶች"
+    override val viewGeneratedDocuments = "የተፈጠሩ ሰነዶችን ይመልከቱ"
+    override val generatedDocumentsList = "የተፈጠሩ ሰነዶች ዝርዝር"
+
+    // Form field labels
+    override val firstNameLabel = "የመጀመሪያ ስም:"
+    override val lastNameLabel = "የአባት ስም:"
+    override val dateOfBirthLabel = "የልደት ቀን:"
+    override val genderLabel = "ፆታ:"
+    override val idNumberLabel = "መታወቂያ ቁጥር:"
+    override val phoneNumberLabel = "ስልክ ቁጥር:"
+    override val emailLabel = "ኢሜይል:"
+
+    // Form placeholders
+    override val enterFirstName = "የመጀመሪያ ስም ያስገቡ"
+    override val enterLastName = "የአባት ስም ያስገቡ"
+    override val selectDateOfBirth = "የልደት ቀን ይምረጡ"
+    override val selectGenderPlaceholder = "ፆታ ይምረጡ"
+    override val enterIdNumber = "13 አሃዝ ያለው መታወቂያ ቁጥር ያስገቡ"
+    override val enterPhoneNumber = "ስልክ ቁጥር ያስገቡ (ለምሳሌ፣ +27123456789)"
+    override val enterEmail = "የኢሜይል አድራሻ ያስገቡ"
+
+    // Validation errors
+    override val invalidEmailFormat = "ልክ ያልሆነ የኢሜይል ቅርፀት"
+    override val invalidPhoneFormat = "ልክ ያልሆነ የስልክ ቁጥር ቅርፀት"
+    override val idNumberMustBe13Digits = "መታወቂያ ቁጥር 13 አሃዝ መሆን አለበት"
+
+    // Date picker
+    override val today = "ዛሬ"
+    override val month = "ወር"
+    override val year = "ዓመት"
+    override val selectDate = "ቀን ይምረጡ"
+
+    // Gender dropdown
+    override val closeGenderSelection = "የፆታ ምርጫን ዝጋ"
+    override val openGenderSelection = "የፆታ ምርጫን ክፈት"
+    override val genderMaleDisplay = "ወንድ"
+    override val genderFemaleDisplay = "ሴት"
+
+    // Residence
+    override val proofOfAddress = "የአድራሻ ማረጋገጫ"
+    override val addResidence = "መኖሪያ ጨምር"
 
     // Common strings
     override val add = "ጨምር"
@@ -689,6 +1033,49 @@ class YorubaStringResources : StringResources {
     override val animal = "Ẹranko"
     override val resource = "Ohun elo"
     override val admin = "Alakoso"
+    override val adminScreen = "Skrini Alakoso"
+    override val generatedDocuments = "Awọn Iwe ti a Ṣẹda"
+    override val viewGeneratedDocuments = "Wo Awọn Iwe ti a Ṣẹda"
+    override val generatedDocumentsList = "Akojọ Awọn Iwe ti a Ṣẹda"
+
+    // Form field labels
+    override val firstNameLabel = "Orukọ Kini:"
+    override val lastNameLabel = "Orukọ Idile:"
+    override val dateOfBirthLabel = "Ọjọ Ibi:"
+    override val genderLabel = "Abo tabi Ako:"
+    override val idNumberLabel = "Nọmba ID:"
+    override val phoneNumberLabel = "Nọmba Fonu:"
+    override val emailLabel = "Imeeli:"
+
+    // Form placeholders
+    override val enterFirstName = "Tẹ orukọ kini sii"
+    override val enterLastName = "Tẹ orukọ idile sii"
+    override val selectDateOfBirth = "Yan ọjọ ibi"
+    override val selectGenderPlaceholder = "Yan abo tabi ako"
+    override val enterIdNumber = "Tẹ nọmba ID onka 13 sii"
+    override val enterPhoneNumber = "Tẹ nọmba fonu sii (fun apẹẹrẹ, +27123456789)"
+    override val enterEmail = "Tẹ adirẹsi imeeli sii"
+
+    // Validation errors
+    override val invalidEmailFormat = "Ọna kika imeeli ti ko tọ"
+    override val invalidPhoneFormat = "Ọna kika nọmba fonu ti ko tọ"
+    override val idNumberMustBe13Digits = "Nọmba ID gbọdọ jẹ onka 13"
+
+    // Date picker
+    override val today = "Oni"
+    override val month = "Osu"
+    override val year = "Ọdun"
+    override val selectDate = "Yan ọjọ"
+
+    // Gender dropdown
+    override val closeGenderSelection = "Pa yiyan abo tabi ako"
+    override val openGenderSelection = "Ṣi yiyan abo tabi ako"
+    override val genderMaleDisplay = "Ọkunrin"
+    override val genderFemaleDisplay = "Obinrin"
+
+    // Residence
+    override val proofOfAddress = "Ẹri Adirẹsi"
+    override val addResidence = "Fi Ibugbe kun"
 
     // Common strings
     override val add = "Fi kun"

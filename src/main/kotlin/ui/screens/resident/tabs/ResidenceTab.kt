@@ -170,9 +170,9 @@ fun ResidenceTab(
                             Button(
                                 onClick = { showProofOfAddressDialog = true }
                             ) {
-                                Icon(Icons.Default.Info, contentDescription = "Proof of Address")
+                                Icon(Icons.Default.Info, contentDescription = strings.value.proofOfAddress)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Proof of Address")
+                                Text(strings.value.proofOfAddress)
                             }
 
                             if (showProofOfAddressDialog) {
@@ -220,9 +220,9 @@ fun ResidenceTab(
                         onClick = { showEditDialog = true },
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
+                        Icon(Icons.Default.Add, contentDescription = strings.value.add)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Residence")
+                        Text(strings.value.addResidence)
                     }
                 }
             }
