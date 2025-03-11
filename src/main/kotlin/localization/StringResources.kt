@@ -8,6 +8,18 @@ interface StringResources {
     val delete: String
     val back: String
     val changesSaved: String
+    val add: String
+    val reload: String
+    val search: String
+    val page: String
+    val of: String
+    val showing: String
+    val noAddress: String
+    val selectGender: String
+    val age: String
+    val glossary: String
+    val searchPlaceholder: String
+    val addNewResident: String
 
     // Navigation
     val next: String
@@ -16,6 +28,12 @@ interface StringResources {
     val contentDescSave: String
     val contentDescPrevious: String
     val contentDescNext: String
+    val contentDescAdd: String
+    val contentDescEdit: String
+    val contentDescDelete: String
+    val contentDescSaveChanges: String
+    val contentDescReload: String
+    val contentDescGlossary: String
 
     // Settings strings
     val settings: String
@@ -23,6 +41,11 @@ interface StringResources {
     val selectLanguage: String
     val appearance: String
     val darkMode: String
+
+    // Dashboard strings
+    val animal: String
+    val resource: String
+    val admin: String
 
     // Resident strings
     val resident: String
@@ -68,6 +91,32 @@ interface StringResources {
 }
 
 class EnglishStringResources : StringResources {
+    override val animal = "Animal"
+    override val resource = "Resource"
+    override val admin = "Admin"
+
+    // Common strings
+    override val add = "Add"
+    override val reload = "Reload"
+    override val search = "Search"
+    override val page = "Page"
+    override val of = "of"
+    override val showing = "Showing"
+    override val noAddress = "No address"
+    override val selectGender = "Select Gender"
+    override val age = "Age"
+    override val glossary = "Glossary"
+    override val searchPlaceholder = "Search by ID number, name or other details..."
+    override val addNewResident = "Add New Resident"
+
+    // Content descriptions
+    override val contentDescAdd = "Add"
+    override val contentDescEdit = "Edit"
+    override val contentDescDelete = "Delete"
+    override val contentDescSaveChanges = "Save Changes"
+    override val contentDescReload = "Reload"
+    override val contentDescGlossary = "Glossary"
+
     override val dependentsInformation = "Dependents Information"
     override val addDependent = "Add Dependent"
     override val editDependent = "Edit Dependent"
@@ -127,6 +176,32 @@ class EnglishStringResources : StringResources {
 }
 
 class SetswanaStringResources : StringResources {
+    override val animal = "Phologolo"
+    override val resource = "Motswedi"
+    override val admin = "Motsamaisi"
+
+    // Common strings
+    override val add = "Oketsa"
+    override val reload = "Laisa sešwa"
+    override val search = "Batla"
+    override val page = "Tsebe"
+    override val of = "ya"
+    override val showing = "Go bontsha"
+    override val noAddress = "Ga go na aterese"
+    override val selectGender = "Tlhopha Bong"
+    override val age = "Dingwaga"
+    override val glossary = "Thanodi"
+    override val searchPlaceholder = "Batla ka nomoro ya ID, leina kgotsa dintlha tse dingwe..."
+    override val addNewResident = "Oketsa Monni yo Mošwa"
+
+    // Content descriptions
+    override val contentDescAdd = "Oketsa"
+    override val contentDescEdit = "Fetola"
+    override val contentDescDelete = "Tlosa"
+    override val contentDescSaveChanges = "Boloka Diphetogo"
+    override val contentDescReload = "Laisa sešwa"
+    override val contentDescGlossary = "Thanodi"
+
     override val dependentsInformation = "Tshedimosetso ya Bana"
     override val addDependent = "Oketsa Ngwana"
     override val editDependent = "Fetola Ngwana"
@@ -186,6 +261,32 @@ class SetswanaStringResources : StringResources {
 }
 
 class XhosaStringResources : StringResources {
+    override val animal = "Isilwanyana"
+    override val resource = "Izixhobo"
+    override val admin = "Umlawuli"
+
+    // Common strings
+    override val add = "Yongeza"
+    override val reload = "Layisha kwakhona"
+    override val search = "Khangela"
+    override val page = "Iphepha"
+    override val of = "ye"
+    override val showing = "Ibonisa"
+    override val noAddress = "Akukho dilesi"
+    override val selectGender = "Khetha Isini"
+    override val age = "Iminyaka"
+    override val glossary = "Isichazi-magama"
+    override val searchPlaceholder = "Khangela ngenombolo ye-ID, igama okanye ezinye iinkcukacha..."
+    override val addNewResident = "Yongeza Umhlali Omtsha"
+
+    // Content descriptions
+    override val contentDescAdd = "Yongeza"
+    override val contentDescEdit = "Hlela"
+    override val contentDescDelete = "Cima"
+    override val contentDescSaveChanges = "Gcina Utshintsho"
+    override val contentDescReload = "Layisha kwakhona"
+    override val contentDescGlossary = "Isichazi-magama"
+
     override val dependentsInformation = "Ulwazi lwabaxhomekeki"
     override val addDependent = "Yongeza umxhomekeki"
     override val editDependent = "Hlela umxhomekeki"
@@ -245,6 +346,32 @@ class XhosaStringResources : StringResources {
 }
 
 class SepediStringResources : StringResources {
+    override val animal = "Phoofolo"
+    override val resource = "Mothopo"
+    override val admin = "Molaodi"
+
+    // Common strings
+    override val add = "Oketša"
+    override val reload = "Laela gape"
+    override val search = "Nyaka"
+    override val page = "Letlakala"
+    override val of = "la"
+    override val showing = "Go bontšha"
+    override val noAddress = "Ga go na aterese"
+    override val selectGender = "Kgetha Bong"
+    override val age = "Mengwaga"
+    override val glossary = "Pukuntšu"
+    override val searchPlaceholder = "Nyaka ka nomoro ya ID, leina goba dintlha tše dingwe..."
+    override val addNewResident = "Oketša Modudi yo Mofsa"
+
+    // Content descriptions
+    override val contentDescAdd = "Oketša"
+    override val contentDescEdit = "Fetola"
+    override val contentDescDelete = "Phumula"
+    override val contentDescSaveChanges = "Boloka Diphetogo"
+    override val contentDescReload = "Laela gape"
+    override val contentDescGlossary = "Pukuntšu"
+
     override val dependentsInformation = "Tshedimošo ya Bana"
     override val addDependent = "Oketša Ngwana"
     override val editDependent = "Fetola Ngwana"
@@ -303,6 +430,346 @@ class SepediStringResources : StringResources {
     override val optional = "Ga e gapeletšwe"
 }
 
+class ShonaStringResources : StringResources {
+    override val animal = "Mhuka"
+    override val resource = "Zvekushandisa"
+    override val admin = "Mutongi"
+
+    // Common strings
+    override val add = "Wedzera"
+    override val reload = "Rodha zvakare"
+    override val search = "Tsvaga"
+    override val page = "Peji"
+    override val of = "ye"
+    override val showing = "Kuratidza"
+    override val noAddress = "Hapana kero"
+    override val selectGender = "Sarudza Mhando"
+    override val age = "Makore"
+    override val glossary = "Duramanzwi"
+    override val searchPlaceholder = "Tsvaga nenombero yeID, zita kana mamwe mashoko..."
+    override val addNewResident = "Wedzera Mugariri Mutsva"
+
+    // Content descriptions
+    override val contentDescAdd = "Wedzera"
+    override val contentDescEdit = "Gadzirisa"
+    override val contentDescDelete = "Dzima"
+    override val contentDescSaveChanges = "Chengetedza Shanduko"
+    override val contentDescReload = "Rodha zvakare"
+    override val contentDescGlossary = "Duramanzwi"
+
+    override val dependentsInformation = "Ruzivo rwevachengeti"
+    override val addDependent = "Wedzera Muchengeti"
+    override val editDependent = "Gadzirisa Muchengeti"
+    override val name = "Zita"
+    override val surname = "Surname"
+    override val genderMale = "Murume"
+    override val genderFemale = "Mukadzi"
+    override val genderOther = "Zvimwe"
+    override val toggleDropdown = "Toggle dropdown"
+    override val save = "Chengetedza"
+    override val cancel = "Kanzura"
+    override val edit = "Gadzirisa"
+    override val delete = "Dzima"
+    override val back = "Dzokera"
+    override val changesSaved = "Shanduko dzachengetedzwa zvakanaka"
+
+    override val next = "Tevere"
+    override val previous = "Yapfuura"
+    override val contentDescCancel = "Kanzura"
+    override val contentDescSave = "Chengetedza"
+    override val contentDescPrevious = "Yapfuura"
+    override val contentDescNext = "Tevere"
+
+    override val settings = "Zvimiso"
+    override val language = "Mutauro"
+    override val selectLanguage = "Sarudza Mutauro"
+    override val appearance = "Kuonekwa"
+    override val darkMode = "Mwenje Wakadzima"
+
+    override val resident = "Mugariri"
+    override val residents = "Vagari"
+    override val addResident = "Wedzera Mugariri"
+    override val editResident = "Gadzirisa Mugariri"
+    override val firstName = "Zita Rokutanga"
+    override val lastName = "Zita Rokupedzisira"
+    override val dateOfBirth = "Zuva Rokuberekwa"
+    override val gender = "Mhando"
+    override val idNumber = "Nhamba yeID"
+
+    override val qualifications = "Zvikwanisiro"
+    override val dependents = "Vachengeti"
+    override val residence = "Nzvimbo Yekugara"
+    override val employment = "Basa"
+
+    override val residenceInformation = "Ruzivo Rwenzvimbo Yekugara"
+    override val street = "Mugwagwa"
+    override val houseNumber = "Nhamba yeImba"
+    override val suburb = "Nzvimbo"
+    override val town = "Guta"
+    override val postalCode = "Nhamba yePosi"
+    override val geoCoordinates = "Nzvimbo Pasi"
+    override val landmark = "Chiratidzo"
+    override val occupationDate = "Zuva Rokutanga Kugara"
+    override val noResidenceInfo = "Hapana ruzivo rwenzvimbo yekugara"
+    override val editResidence = "Gadzirisa Nzvimbo Yekugara"
+    override val optional = "Hazvina Kukosha"
+}
+
+class SwahiliStringResources : StringResources {
+    override val animal = "Mnyama"
+    override val resource = "Rasilimali"
+    override val admin = "Msimamizi"
+
+    // Common strings
+    override val add = "Ongeza"
+    override val reload = "Pakia upya"
+    override val search = "Tafuta"
+    override val page = "Ukurasa"
+    override val of = "ya"
+    override val showing = "Inaonyesha"
+    override val noAddress = "Hakuna anwani"
+    override val selectGender = "Chagua Jinsia"
+    override val age = "Umri"
+    override val glossary = "Kamusi"
+    override val searchPlaceholder = "Tafuta kwa nambari ya kitambulisho, jina au maelezo mengine..."
+    override val addNewResident = "Ongeza Mkazi Mpya"
+
+    // Content descriptions
+    override val contentDescAdd = "Ongeza"
+    override val contentDescEdit = "Hariri"
+    override val contentDescDelete = "Futa"
+    override val contentDescSaveChanges = "Hifadhi Mabadiliko"
+    override val contentDescReload = "Pakia upya"
+    override val contentDescGlossary = "Kamusi"
+
+    override val dependentsInformation = "Taarifa za Wategemezi"
+    override val addDependent = "Ongeza Mtegemezi"
+    override val editDependent = "Hariri Mtegemezi"
+    override val name = "Jina"
+    override val surname = "Jina la Ukoo"
+    override val genderMale = "Mwanaume"
+    override val genderFemale = "Mwanamke"
+    override val genderOther = "Nyingine"
+    override val toggleDropdown = "Badilisha orodha"
+    override val save = "Hifadhi"
+    override val cancel = "Ghairi"
+    override val edit = "Hariri"
+    override val delete = "Futa"
+    override val back = "Rudi"
+    override val changesSaved = "Mabadiliko yamehifadhiwa kwa mafanikio"
+
+    override val next = "Inayofuata"
+    override val previous = "Iliyotangulia"
+    override val contentDescCancel = "Ghairi"
+    override val contentDescSave = "Hifadhi"
+    override val contentDescPrevious = "Iliyotangulia"
+    override val contentDescNext = "Inayofuata"
+
+    override val settings = "Mipangilio"
+    override val language = "Lugha"
+    override val selectLanguage = "Chagua Lugha"
+    override val appearance = "Mwonekano"
+    override val darkMode = "Hali ya Giza"
+
+    override val resident = "Mkazi"
+    override val residents = "Wakazi"
+    override val addResident = "Ongeza Mkazi"
+    override val editResident = "Hariri Mkazi"
+    override val firstName = "Jina la Kwanza"
+    override val lastName = "Jina la Mwisho"
+    override val dateOfBirth = "Tarehe ya Kuzaliwa"
+    override val gender = "Jinsia"
+    override val idNumber = "Nambari ya Kitambulisho"
+
+    override val qualifications = "Sifa"
+    override val dependents = "Wategemezi"
+    override val residence = "Makazi"
+    override val employment = "Ajira"
+
+    override val residenceInformation = "Taarifa za Makazi"
+    override val street = "Mtaa"
+    override val houseNumber = "Nambari ya Nyumba"
+    override val suburb = "Mtaa wa Kando"
+    override val town = "Mji"
+    override val postalCode = "Msimbo wa Posta"
+    override val geoCoordinates = "Mahali pa Kijiografia"
+    override val landmark = "Alama ya Ardhi"
+    override val occupationDate = "Tarehe ya Kuingia"
+    override val noResidenceInfo = "Hakuna taarifa za makazi"
+    override val editResidence = "Hariri Makazi"
+    override val optional = "Hiari"
+}
+
+class AmharicStringResources : StringResources {
+    override val animal = "እንስሳ"
+    override val resource = "ሀብት"
+    override val admin = "አስተዳዳሪ"
+
+    // Common strings
+    override val add = "ጨምር"
+    override val reload = "እንደገና ጫን"
+    override val search = "ፈልግ"
+    override val page = "ገጽ"
+    override val of = "ከ"
+    override val showing = "እያሳየ ነው"
+    override val noAddress = "አድራሻ የለም"
+    override val selectGender = "ፆታ ይምረጡ"
+    override val age = "እድሜ"
+    override val glossary = "መዝገበ ቃላት"
+    override val searchPlaceholder = "በመታወቂያ ቁጥር፣ በስም ወይም በሌሎች ዝርዝሮች ይፈልጉ..."
+    override val addNewResident = "አዲስ ነዋሪ ጨምር"
+
+    // Content descriptions
+    override val contentDescAdd = "ጨምር"
+    override val contentDescEdit = "አርትዕ"
+    override val contentDescDelete = "ሰርዝ"
+    override val contentDescSaveChanges = "ለውጦችን አስቀምጥ"
+    override val contentDescReload = "እንደገና ጫን"
+    override val contentDescGlossary = "መዝገበ ቃላት"
+
+    override val dependentsInformation = "የጥገኞች መረጃ"
+    override val addDependent = "ጥገኛ ጨምር"
+    override val editDependent = "ጥገኛን አርትዕ"
+    override val name = "ስም"
+    override val surname = "የአባት ስም"
+    override val genderMale = "ወንድ"
+    override val genderFemale = "ሴት"
+    override val genderOther = "ሌላ"
+    override val toggleDropdown = "ድሮፕዳውን ቀይር"
+    override val save = "አስቀምጥ"
+    override val cancel = "ሰርዝ"
+    override val edit = "አርትዕ"
+    override val delete = "ሰርዝ"
+    override val back = "ተመለስ"
+    override val changesSaved = "ለውጦች በተሳካ ሁኔታ ተቀምጠዋል"
+
+    override val next = "ቀጣይ"
+    override val previous = "ቀዳሚ"
+    override val contentDescCancel = "ሰርዝ"
+    override val contentDescSave = "አስቀምጥ"
+    override val contentDescPrevious = "ቀዳሚ"
+    override val contentDescNext = "ቀጣይ"
+
+    override val settings = "ቅንብሮች"
+    override val language = "ቋንቋ"
+    override val selectLanguage = "ቋንቋ ይምረጡ"
+    override val appearance = "መልክ"
+    override val darkMode = "ጨለማ ሁነታ"
+
+    override val resident = "ነዋሪ"
+    override val residents = "ነዋሪዎች"
+    override val addResident = "ነዋሪ ጨምር"
+    override val editResident = "ነዋሪን አርትዕ"
+    override val firstName = "የመጀመሪያ ስም"
+    override val lastName = "የአባት ስም"
+    override val dateOfBirth = "የልደት ቀን"
+    override val gender = "ፆታ"
+    override val idNumber = "መታወቂያ ቁጥር"
+
+    override val qualifications = "ብቃቶች"
+    override val dependents = "ጥገኞች"
+    override val residence = "መኖሪያ"
+    override val employment = "ስራ"
+
+    override val residenceInformation = "የመኖሪያ መረጃ"
+    override val street = "መንገድ"
+    override val houseNumber = "የቤት ቁጥር"
+    override val suburb = "አካባቢ"
+    override val town = "ከተማ"
+    override val postalCode = "የፖስታ ኮድ"
+    override val geoCoordinates = "የመሬት አቀማመጥ"
+    override val landmark = "መለያ ምልክት"
+    override val occupationDate = "የመያዣ ቀን"
+    override val noResidenceInfo = "የመኖሪያ መረጃ የለም"
+    override val editResidence = "መኖሪያን አርትዕ"
+    override val optional = "አማራጭ"
+}
+
+class YorubaStringResources : StringResources {
+    override val animal = "Ẹranko"
+    override val resource = "Ohun elo"
+    override val admin = "Alakoso"
+
+    // Common strings
+    override val add = "Fi kun"
+    override val reload = "Tun gbà"
+    override val search = "Àwárí"
+    override val page = "Ojú ìwé"
+    override val of = "ti"
+    override val showing = "Fihan"
+    override val noAddress = "Ko si adirẹsi"
+    override val selectGender = "Yan Abo tabi Ako"
+    override val age = "Ọjọ ori"
+    override val glossary = "Ìwé ìtumọ̀"
+    override val searchPlaceholder = "Àwárí nípa nọmba ID, orúkọ tàbí àwọn alaye míràn..."
+    override val addNewResident = "Fi Olugbe Tuntun kun"
+
+    // Content descriptions
+    override val contentDescAdd = "Fi kun"
+    override val contentDescEdit = "Ṣatunkọ"
+    override val contentDescDelete = "Pa rẹ"
+    override val contentDescSaveChanges = "Fipamọ Awọn ayipada"
+    override val contentDescReload = "Tun gbà"
+    override val contentDescGlossary = "Ìwé ìtumọ̀"
+
+    override val dependentsInformation = "Alaye Awọn Ọmọ"
+    override val addDependent = "Fi Ọmọ kun"
+    override val editDependent = "Ṣatunkọ Ọmọ"
+    override val name = "Orukọ"
+    override val surname = "Orukọ Idile"
+    override val genderMale = "Ọkunrin"
+    override val genderFemale = "Obinrin"
+    override val genderOther = "Omiiran"
+    override val toggleDropdown = "Yi aṣayan pada"
+    override val save = "Fipamọ"
+    override val cancel = "Fagilee"
+    override val edit = "Ṣatunkọ"
+    override val delete = "Pa rẹ"
+    override val back = "Pada"
+    override val changesSaved = "Awọn ayipada ti fipamọ ni ifijišẹ"
+
+    override val next = "Itele"
+    override val previous = "Ti tẹlẹ"
+    override val contentDescCancel = "Fagilee"
+    override val contentDescSave = "Fipamọ"
+    override val contentDescPrevious = "Ti tẹlẹ"
+    override val contentDescNext = "Itele"
+
+    override val settings = "Ètò"
+    override val language = "Èdè"
+    override val selectLanguage = "Yan Èdè"
+    override val appearance = "Irisi"
+    override val darkMode = "Ipo Dudu"
+
+    override val resident = "Olugbe"
+    override val residents = "Awọn Olugbe"
+    override val addResident = "Fi Olugbe kun"
+    override val editResident = "Ṣatunkọ Olugbe"
+    override val firstName = "Orukọ Kini"
+    override val lastName = "Orukọ Idile"
+    override val dateOfBirth = "Ọjọ Ibi"
+    override val gender = "Abo tabi Ako"
+    override val idNumber = "Nọmba ID"
+
+    override val qualifications = "Awọn Ẹkọ"
+    override val dependents = "Awọn Ọmọ"
+    override val residence = "Ibugbe"
+    override val employment = "Iṣẹ"
+
+    override val residenceInformation = "Alaye Ibugbe"
+    override val street = "Opopona"
+    override val houseNumber = "Nọmba Ile"
+    override val suburb = "Agbegbe"
+    override val town = "Ilu"
+    override val postalCode = "Koodu Ifiweranṣẹ"
+    override val geoCoordinates = "Ipo Ile-aye"
+    override val landmark = "Ami Ile"
+    override val occupationDate = "Ọjọ Igbese"
+    override val noResidenceInfo = "Ko si alaye ibugbe"
+    override val editResidence = "Ṣatunkọ Ibugbe"
+    override val optional = "Aṣayan"
+}
+
 object StringResourcesManager {
     fun getStringResources(locale: SupportedLanguage): StringResources {
         return when (locale) {
@@ -310,6 +777,10 @@ object StringResourcesManager {
             SupportedLanguage.SETSWANA -> SetswanaStringResources()
             SupportedLanguage.XHOSA -> XhosaStringResources()
             SupportedLanguage.SEPEDI -> SepediStringResources()
+            SupportedLanguage.SHONA -> ShonaStringResources()
+            SupportedLanguage.SWAHILI -> SwahiliStringResources()
+            SupportedLanguage.AMHARIC -> AmharicStringResources()
+            SupportedLanguage.YORUBA -> YorubaStringResources()
         }
     }
 

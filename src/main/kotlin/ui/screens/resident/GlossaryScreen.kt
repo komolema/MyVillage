@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +25,10 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import models.*
 import ui.components.ScrollableContainer
+import utils.GlossaryPdfUtils
 import viewmodel.ResidentWindowViewModel
+import java.awt.Desktop
+import java.io.File
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -140,18 +144,62 @@ fun GlossaryDialog(
                         )
 
                         // Print Glossary Button
+                        var isGeneratingGlossaryPdf by remember { mutableStateOf(false) }
+                        var glossaryPdfError by remember { mutableStateOf<String?>(null) }
+
                         OutlinedButton(
-                            onClick = { /* Print functionality to be implemented later */ },
+                            onClick = {
+                                isGeneratingGlossaryPdf = true
+                                glossaryPdfError = null
+
+                                try {
+                                    val resident = state.resident
+                                    val address = state.address
+                                    val dependants = state.dependants
+                                    val qualifications = state.qualifications
+                                    val employmentHistory = state.employmentHistory
+
+                                    if (resident != null) {
+                                        val pdfFile = GlossaryPdfUtils.generateGlossaryPdf(
+                                            resident = resident,
+                                            address = address,
+                                            dependants = dependants,
+                                            qualifications = qualifications,
+                                            employmentHistory = employmentHistory
+                                        )
+
+                                        // Open the PDF file with the default PDF viewer
+                                        if (Desktop.isDesktopSupported()) {
+                                            Desktop.getDesktop().open(pdfFile)
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    glossaryPdfError = "Error generating PDF: ${e.message}"
+                                } finally {
+                                    isGeneratingGlossaryPdf = false
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)  // Fixed height for consistency
                                 .padding(vertical = 8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.primary)  // Added border color
+                            border = BorderStroke(1.dp, MaterialTheme.colors.primary),  // Added border color
+                            enabled = !isGeneratingGlossaryPdf
                         ) {
                             Text(
                                 "Print Glossary",
                                 style = MaterialTheme.typography.button,
                                 fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        // Show error message if there was an error generating the PDF
+                        if (glossaryPdfError != null) {
+                            Text(
+                                text = glossaryPdfError!!,
+                                color = MaterialTheme.colors.error,
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(horizontal = 8.dp)
                             )
                         }
 
@@ -188,13 +236,41 @@ fun GlossaryDialog(
                         }
 
                         // Print Dependents List Button
+                        var isGeneratingDependentsPdf by remember { mutableStateOf(false) }
+                        var dependentsPdfError by remember { mutableStateOf<String?>(null) }
+
                         OutlinedButton(
-                            onClick = { /* Print functionality to be implemented later */ },
+                            onClick = {
+                                isGeneratingDependentsPdf = true
+                                dependentsPdfError = null
+
+                                try {
+                                    val resident = state.resident
+                                    val dependants = state.dependants
+
+                                    if (resident != null) {
+                                        val pdfFile = GlossaryPdfUtils.generateDependentsPdf(
+                                            resident = resident,
+                                            dependants = dependants
+                                        )
+
+                                        // Open the PDF file with the default PDF viewer
+                                        if (Desktop.isDesktopSupported()) {
+                                            Desktop.getDesktop().open(pdfFile)
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    dependentsPdfError = "Error generating PDF: ${e.message}"
+                                } finally {
+                                    isGeneratingDependentsPdf = false
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)  // Fixed height for consistency
                                 .padding(vertical = 8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.primary)  // Added border color
+                            border = BorderStroke(1.dp, MaterialTheme.colors.primary),  // Added border color
+                            enabled = !isGeneratingDependentsPdf
                         ) {
                             Text(
                                 "Print Dependents List",
@@ -203,14 +279,52 @@ fun GlossaryDialog(
                             )
                         }
 
+                        // Show error message if there was an error generating the PDF
+                        if (dependentsPdfError != null) {
+                            Text(
+                                text = dependentsPdfError!!,
+                                color = MaterialTheme.colors.error,
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        }
+
                         // Print Qualifications Button
+                        var isGeneratingQualificationsPdf by remember { mutableStateOf(false) }
+                        var qualificationsPdfError by remember { mutableStateOf<String?>(null) }
+
                         OutlinedButton(
-                            onClick = { /* Print functionality to be implemented later */ },
+                            onClick = {
+                                isGeneratingQualificationsPdf = true
+                                qualificationsPdfError = null
+
+                                try {
+                                    val resident = state.resident
+                                    val qualifications = state.qualifications
+
+                                    if (resident != null) {
+                                        val pdfFile = GlossaryPdfUtils.generateQualificationsPdf(
+                                            resident = resident,
+                                            qualifications = qualifications
+                                        )
+
+                                        // Open the PDF file with the default PDF viewer
+                                        if (Desktop.isDesktopSupported()) {
+                                            Desktop.getDesktop().open(pdfFile)
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    qualificationsPdfError = "Error generating PDF: ${e.message}"
+                                } finally {
+                                    isGeneratingQualificationsPdf = false
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)  // Fixed height for consistency
                                 .padding(vertical = 8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.primary)  // Added border color
+                            border = BorderStroke(1.dp, MaterialTheme.colors.primary),  // Added border color
+                            enabled = !isGeneratingQualificationsPdf
                         ) {
                             Text(
                                 "Print Qualifications",
@@ -219,19 +333,67 @@ fun GlossaryDialog(
                             )
                         }
 
+                        // Show error message if there was an error generating the PDF
+                        if (qualificationsPdfError != null) {
+                            Text(
+                                text = qualificationsPdfError!!,
+                                color = MaterialTheme.colors.error,
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        }
+
                         // Print Employment History Button
+                        var isGeneratingEmploymentPdf by remember { mutableStateOf(false) }
+                        var employmentPdfError by remember { mutableStateOf<String?>(null) }
+
                         OutlinedButton(
-                            onClick = { /* Print functionality to be implemented later */ },
+                            onClick = {
+                                isGeneratingEmploymentPdf = true
+                                employmentPdfError = null
+
+                                try {
+                                    val resident = state.resident
+                                    val employmentHistory = state.employmentHistory
+
+                                    if (resident != null) {
+                                        val pdfFile = GlossaryPdfUtils.generateEmploymentHistoryPdf(
+                                            resident = resident,
+                                            employmentHistory = employmentHistory
+                                        )
+
+                                        // Open the PDF file with the default PDF viewer
+                                        if (Desktop.isDesktopSupported()) {
+                                            Desktop.getDesktop().open(pdfFile)
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    employmentPdfError = "Error generating PDF: ${e.message}"
+                                } finally {
+                                    isGeneratingEmploymentPdf = false
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)  // Fixed height for consistency
                                 .padding(vertical = 8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.primary)  // Added border color
+                            border = BorderStroke(1.dp, MaterialTheme.colors.primary),  // Added border color
+                            enabled = !isGeneratingEmploymentPdf
                         ) {
                             Text(
                                 "Print Employment History",
                                 style = MaterialTheme.typography.button,
                                 fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        // Show error message if there was an error generating the PDF
+                        if (employmentPdfError != null) {
+                            Text(
+                                text = employmentPdfError!!,
+                                color = MaterialTheme.colors.error,
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(horizontal = 8.dp)
                             )
                         }
                     }
@@ -286,6 +448,8 @@ fun GlossaryScreen(
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadEmployment(UUID.fromString(residentId)))
     }
 
+    var showPrintOptions by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -293,6 +457,16 @@ fun GlossaryScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    // Print button
+                    IconButton(onClick = { showPrintOptions = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Info, // Using Info icon for print options
+                            contentDescription = "Print Options",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             )
@@ -304,6 +478,257 @@ fun GlossaryScreen(
                 .padding(16.dp)
         ) {
             GlossaryContent(state = state)
+        }
+
+        // Show print options dialog when the print button is clicked
+        if (showPrintOptions) {
+            PrintOptionsDialog(
+                state = state,
+                onDismiss = { showPrintOptions = false }
+            )
+        }
+    }
+}
+
+/**
+ * Dialog for displaying print options.
+ *
+ * @param state The current state of the resident window
+ * @param onDismiss Callback to dismiss the dialog
+ */
+@Composable
+private fun PrintOptionsDialog(
+    state: ResidentWindowState,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Print Options",
+                    style = MaterialTheme.typography.h6,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Print Glossary Button
+                var isGeneratingGlossaryPdf by remember { mutableStateOf(false) }
+                var glossaryPdfError by remember { mutableStateOf<String?>(null) }
+
+                Button(
+                    onClick = {
+                        isGeneratingGlossaryPdf = true
+                        glossaryPdfError = null
+
+                        try {
+                            val resident = state.resident
+                            val address = state.address
+                            val dependants = state.dependants
+                            val qualifications = state.qualifications
+                            val employmentHistory = state.employmentHistory
+
+                            if (resident != null) {
+                                val pdfFile = GlossaryPdfUtils.generateGlossaryPdf(
+                                    resident = resident,
+                                    address = address,
+                                    dependants = dependants,
+                                    qualifications = qualifications,
+                                    employmentHistory = employmentHistory
+                                )
+
+                                // Open the PDF file with the default PDF viewer
+                                if (Desktop.isDesktopSupported()) {
+                                    Desktop.getDesktop().open(pdfFile)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            glossaryPdfError = "Error generating PDF: ${e.message}"
+                        } finally {
+                            isGeneratingGlossaryPdf = false
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    enabled = !isGeneratingGlossaryPdf
+                ) {
+                    Text("Print Full Glossary")
+                }
+
+                // Show error message if there was an error generating the PDF
+                if (glossaryPdfError != null) {
+                    Text(
+                        text = glossaryPdfError!!,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
+
+                // Print Dependents List Button
+                var isGeneratingDependentsPdf by remember { mutableStateOf(false) }
+                var dependentsPdfError by remember { mutableStateOf<String?>(null) }
+
+                Button(
+                    onClick = {
+                        isGeneratingDependentsPdf = true
+                        dependentsPdfError = null
+
+                        try {
+                            val resident = state.resident
+                            val dependants = state.dependants
+
+                            if (resident != null) {
+                                val pdfFile = GlossaryPdfUtils.generateDependentsPdf(
+                                    resident = resident,
+                                    dependants = dependants
+                                )
+
+                                // Open the PDF file with the default PDF viewer
+                                if (Desktop.isDesktopSupported()) {
+                                    Desktop.getDesktop().open(pdfFile)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            dependentsPdfError = "Error generating PDF: ${e.message}"
+                        } finally {
+                            isGeneratingDependentsPdf = false
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    enabled = !isGeneratingDependentsPdf
+                ) {
+                    Text("Print Dependents List")
+                }
+
+                // Show error message if there was an error generating the PDF
+                if (dependentsPdfError != null) {
+                    Text(
+                        text = dependentsPdfError!!,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
+
+                // Print Qualifications Button
+                var isGeneratingQualificationsPdf by remember { mutableStateOf(false) }
+                var qualificationsPdfError by remember { mutableStateOf<String?>(null) }
+
+                Button(
+                    onClick = {
+                        isGeneratingQualificationsPdf = true
+                        qualificationsPdfError = null
+
+                        try {
+                            val resident = state.resident
+                            val qualifications = state.qualifications
+
+                            if (resident != null) {
+                                val pdfFile = GlossaryPdfUtils.generateQualificationsPdf(
+                                    resident = resident,
+                                    qualifications = qualifications
+                                )
+
+                                // Open the PDF file with the default PDF viewer
+                                if (Desktop.isDesktopSupported()) {
+                                    Desktop.getDesktop().open(pdfFile)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            qualificationsPdfError = "Error generating PDF: ${e.message}"
+                        } finally {
+                            isGeneratingQualificationsPdf = false
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    enabled = !isGeneratingQualificationsPdf
+                ) {
+                    Text("Print Qualifications")
+                }
+
+                // Show error message if there was an error generating the PDF
+                if (qualificationsPdfError != null) {
+                    Text(
+                        text = qualificationsPdfError!!,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
+
+                // Print Employment History Button
+                var isGeneratingEmploymentPdf by remember { mutableStateOf(false) }
+                var employmentPdfError by remember { mutableStateOf<String?>(null) }
+
+                Button(
+                    onClick = {
+                        isGeneratingEmploymentPdf = true
+                        employmentPdfError = null
+
+                        try {
+                            val resident = state.resident
+                            val employmentHistory = state.employmentHistory
+
+                            if (resident != null) {
+                                val pdfFile = GlossaryPdfUtils.generateEmploymentHistoryPdf(
+                                    resident = resident,
+                                    employmentHistory = employmentHistory
+                                )
+
+                                // Open the PDF file with the default PDF viewer
+                                if (Desktop.isDesktopSupported()) {
+                                    Desktop.getDesktop().open(pdfFile)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            employmentPdfError = "Error generating PDF: ${e.message}"
+                        } finally {
+                            isGeneratingEmploymentPdf = false
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    enabled = !isGeneratingEmploymentPdf
+                ) {
+                    Text("Print Employment History")
+                }
+
+                // Show error message if there was an error generating the PDF
+                if (employmentPdfError != null) {
+                    Text(
+                        text = employmentPdfError!!,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
+
+                // Close button
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 16.dp)
+                ) {
+                    Text("Close")
+                }
+            }
         }
     }
 }

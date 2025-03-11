@@ -5,15 +5,18 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import localization.StringResourcesManager
 import theme.*
 
 @Composable
 fun DashboardScreen(navController: NavController) {
+    val strings = remember { StringResourcesManager.getCurrentStringResources() }
     val buttonModifier = Modifier
         .width(200.dp)
         .height(60.dp)
@@ -28,7 +31,7 @@ fun DashboardScreen(navController: NavController) {
             colors = ButtonDefaults.buttonColors(BlueButtonColor),
             modifier = buttonModifier
         ) {
-            Text("Resident")
+            Text(strings.resident)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
@@ -36,7 +39,7 @@ fun DashboardScreen(navController: NavController) {
             colors = ButtonDefaults.buttonColors(GreenButtonColor),
             modifier = buttonModifier
         ) {
-            Text("Animal")
+            Text(strings.animal)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
@@ -44,7 +47,7 @@ fun DashboardScreen(navController: NavController) {
             colors = ButtonDefaults.buttonColors(RedButtonColor),
             modifier = buttonModifier
         ) {
-            Text("Resource")
+            Text(strings.resource)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
@@ -52,7 +55,7 @@ fun DashboardScreen(navController: NavController) {
             colors = ButtonDefaults.buttonColors(YellowButtonColor),
             modifier = buttonModifier
         ) {
-            Text("Admin")
+            Text(strings.admin)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
@@ -60,7 +63,7 @@ fun DashboardScreen(navController: NavController) {
             colors = ButtonDefaults.buttonColors(GrayButtonColor),
             modifier = buttonModifier
         ) {
-            Text("Settings")
+            Text(strings.settings)
         }
     }
 }

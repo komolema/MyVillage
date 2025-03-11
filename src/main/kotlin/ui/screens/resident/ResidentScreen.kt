@@ -30,6 +30,7 @@ import viewmodel.ResidentWindowViewModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import localization.StringResourcesManager
 
 // State for tracking edited cells
 data class EditedCell(val rowIndex: Int, val columnName: String, val value: String)
@@ -316,7 +317,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                     value = searchText,
                     onValueChange = { searchText = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search by ID number, name or other details...") },
+                    placeholder = { Text(StringResourcesManager.getCurrentStringResources().searchPlaceholder) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(
@@ -360,17 +361,17 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
 
                         state = dataTableState,
                         columns = listOf(
-                            DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("First Name") },
-                            DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("Last Name") },
-                            DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("Date of Birth") },
-                            DataColumn(width = TableColumnWidth.Fixed(80.dp)) { HeaderCell("Age") },
-                            DataColumn(width = TableColumnWidth.Fixed(150.dp)) { HeaderCell("Gender") },
-                            DataColumn(width = TableColumnWidth.Flex(1f)) { HeaderCell("Address") },
+                            DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell(StringResourcesManager.getCurrentStringResources().firstName) },
+                            DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell(StringResourcesManager.getCurrentStringResources().lastName) },
+                            DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell(StringResourcesManager.getCurrentStringResources().dateOfBirth) },
+                            DataColumn(width = TableColumnWidth.Fixed(80.dp)) { HeaderCell(StringResourcesManager.getCurrentStringResources().age) },
+                            DataColumn(width = TableColumnWidth.Fixed(150.dp)) { HeaderCell(StringResourcesManager.getCurrentStringResources().gender) },
+                            DataColumn(width = TableColumnWidth.Fixed(150.dp)) { HeaderCell(StringResourcesManager.getCurrentStringResources().residence) },
                             DataColumn(
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
                                 Column {
-                                    HeaderCell("Glossary")
+                                    HeaderCell(StringResourcesManager.getCurrentStringResources().glossary)
                                     Spacer(modifier = Modifier.height(40.dp))
                                 }
                             },
@@ -378,7 +379,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
                                 Column {
-                                    HeaderCell("Edit")
+                                    HeaderCell(StringResourcesManager.getCurrentStringResources().edit)
                                     Spacer(modifier = Modifier.height(40.dp))
                                 }
                             },
@@ -386,7 +387,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
                                 Column {
-                                    HeaderCell("Save")
+                                    HeaderCell(StringResourcesManager.getCurrentStringResources().save)
                                     Spacer(modifier = Modifier.height(40.dp))
                                 }
                             },
@@ -394,7 +395,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
                                 Column {
-                                    HeaderCell("Reload")
+                                    HeaderCell(StringResourcesManager.getCurrentStringResources().reload)
                                     Spacer(modifier = Modifier.height(40.dp))
                                 }
                             },
@@ -402,7 +403,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
                                 Column {
-                                    HeaderCell("Delete")
+                                    HeaderCell(StringResourcesManager.getCurrentStringResources().delete)
                                     Spacer(modifier = Modifier.height(40.dp))
                                 }
                             }
@@ -550,7 +551,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                         ) {
                                             Icon(
                                                 Icons.Default.Info,
-                                                contentDescription = "Glossary",
+                                                contentDescription = StringResourcesManager.getCurrentStringResources().contentDescGlossary,
                                                 tint = MaterialTheme.colors.primary
                                             )
                                         }
@@ -580,7 +581,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                         ) {
                                             Icon(
                                                 Icons.Default.Edit,
-                                                contentDescription = "Edit",
+                                                contentDescription = StringResourcesManager.getCurrentStringResources().contentDescEdit,
                                                 tint = MaterialTheme.colors.primary
                                             )
                                         }
@@ -617,7 +618,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                         ) {
                                             Icon(
                                                 Icons.Default.Done,
-                                                contentDescription = "Save",
+                                                contentDescription = StringResourcesManager.getCurrentStringResources().contentDescSave,
                                                 tint = if (isRowModified(index)) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
                                             )
                                         }
@@ -643,7 +644,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                         ) {
                                             Icon(
                                                 Icons.Default.Close,
-                                                contentDescription = "Reload",
+                                                contentDescription = StringResourcesManager.getCurrentStringResources().contentDescReload,
                                                 tint = if (isRowModified(index)) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
                                             )
                                         }
@@ -666,7 +667,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                         ) {
                                             Icon(
                                                 Icons.Default.Delete,
-                                                contentDescription = "Delete",
+                                                contentDescription = StringResourcesManager.getCurrentStringResources().contentDescDelete,
                                                 tint = MaterialTheme.colors.error
                                             )
                                         }
@@ -694,7 +695,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Showing ${state.residents.size} of ${state.totalItems} residents",
+                        "${StringResourcesManager.getCurrentStringResources().showing} ${state.residents.size} ${StringResourcesManager.getCurrentStringResources().of} ${state.totalItems} ${StringResourcesManager.getCurrentStringResources().residents}",
                         style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
@@ -708,11 +709,11 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                             enabled = dataTableState.pageIndex > 0,
                             modifier = Modifier.height(36.dp)
                         ) {
-                            Icon(Icons.Default.ArrowBack, "Previous Page")
+                            Icon(Icons.Default.ArrowBack, StringResourcesManager.getCurrentStringResources().contentDescPrevious)
                         }
 
                         Text(
-                            "Page ${dataTableState.pageIndex + 1} of ${dataTableState.pageSize}",
+                            "${StringResourcesManager.getCurrentStringResources().page} ${dataTableState.pageIndex + 1} ${StringResourcesManager.getCurrentStringResources().of} ${dataTableState.pageSize}",
                             style = MaterialTheme.typography.body2,
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
@@ -722,7 +723,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                             enabled = dataTableState.pageIndex < dataTableState.pageSize - 1,
                             modifier = Modifier.height(36.dp)
                         ) {
-                            Icon(Icons.Default.ArrowForward, "Next Page")
+                            Icon(Icons.Default.ArrowForward, StringResourcesManager.getCurrentStringResources().contentDescNext)
                         }
                     }
                 }
@@ -739,12 +740,12 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
             ) {
                 Icon(
                     Icons.Default.Add,
-                    contentDescription = "Add",
+                    contentDescription = StringResourcesManager.getCurrentStringResources().contentDescAdd,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    "Add New Resident",
+                    StringResourcesManager.getCurrentStringResources().addNewResident,
                     style = MaterialTheme.typography.button
                 )
             }
