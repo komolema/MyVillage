@@ -153,13 +153,41 @@ fun ResidenceTab(
                             .padding(top = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Button(
-                            onClick = { showEditDialog = true },
-                            enabled = mode == WindowMode.UPDATE
-                        ) {
-                            Icon(Icons.Default.Edit, contentDescription = strings.value.edit)
+                        Row {
+                            Button(
+                                onClick = { showEditDialog = true },
+                                enabled = mode == WindowMode.UPDATE
+                            ) {
+                                Icon(Icons.Default.Edit, contentDescription = strings.value.edit)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(strings.value.edit)
+                            }
+
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(strings.value.edit)
+
+                            // Proof of Address button
+                            var showProofOfAddressDialog by remember { mutableStateOf(false) }
+                            Button(
+                                onClick = { showProofOfAddressDialog = true }
+                            ) {
+                                Icon(Icons.Default.Info, contentDescription = "Proof of Address")
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Proof of Address")
+                            }
+
+                            if (showProofOfAddressDialog) {
+                                val resident = viewModel.state.value.resident
+                                val address = currentAddress
+                                val residence = currentResidence
+                                if (resident != null && address != null && residence != null) {
+                                    ui.screens.resident.ProofOfAddressDialog(
+                                        resident = resident,
+                                        address = address,
+                                        residence = residence,
+                                        onDismiss = { showProofOfAddressDialog = false }
+                                    )
+                                }
+                            }
                         }
 
                         Button(

@@ -22,9 +22,11 @@ import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import models.expanded.ResidentExpanded
+import org.koin.compose.koinInject
 import ui.components.WindowToolbar
 import ui.components.ScrollableContainer
 import viewmodel.ResidentViewModel
+import viewmodel.ResidentWindowViewModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -336,7 +338,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 100.dp, max = 2000.dp)
-                            .widthIn(max = 1200.dp),
+                            .widthIn(max = 1800.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         separator = {
                             Spacer(
@@ -358,14 +360,20 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
 
                         state = dataTableState,
                         columns = listOf(
-                            DataColumn(width = TableColumnWidth.Fixed(150.dp)) { HeaderCell("ID Number") },
                             DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("First Name") },
                             DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("Last Name") },
                             DataColumn(width = TableColumnWidth.Fixed(120.dp)) { HeaderCell("Date of Birth") },
                             DataColumn(width = TableColumnWidth.Fixed(80.dp)) { HeaderCell("Age") },
                             DataColumn(width = TableColumnWidth.Fixed(150.dp)) { HeaderCell("Gender") },
                             DataColumn(width = TableColumnWidth.Flex(1f)) { HeaderCell("Address") },
-                            DataColumn(width = TableColumnWidth.Fixed(100.dp)) { HeaderCell("Dependants") },
+                            DataColumn(
+                                width = TableColumnWidth.Fixed(80.dp)
+                            ) {
+                                Column {
+                                    HeaderCell("Glossary")
+                                    Spacer(modifier = Modifier.height(40.dp))
+                                }
+                            },
                             DataColumn(
                                 width = TableColumnWidth.Fixed(80.dp)
                             ) {
@@ -404,23 +412,6 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                             val rowBackground = if (isRowModified(index)) Color.Yellow.copy(alpha = 0.2f)
                                               else Color.LightGray.copy(alpha = 0.1f)
                             row {
-                                cell {
-                                    ResidentIdCell(
-                                        index = index,
-                                        resExp = resExp,
-                                        rowBackground = rowBackground,
-                                        editingCell = editingCell,
-                                        editedCells = editedCells,
-                                        onEdit = { cell ->
-                                            // Clear previous edits if switching to a different row
-                                            if (editingCell?.rowIndex != cell.rowIndex) {
-                                                editedCells.clear()
-                                            }
-                                            editingCell = cell
-                                        },
-                                        windowMode = windowMode
-                                    )
-                                }
                                 cell { 
                                     Box(
                                         modifier = Modifier
@@ -543,7 +534,36 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                     }
                                 }
                                 cell {
-                                    TableCellWithBackground(resExp.dependants.size.toString(), rowBackground) // Dependants count is read-only
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(rowBackground),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        var showGlossaryDialog by remember { mutableStateOf(false) }
+
+                                        IconButton(
+                                            onClick = {
+                                                showGlossaryDialog = true
+                                            },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Info,
+                                                contentDescription = "Glossary",
+                                                tint = MaterialTheme.colors.primary
+                                            )
+                                        }
+
+                                        if (showGlossaryDialog) {
+                                            val residentWindowViewModel: viewmodel.ResidentWindowViewModel = koinInject()
+                                            GlossaryDialog(
+                                                viewModel = residentWindowViewModel,
+                                                residentId = resExp.resident.id,
+                                                onDismiss = { showGlossaryDialog = false }
+                                            )
+                                        }
+                                    }
                                 }
                                 cell {
                                     Box(

@@ -9,6 +9,7 @@ import org.koin.compose.koinInject
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
+import ui.screens.resident.GlossaryScreen
 import ui.screens.resident.ResidentScreen
 import ui.screens.resident.ResidentWindow
 import ui.screens.resident.WindowMode
@@ -59,6 +60,14 @@ fun AppNavigation() {
         }
         composable(NavigationRoute.Settings.route) { 
             SettingsScreen(navigationService.navController) 
+        }
+        composable("glossary/{residentId}") { backStackEntry ->
+            val residentId = backStackEntry.arguments?.getString("residentId") ?: ""
+            GlossaryScreen(
+                navigationService.navController,
+                residentWindowViewModel,
+                residentId
+            )
         }
     }
 }

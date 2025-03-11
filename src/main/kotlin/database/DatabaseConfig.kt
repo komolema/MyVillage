@@ -27,7 +27,8 @@ object DatabaseConfig {
                 Ownerships,
                 Payments,
                 Residences,
-                Resources
+                Resources,
+                ProofOfAddresses
                 // Add other tables as needed
             )
         }

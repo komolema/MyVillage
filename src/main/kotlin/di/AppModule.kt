@@ -14,6 +14,7 @@ val daoModule = module {
     single<ManagedByDao> { ManagedByDaoImpl() }
     single<OwnershipDao> { OwnershipDaoImpl() }
     single<PaymentDao> { PaymentDaoImpl() }
+    single<ProofOfAddressDao> { ProofOfAddressDaoImpl() }
     single<QualificationDao> { QualificationDaoImpl() }
     single<ResidenceDao> { ResidenceDaoImpl() }
     single<ResidentDao> { ResidentDaoImpl(get(), get()) }

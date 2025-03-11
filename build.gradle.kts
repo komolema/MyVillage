@@ -13,6 +13,7 @@ val koinVersion = "4.0.2"
 val exposedVersion = "0.59.0"
 val arrowVersion = "2.0.1"
 val kotestVersion = "6.0.0.M2"
+val pdfboxVersion = "2.0.29"
 
 repositories {
     mavenCentral()
@@ -62,6 +63,10 @@ dependencies {
     implementation("io.insert-koin:koin-compose:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel:$koinVersion")
     implementation("io.insert-koin:koin-compose-viewmodel-navigation:$koinVersion")
+
+    // PDF handling with Apache PDFBox
+    implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
+    implementation("org.apache.pdfbox:fontbox:$pdfboxVersion")
 
     // Test dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
