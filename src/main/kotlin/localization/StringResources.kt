@@ -20,6 +20,22 @@ interface StringResources {
     val glossary: String
     val searchPlaceholder: String
     val addNewResident: String
+    val skip: String
+    val getStarted: String
+    val finish: String
+
+    // Onboarding strings
+    val onboardingWelcomeTitle: String
+    val onboardingWelcomeDescription: String
+    val onboardingSelectLanguage: String
+    val onboardingWatchVideo: String
+
+    val onboardingUserRoleTitle: String
+    val onboardingUserRoleDescription: String
+    val onboardingAdministratorRole: String
+    val onboardingAdministratorRoleDescription: String
+    val onboardingStandardRole: String
+    val onboardingStandardRoleDescription: String
 
     // Form field labels
     val firstNameLabel: String
@@ -141,6 +157,24 @@ class EnglishStringResources : StringResources {
     override val generatedDocuments = "Generated Documents"
     override val viewGeneratedDocuments = "View Generated Documents"
     override val generatedDocumentsList = "Generated Documents List"
+
+    // Common buttons
+    override val skip = "Skip"
+    override val getStarted = "Get Started"
+    override val finish = "Finish"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "Welcome to MyVillage"
+    override val onboardingWelcomeDescription = "MyVillage helps you manage your community efficiently with powerful tools for resident, animal, and resource management."
+    override val onboardingSelectLanguage = "Select your preferred language"
+    override val onboardingWatchVideo = "Watch introduction video"
+
+    override val onboardingUserRoleTitle = "Select Your Role"
+    override val onboardingUserRoleDescription = "Choose the role that best describes your responsibilities in the village management system."
+    override val onboardingAdministratorRole = "Administrator"
+    override val onboardingAdministratorRoleDescription = "Full access to system management, including user roles, settings, and all administrative functions."
+    override val onboardingStandardRole = "Standard User"
+    override val onboardingStandardRoleDescription = "Access to day-to-day operations for managing residents, animals, and resources."
 
     // Form field labels
     override val firstNameLabel = "First Name:"
@@ -270,6 +304,24 @@ class SetswanaStringResources : StringResources {
     override val viewGeneratedDocuments = "Lebelela Dikwalo tse di Tlhagisitsweng"
     override val generatedDocumentsList = "Lenane la Dikwalo tse di Tlhagisitsweng"
 
+    // Common buttons
+    override val skip = "Tlola"
+    override val getStarted = "Simolola"
+    override val finish = "Fetsa"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "O amogelesegile mo MyVillage"
+    override val onboardingWelcomeDescription = "MyVillage e go thusa go laola motse wa gago ka bokgoni ka didiriswa tse di maatla tsa go laola baagi, diphologolo, le metswedi."
+    override val onboardingSelectLanguage = "Tlhopha puo e o e ratang"
+    override val onboardingWatchVideo = "Lebelela video ya matseno"
+
+    override val onboardingUserRoleTitle = "Tlhopha Tiro ya Gago"
+    override val onboardingUserRoleDescription = "Tlhopha tiro e e tlhalosang maikarabelo a gago mo thulaganyong ya taolo ya motse."
+    override val onboardingAdministratorRole = "Motsamaisi"
+    override val onboardingAdministratorRoleDescription = "Phitlhelelo e e feletseng ya taolo ya thulaganyo, go akaretsa ditiro tsa badirisi, dipeakanyo, le ditiro tsotlhe tsa tsamaiso."
+    override val onboardingStandardRole = "Modirisi wa Tlwaelo"
+    override val onboardingStandardRoleDescription = "Phitlhelelo ya ditiro tsa letsatsi le letsatsi tsa go laola baagi, diphologolo, le metswedi."
+
     // Form field labels
     override val firstNameLabel = "Leina la Ntlha:"
     override val lastNameLabel = "Sefane:"
@@ -397,6 +449,24 @@ class XhosaStringResources : StringResources {
     override val generatedDocuments = "Amaxwebhu Akhiqiziweyo"
     override val viewGeneratedDocuments = "Jonga Amaxwebhu Akhiqiziweyo"
     override val generatedDocumentsList = "Uluhlu Lwamaxwebhu Akhiqiziweyo"
+
+    // Common buttons
+    override val skip = "Tsiba"
+    override val getStarted = "Qalisa"
+    override val finish = "Gqiba"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "Wamkelekile kwi-MyVillage"
+    override val onboardingWelcomeDescription = "I-MyVillage ikunceda ulawule uluntu lwakho ngokufanelekileyo ngezixhobo ezinamandla zokulawula abahlali, izilwanyana, kunye nezixhobo."
+    override val onboardingSelectLanguage = "Khetha ulwimi olukhetha lona"
+    override val onboardingWatchVideo = "Bukela ividiyo yesaziso"
+
+    override val onboardingUserRoleTitle = "Khetha Indima Yakho"
+    override val onboardingUserRoleDescription = "Khetha indima echaza kakuhle uxanduva lwakho kwinkqubo yolawulo loluntu."
+    override val onboardingAdministratorRole = "Umlawuli"
+    override val onboardingAdministratorRoleDescription = "Ukufikelela okupheleleyo kulawulo lwenkqubo, kuquka iindima zabasebenzisi, iisethingi, kunye nayo yonke imisebenzi yolawulo."
+    override val onboardingStandardRole = "Umsebenzisi Oqhelekileyo"
+    override val onboardingStandardRoleDescription = "Ukufikelela kwimisebenzi yemihla ngemihla yokulawula abahlali, izilwanyana, kunye nezixhobo."
 
     // Form field labels
     override val firstNameLabel = "Igama:"
@@ -526,6 +596,24 @@ class SepediStringResources : StringResources {
     override val viewGeneratedDocuments = "Lebelela Ditokumente tše di Hlamilwego"
     override val generatedDocumentsList = "Lenaneo la Ditokumente tše di Hlamilwego"
 
+    // Common buttons
+    override val skip = "Tshela"
+    override val getStarted = "Thoma"
+    override val finish = "Fetša"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "O amogetšwe go MyVillage"
+    override val onboardingWelcomeDescription = "MyVillage e go thuša go laola setšhaba sa gago ka bokgoni ka didirišwa tše maatla tša go laola badudi, diphoofolo, le methopo."
+    override val onboardingSelectLanguage = "Kgetha polelo yeo o e ratago"
+    override val onboardingWatchVideo = "Lebelela video ya matseno"
+
+    override val onboardingUserRoleTitle = "Kgetha Tema ya Gago"
+    override val onboardingUserRoleDescription = "Kgetha tema yeo e hlalošago maikarabelo a gago ka botlalo ka gare ga tshepedišo ya taolo ya setšhaba."
+    override val onboardingAdministratorRole = "Molaodi"
+    override val onboardingAdministratorRoleDescription = "Phihlelelo e feletšego go taolo ya tshepedišo, go akaretša dikarolo tša badiriši, dipeakanyo, le mešomo ka moka ya taolo."
+    override val onboardingStandardRole = "Modiriši wa Tlwaelo"
+    override val onboardingStandardRoleDescription = "Phihlelelo go mešomo ya letšatši ka letšatši ya go laola badudi, diphoofolo, le methopo."
+
     // Form field labels
     override val firstNameLabel = "Leina la Mathomo:"
     override val lastNameLabel = "Sefane:"
@@ -653,6 +741,24 @@ class ShonaStringResources : StringResources {
     override val generatedDocuments = "Magwaro Akagadzirwa"
     override val viewGeneratedDocuments = "Ona Magwaro Akagadzirwa"
     override val generatedDocumentsList = "Rondedzero yeMagwaro Akagadzirwa"
+
+    // Common buttons
+    override val skip = "Darikai"
+    override val getStarted = "Tangai"
+    override val finish = "Pedza"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "Tinokugachirai kuMyVillage"
+    override val onboardingWelcomeDescription = "MyVillage inokubatsira kutungamirira munharaunda yako zvakanaka neshandiso dzine simba dzekutungamirira vagari, mhuka, uye zvekushandisa."
+    override val onboardingSelectLanguage = "Sarudza mutauro waunoda"
+    override val onboardingWatchVideo = "Tarisa vhidhiyo yekutanga"
+
+    override val onboardingUserRoleTitle = "Sarudza Basa Rako"
+    override val onboardingUserRoleDescription = "Sarudza basa rinotsanangura zvakanyanya mabasa ako musystem yekutonga munharaunda."
+    override val onboardingAdministratorRole = "Mutongi"
+    override val onboardingAdministratorRoleDescription = "Kukwanisa kusvika zvizere pakutonga system, kusanganisira mabasa evashandisi, masetting, uye mabasa ose ekutonga."
+    override val onboardingStandardRole = "Mushandisi Wemazuva Ose"
+    override val onboardingStandardRoleDescription = "Kukwanisa kusvika pamabasa emazuva ose ekutonga vagari, mhuka, uye zvinhu."
 
     // Form field labels
     override val firstNameLabel = "Zita Rokutanga:"
@@ -782,6 +888,24 @@ class SwahiliStringResources : StringResources {
     override val viewGeneratedDocuments = "Tazama Nyaraka Zilizozalishwa"
     override val generatedDocumentsList = "Orodha ya Nyaraka Zilizozalishwa"
 
+    // Common buttons
+    override val skip = "Ruka"
+    override val getStarted = "Anza"
+    override val finish = "Maliza"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "Karibu kwenye MyVillage"
+    override val onboardingWelcomeDescription = "MyVillage inakusaidia kusimamia jamii yako kwa ufanisi na zana zenye nguvu za kusimamia wakazi, wanyama, na rasilimali."
+    override val onboardingSelectLanguage = "Chagua lugha unayopendelea"
+    override val onboardingWatchVideo = "Tazama video ya utangulizi"
+
+    override val onboardingUserRoleTitle = "Chagua Jukumu Lako"
+    override val onboardingUserRoleDescription = "Chagua jukumu ambalo linaelezea vyema majukumu yako katika mfumo wa usimamizi wa jamii."
+    override val onboardingAdministratorRole = "Msimamizi"
+    override val onboardingAdministratorRoleDescription = "Ufikiaji kamili wa usimamizi wa mfumo, ikiwa ni pamoja na majukumu ya watumiaji, mipangilio, na kazi zote za utawala."
+    override val onboardingStandardRole = "Mtumiaji wa Kawaida"
+    override val onboardingStandardRoleDescription = "Ufikiaji wa shughuli za kila siku za kusimamia wakazi, wanyama, na rasilimali."
+
     // Form field labels
     override val firstNameLabel = "Jina la Kwanza:"
     override val lastNameLabel = "Jina la Mwisho:"
@@ -910,6 +1034,24 @@ class AmharicStringResources : StringResources {
     override val viewGeneratedDocuments = "የተፈጠሩ ሰነዶችን ይመልከቱ"
     override val generatedDocumentsList = "የተፈጠሩ ሰነዶች ዝርዝር"
 
+    // Common buttons
+    override val skip = "ዝለል"
+    override val getStarted = "ጀምር"
+    override val finish = "ጨርስ"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "እንኳን ወደ MyVillage በደህና መጡ"
+    override val onboardingWelcomeDescription = "MyVillage ማህበረሰብዎን በብቃት እንዲያስተዳድሩ ለነዋሪዎች፣ ለእንስሳት እና ለሀብቶች አስተዳደር ጠንካራ መሳሪያዎችን ይሰጥዎታል።"
+    override val onboardingSelectLanguage = "የሚፈልጉትን ቋንቋ ይምረጡ"
+    override val onboardingWatchVideo = "የመግቢያ ቪዲዮን ይመልከቱ"
+
+    override val onboardingUserRoleTitle = "የእርስዎን ሚና ይምረጡ"
+    override val onboardingUserRoleDescription = "በማህበረሰብ አስተዳደር ሥርዓት ውስጥ ያለዎትን ኃላፊነት በተሻለ ሁኔታ የሚገልጽ ሚና ይምረጡ።"
+    override val onboardingAdministratorRole = "አስተዳዳሪ"
+    override val onboardingAdministratorRoleDescription = "የተጠቃሚ ሚናዎችን፣ ቅንብሮችን እና ሁሉንም የአስተዳደር ተግባራትን ጨምሮ ሙሉ የሥርዓት አስተዳደር መዳረሻ።"
+    override val onboardingStandardRole = "መደበኛ ተጠቃሚ"
+    override val onboardingStandardRoleDescription = "ነዋሪዎችን፣ እንስሳትን እና ሀብቶችን ለማስተዳደር የዕለት ተዕለት ሥራዎች መዳረሻ።"
+
     // Form field labels
     override val firstNameLabel = "የመጀመሪያ ስም:"
     override val lastNameLabel = "የአባት ስም:"
@@ -1037,6 +1179,24 @@ class YorubaStringResources : StringResources {
     override val generatedDocuments = "Awọn Iwe ti a Ṣẹda"
     override val viewGeneratedDocuments = "Wo Awọn Iwe ti a Ṣẹda"
     override val generatedDocumentsList = "Akojọ Awọn Iwe ti a Ṣẹda"
+
+    // Common buttons
+    override val skip = "Fo"
+    override val getStarted = "Bẹrẹ"
+    override val finish = "Pari"
+
+    // Onboarding strings
+    override val onboardingWelcomeTitle = "Kaabo si MyVillage"
+    override val onboardingWelcomeDescription = "MyVillage n ran ọ lọwọ lati ṣakoso agbegbe rẹ ni ọna to munadoko pẹlu awọn irinṣẹ alagbara fun iṣakoso awọn olugbe, ẹranko, ati awọn ohun elo."
+    override val onboardingSelectLanguage = "Yan ede ti o fẹ"
+    override val onboardingWatchVideo = "Wo fidio ifihan"
+
+    override val onboardingUserRoleTitle = "Yan Ipa Rẹ"
+    override val onboardingUserRoleDescription = "Yan ipa ti o ṣapejuwe ojuṣe rẹ daradara ninu eto iṣakoso agbegbe."
+    override val onboardingAdministratorRole = "Alakoso"
+    override val onboardingAdministratorRoleDescription = "Wiwọle kikun si iṣakoso eto, pẹlu awọn ipa olumulo, awọn eto, ati gbogbo awọn iṣẹ iṣakoso."
+    override val onboardingStandardRole = "Olumulo Deede"
+    override val onboardingStandardRoleDescription = "Wiwọle si awọn iṣẹ ojoojumọ fun iṣakoso awọn olugbe, awọn ẹranko, ati awọn ohun elo."
 
     // Form field labels
     override val firstNameLabel = "Orukọ Kini:"

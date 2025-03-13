@@ -32,6 +32,8 @@ val viewModelModule = module {
         employmentDao = get()
     ) }
     factory { AnimalViewModel(get(), get(), get()) }
+    factory { OnboardingViewModel() }
+    factory { SettingsViewModel() }
 }
 
 val appModule = listOf(daoModule, viewModelModule)

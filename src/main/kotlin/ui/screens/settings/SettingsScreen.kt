@@ -113,6 +113,33 @@ fun SettingsScreen(navController: NavController) {
                     }
                 }
             }
+
+            // Onboarding Section
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Onboarding",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Show onboarding on startup")
+                        Switch(
+                            checked = viewModel.showOnboardingOnStartup.value,
+                            onCheckedChange = { viewModel.updateShowOnboardingOnStartup(it) }
+                        )
+                    }
+                }
+            }
         }
     }
 }

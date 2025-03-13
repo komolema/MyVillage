@@ -9,12 +9,15 @@ import org.koin.compose.koinInject
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
+import ui.screens.onboarding.WelcomeScreen
+import ui.screens.onboarding.UserRoleScreen
 import ui.screens.resident.GlossaryScreen
 import ui.screens.resident.ResidentScreen
 import ui.screens.resident.ResidentWindow
 import ui.screens.resident.WindowMode
 import ui.screens.resource.ResourceScreen
 import ui.screens.settings.SettingsScreen
+import viewmodel.OnboardingViewModel
 import viewmodel.ResidentViewModel
 import viewmodel.ResidentWindowViewModel
 import java.util.*
@@ -25,8 +28,16 @@ fun AppNavigation() {
     val navigationService = remember { NavigationService.create(navController) }
     val residentViewModel: ResidentViewModel = koinInject()
     val residentWindowViewModel: ResidentWindowViewModel = koinInject()
+    val onboardingViewModel: OnboardingViewModel = koinInject()
 
-    NavHost(navController = navController, startDestination = NavigationRoute.Dashboard.route) {
+    // Determine start destination based on onboarding settings
+    val startDestination = if (onboardingViewModel.isOnboardingRequired()) {
+        NavigationRoute.OnboardingWelcome.route
+    } else {
+        NavigationRoute.Dashboard.route
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(NavigationRoute.Dashboard.route) { 
             DashboardScreen(navigationService.navController) 
         }
@@ -68,6 +79,42 @@ fun AppNavigation() {
                 residentWindowViewModel,
                 residentId
             )
+        }
+
+        // Onboarding screens
+        composable(NavigationRoute.OnboardingWelcome.route) {
+            WelcomeScreen(navigationService.navController)
+        }
+
+        composable(NavigationRoute.OnboardingUserRole.route) {
+            UserRoleScreen(navigationService.navController)
+        }
+
+        composable(NavigationRoute.OnboardingAdminConfig.route) {
+            // TODO: Implement AdminConfigScreen
+            // For now, navigate to the next screen
+            navController.navigate(NavigationRoute.OnboardingFeatureTour.route)
+        }
+
+        composable(NavigationRoute.OnboardingFeatureTour.route) {
+            // TODO: Implement FeatureTourScreen
+            // For now, navigate to the next screen
+            navController.navigate(NavigationRoute.OnboardingFirstAction.route)
+        }
+
+        composable(NavigationRoute.OnboardingFirstAction.route) {
+            // TODO: Implement FirstActionScreen
+            // For now, navigate to the next screen
+            navController.navigate(NavigationRoute.OnboardingDashboardIntro.route)
+        }
+
+        composable(NavigationRoute.OnboardingDashboardIntro.route) {
+            // TODO: Implement DashboardIntroScreen
+            // For now, complete onboarding and navigate to Dashboard
+            onboardingViewModel.completeOnboarding()
+            navController.navigate(NavigationRoute.Dashboard.route) {
+                popUpTo(NavigationRoute.OnboardingWelcome.route) { inclusive = true }
+            }
         }
     }
 }

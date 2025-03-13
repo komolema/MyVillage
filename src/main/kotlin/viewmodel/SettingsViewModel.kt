@@ -14,6 +14,9 @@ class SettingsViewModel {
     private val _isDarkMode = mutableStateOf(AppSettingsManager.getCurrentSettings().isDarkMode)
     val isDarkMode: State<Boolean> = _isDarkMode
 
+    private val _showOnboardingOnStartup = mutableStateOf(AppSettingsManager.getCurrentSettings().showOnboardingOnStartup)
+    val showOnboardingOnStartup: State<Boolean> = _showOnboardingOnStartup
+
     val supportedLanguages = LocaleManager.getSupportedLanguages()
     private val _strings = mutableStateOf(StringResourcesManager.getCurrentStringResources())
     val strings get() = _strings.value
@@ -28,5 +31,10 @@ class SettingsViewModel {
     fun updateDarkMode(enabled: Boolean) {
         _isDarkMode.value = enabled
         AppSettingsManager.updateDarkMode(enabled)
+    }
+
+    fun updateShowOnboardingOnStartup(show: Boolean) {
+        _showOnboardingOnStartup.value = show
+        AppSettingsManager.updateShowOnboardingOnStartup(show)
     }
 }
