@@ -36,7 +36,7 @@ fun DashboardScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { navController.navigate("animal") },
-            colors = ButtonDefaults.buttonColors(GreenButtonColor),
+            colors = ButtonDefaults.buttonColors(PurpleButtonColor),
             modifier = buttonModifier
         ) {
             Text(strings.animal)

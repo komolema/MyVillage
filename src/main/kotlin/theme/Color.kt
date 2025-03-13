@@ -7,3 +7,4 @@ val GreenButtonColor = Color(0xFF4CAF50)
 val RedButtonColor = Color(0xFFF44336)
 val YellowButtonColor = Color(0xFFFFEB3B)
 val GrayButtonColor = Color(0xFF9E9E9E)
+val PurpleButtonColor = Color(0xFF9C27B0) // New color for animal section

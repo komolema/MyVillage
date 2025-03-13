@@ -31,6 +31,7 @@ val viewModelModule = module {
         addressDao = get(),
         employmentDao = get()
     ) }
+    factory { AnimalViewModel(get(), get(), get()) }
 }
 
 val appModule = listOf(daoModule, viewModelModule)
