@@ -117,8 +117,8 @@ class ProofOfAddressDaoImpl : ProofOfAddressDao {
         val entityId = this[ProofOfAddresses.id] as EntityID<UUID>
         return ProofOfAddress(
             id = entityId.value,
-            residentId = (this[ProofOfAddresses.residentId] as EntityID<UUID>).value,
-            addressId = (this[ProofOfAddresses.addressId] as EntityID<UUID>).value,
+            residentId = this[ProofOfAddresses.residentId],
+            addressId = this[ProofOfAddresses.addressId],
             referenceNumber = this[ProofOfAddresses.referenceNumber],
             generatedAt = this[ProofOfAddresses.generatedAt],
             generatedBy = this[ProofOfAddresses.generatedBy],

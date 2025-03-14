@@ -34,7 +34,8 @@ class OwnershipDaoImpl : OwnershipDao {
     }
 
     override fun getOwnershipById(id: UUID): Ownership? = transaction {
-        Ownerships.select(Ownerships.id eq id)
+        Ownerships.selectAll()
+            .where { Ownerships.id eq id }
             .map { it.toOwnership() }
             .singleOrNull()
     }
@@ -45,17 +46,20 @@ class OwnershipDaoImpl : OwnershipDao {
     }
 
     override fun getOwnershipsByResident(residentId: UUID): List<Ownership> = transaction {
-        Ownerships.select(Ownerships.residentId eq residentId)
+        Ownerships.selectAll()
+            .where { Ownerships.residentId eq residentId }
             .map { it.toOwnership() }
     }
 
     override fun getOwnershipsByAnimal(animalId: UUID): List<Ownership> = transaction {
-        Ownerships.select(Ownerships.animalId eq animalId)
+        Ownerships.selectAll()
+            .where { Ownerships.animalId eq animalId }
             .map { it.toOwnership() }
     }
 
     override fun getValidOwnerships(): List<Ownership> = transaction {
-        Ownerships.select(Ownerships.valid eq true)
+        Ownerships.selectAll()
+            .where { Ownerships.valid eq true }
             .map { it.toOwnership() }
     }
 
