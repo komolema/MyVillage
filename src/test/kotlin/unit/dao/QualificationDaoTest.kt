@@ -1,10 +1,10 @@
 package unit.dao
 
-import database.dao.QualificationDao
-import database.dao.QualificationDaoImpl
-import database.schema.Qualifications
-import database.schema.Residents
-import models.Qualification
+import database.dao.domain.QualificationDao
+import database.dao.domain.QualificationDaoImpl
+import database.schema.domain.Qualifications
+import database.schema.domain.Residents
+import models.domain.Qualification
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction

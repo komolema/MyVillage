@@ -1,9 +1,10 @@
-package database.dao
+package integration.dao
 
-import database.schema.ManagedBy
-import database.schema.Resources
-import database.schema.Residents
-import models.ManagedBy as ManagedByModel
+import database.dao.domain.ManagedByDaoImpl
+import database.schema.domain.ManagedBy
+import database.schema.domain.Resources
+import database.schema.domain.Residents
+import models.domain.ManagedBy as ManagedByModel
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -42,7 +43,7 @@ class ManagedByDaoTest {
     fun testCreateManagedBy() = transaction {
         val managedBy = createTestManagedBy()
         val createdManagedBy = managedByDao.createManagedBy(managedBy)
-        
+
         assertNotNull(createdManagedBy.id)
         assertEquals(managedBy.resourceId, createdManagedBy.resourceId)
         assertEquals(managedBy.residentId, createdManagedBy.residentId)
@@ -54,7 +55,7 @@ class ManagedByDaoTest {
     fun testGetManagedById() = transaction {
         val managedBy = createTestManagedBy()
         val createdManagedBy = managedByDao.createManagedBy(managedBy)
-        
+
         val fetchedManagedBy = managedByDao.getManagedById(createdManagedBy.id)
         assertNotNull(fetchedManagedBy)
         assertEquals(createdManagedBy.resourceId, fetchedManagedBy?.resourceId)
@@ -114,15 +115,15 @@ class ManagedByDaoTest {
     fun testUpdateManagedBy() = transaction {
         val managedBy = createTestManagedBy()
         val createdManagedBy = managedByDao.createManagedBy(managedBy)
-        
+
         val updatedManagedBy = createdManagedBy.copy(
             status = "Inactive",
             position = "Senior Manager"
         )
-        
+
         val updateResult = managedByDao.updateManagedBy(updatedManagedBy)
         assertTrue(updateResult)
-        
+
         val fetchedManagedBy = managedByDao.getManagedById(createdManagedBy.id)
         assertEquals(updatedManagedBy.status, fetchedManagedBy?.status)
         assertEquals(updatedManagedBy.position, fetchedManagedBy?.position)
@@ -132,10 +133,10 @@ class ManagedByDaoTest {
     fun testDeleteManagedBy() = transaction {
         val managedBy = createTestManagedBy()
         val createdManagedBy = managedByDao.createManagedBy(managedBy)
-        
+
         val deleteResult = managedByDao.deleteManagedBy(createdManagedBy.id)
         assertTrue(deleteResult)
-        
+
         val fetchedManagedBy = managedByDao.getManagedById(createdManagedBy.id)
         assertNull(fetchedManagedBy)
     }

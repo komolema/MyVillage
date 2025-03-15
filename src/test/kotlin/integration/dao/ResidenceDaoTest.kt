@@ -1,9 +1,11 @@
-package database.dao
+package integration.dao
 
-import database.schema.Addresses
-import database.schema.Residences
-import models.Address
-import models.Residence
+import database.dao.domain.AddressDaoImpl
+import database.dao.domain.ResidenceDaoImpl
+import database.schema.domain.Addresses
+import database.schema.domain.Residences
+import models.domain.Address
+import models.domain.Residence
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction

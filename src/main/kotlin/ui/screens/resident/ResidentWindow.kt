@@ -7,12 +7,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 
 
@@ -34,7 +32,7 @@ import java.util.*
 
 import ui.screens.resident.tabs.TabCompletionState
 import ui.screens.resident.tabs.TabState
-import models.Resident
+import models.domain.Resident
 import localization.StringResourcesManager
 import localization.LocaleManager
 

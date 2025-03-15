@@ -1,8 +1,14 @@
 package integration.dao
 
-import database.dao.*
-import database.schema.*
-import models.*
+import database.dao.domain.AddressDaoImpl
+import database.dao.domain.DependantDaoImpl
+import database.dao.domain.ResidenceDaoImpl
+import database.dao.domain.ResidentDaoImpl
+import database.dao.domain.ResourceDaoImpl
+import database.schema.domain.Addresses
+import database.schema.domain.Dependants
+import database.schema.domain.Residents
+import database.schema.domain.Resources
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -11,6 +17,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlinx.coroutines.test.runTest
+import models.domain.Address
+import models.domain.Dependant
+import models.domain.Resident
+import java.time.LocalDate
 
 /**
  * Integration tests for cross-DAO interactions and relationships.
@@ -106,7 +116,7 @@ class CrossDaoTest {
             idNumber = "TEST123",
             firstName = "Test",
             lastName = "Resident",
-            dob = java.time.LocalDate.now(),
+            dob = LocalDate.now(),
             gender = "M",
             phoneNumber = "1234567890",
             email = "test@example.com"

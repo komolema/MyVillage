@@ -11,26 +11,23 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusOrder
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jdatepicker.JDatePicker
 import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
 import java.util.*
 import javax.swing.JPanel
-import models.Resident
+import models.domain.Resident
 import org.jdatepicker.impl.JDatePanelImpl
 import org.jdatepicker.impl.JDatePickerImpl
 import org.jdatepicker.impl.UtilDateModel
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import javax.swing.JFormattedTextField
-import ui.screens.resident.tabs.TabCompletionState
 import localization.LocaleManager
 import localization.StringResourcesManager
 import localization.StringResources
@@ -38,6 +35,13 @@ import localization.StringResources
 enum class Gender {
     MALE,
     FEMALE;
+
+    // Default display name for tests
+    val displayName: String
+        get() = when (this) {
+            MALE -> "Male"
+            FEMALE -> "Female"
+        }
 
     fun getDisplayName(strings: StringResources): String {
         return when (this) {

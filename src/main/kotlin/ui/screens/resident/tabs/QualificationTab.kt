@@ -4,11 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.TableColumnWidth
-import models.Qualification
+import models.domain.Qualification
 import ui.components.DatePicker
 import ui.components.table.GenericTable
 import ui.components.table.TableCellType
@@ -20,7 +19,6 @@ import viewmodel.ResidentWindowViewModel.Intent
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
-import ui.screens.resident.tabs.TabCompletionState
 
 @Composable
 fun QualificationTab(

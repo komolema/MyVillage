@@ -1,6 +1,6 @@
 package ui.screens.resident
 
-import models.*
+import models.domain.*
 
 data class ResidentWindowState(
     val residence: Residence? = null,

@@ -66,6 +66,12 @@ class LocalizationTest {
                     assertEquals("Dipeakanyo", resources.settings)
                     assertEquals("Ye e latelago", resources.next)
                 }
+                else -> {
+                    // For other languages, just verify that the resources exist
+                    assertNotNull(resources.save)
+                    assertNotNull(resources.settings)
+                    assertNotNull(resources.next)
+                }
             }
         }
     }
@@ -111,6 +117,15 @@ class LocalizationTest {
                     assertEquals("Mosadi", resources.genderFemale)
                     assertEquals("Tše dingwe", resources.genderOther)
                 }
+                else -> {
+                    // For other languages, just verify that the resources exist
+                    assertNotNull(resources.dependentsInformation)
+                    assertNotNull(resources.addDependent)
+                    assertNotNull(resources.editDependent)
+                    assertNotNull(resources.genderMale)
+                    assertNotNull(resources.genderFemale)
+                    assertNotNull(resources.genderOther)
+                }
             }
         }
     }
@@ -148,6 +163,13 @@ class LocalizationTest {
                     assertEquals("Nomoro ya Ntlo", resources.houseNumber)
                     assertEquals("Ga e gapeletšwe", resources.optional)
                 }
+                else -> {
+                    // For other languages, just verify that the resources exist
+                    assertNotNull(resources.residenceInformation)
+                    assertNotNull(resources.street)
+                    assertNotNull(resources.houseNumber)
+                    assertNotNull(resources.optional)
+                }
             }
         }
     }
@@ -178,6 +200,13 @@ class LocalizationTest {
                 SupportedLanguage.SEPEDI -> {
                     assertEquals("Maemo a Lefase (Ga e gapeletšwe)", geoCoordinates)
                     assertEquals("Leswao la Lefelo (Ga e gapeletšwe)", landmark)
+                }
+                else -> {
+                    // For other languages, just verify that the format is correct
+                    assertTrue(geoCoordinates.contains(resources.geoCoordinates))
+                    assertTrue(geoCoordinates.contains(resources.optional))
+                    assertTrue(landmark.contains(resources.landmark))
+                    assertTrue(landmark.contains(resources.optional))
                 }
             }
         }

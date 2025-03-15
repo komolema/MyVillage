@@ -1,11 +1,6 @@
 package viewmodel
 
-import database.dao.DependantDao
-import database.dao.EmploymentDao
-import database.dao.QualificationDao
-import database.dao.ResidentDao
-import database.dao.ResidenceDao
-import database.dao.AddressDao
+import database.dao.domain.DomainDataBag
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,23 +8,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import models.Dependant
-import models.Employment
-import models.Qualification
-import models.Resident
-import models.Residence
-import models.Address
+import models.domain.Dependant
+import models.domain.Employment
+import models.domain.Qualification
+import models.domain.Resident
+import models.domain.Residence
+import models.domain.Address
 import ui.screens.resident.ResidentWindowState
 import ui.screens.resident.WindowMode
 import java.util.UUID
 
 class ResidentWindowViewModel(
-    val qualificationDao: QualificationDao,
-    val residentDao: ResidentDao,
-    val dependantDao: DependantDao,
-    val residenceDao: ResidenceDao,
-    val addressDao: AddressDao,
-    val employmentDao: EmploymentDao,
+    private val domainDataBag: DomainDataBag,
     private val initialMode: WindowMode = WindowMode.VIEW,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
@@ -92,9 +82,9 @@ class ResidentWindowViewModel(
     private fun loadResidence(residentId: UUID) {
         viewModelScope.launch {
             try {
-                val residence = residenceDao.getResidenceByResidentId(residentId)
+                val residence = domainDataBag.residenceDao.getResidenceByResidentId(residentId)
                 val address = if (residence != null) {
-                    addressDao.getById(residence.addressId)
+                    domainDataBag.addressDao.getById(residence.addressId)
                 } else null
 
                 _state.update { currentState ->
@@ -117,8 +107,8 @@ class ResidentWindowViewModel(
     private fun createResidence(residence: Residence, address: Address) {
         viewModelScope.launch {
             try {
-                addressDao.create(address)
-                residenceDao.createResidence(residence)
+                domainDataBag.addressDao.create(address)
+                domainDataBag.residenceDao.createResidence(residence)
 
                 _state.update { currentState ->
                     currentState.copy(
@@ -142,8 +132,8 @@ class ResidentWindowViewModel(
     private fun updateResidence(residence: Residence, address: Address) {
         viewModelScope.launch {
             try {
-                addressDao.update(address)
-                residenceDao.updateResidence(residence)
+                domainDataBag.addressDao.update(address)
+                domainDataBag.residenceDao.updateResidence(residence)
 
                 _state.update { currentState ->
                     currentState.copy(
@@ -167,8 +157,8 @@ class ResidentWindowViewModel(
     private fun deleteResidence(residenceId: UUID, addressId: UUID) {
         viewModelScope.launch {
             try {
-                residenceDao.deleteResidence(residenceId)
-                addressDao.delete(addressId)
+                domainDataBag.residenceDao.deleteResidence(residenceId)
+                domainDataBag.addressDao.delete(addressId)
 
                 _state.update { currentState ->
                     currentState.copy(
@@ -192,7 +182,7 @@ class ResidentWindowViewModel(
     private fun deleteQualification(qualificationId: UUID) {
         viewModelScope.launch {
             try {
-                qualificationDao.deleteQualification(qualificationId)
+                domainDataBag.qualificationDao.deleteQualification(qualificationId)
                 _state.update { currentState ->
                     currentState.copy(
                         qualifications = currentState.qualifications.filter { it.id != qualificationId },
@@ -212,7 +202,7 @@ class ResidentWindowViewModel(
     private fun loadDependants(residentId: UUID) {
         viewModelScope.launch {
             try {
-                val dependants = dependantDao.getDependantsByResidentId(residentId)
+                val dependants = domainDataBag.dependantDao.getDependantsByResidentId(residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         dependants = dependants,
@@ -232,8 +222,8 @@ class ResidentWindowViewModel(
     private fun createDependant(newDependant: Dependant) {
         viewModelScope.launch {
             try {
-                val createdDependant = dependantDao.createDependant(newDependant)
-                val updatedDependants = dependantDao.getDependantsByResidentId(createdDependant.residentId)
+                val createdDependant = domainDataBag.dependantDao.createDependant(newDependant)
+                val updatedDependants = domainDataBag.dependantDao.getDependantsByResidentId(createdDependant.residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         dependants = updatedDependants,
@@ -254,8 +244,8 @@ class ResidentWindowViewModel(
     private fun updateDependant(updatedDependant: Dependant) {
         viewModelScope.launch {
             try {
-                dependantDao.updateDependant(updatedDependant)
-                val updatedDependants = dependantDao.getDependantsByResidentId(updatedDependant.residentId)
+                domainDataBag.dependantDao.updateDependant(updatedDependant)
+                val updatedDependants = domainDataBag.dependantDao.getDependantsByResidentId(updatedDependant.residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         dependants = updatedDependants,
@@ -276,7 +266,7 @@ class ResidentWindowViewModel(
     private fun deleteDependant(dependantId: UUID) {
         viewModelScope.launch {
             try {
-                dependantDao.deleteDependant(dependantId)
+                domainDataBag.dependantDao.deleteDependant(dependantId)
                 _state.update { currentState ->
                     currentState.copy(
                         dependants = currentState.dependants.filter { it.id != dependantId },
@@ -305,7 +295,7 @@ class ResidentWindowViewModel(
     private fun updateResident(residentState: Resident) {
         viewModelScope.launch {
             try {
-                residentDao.updateResident(residentState)
+                domainDataBag.residentDao.updateResident(residentState)
                 _state.update { currentState ->
                     currentState.copy(
                         resident = residentState,
@@ -327,7 +317,7 @@ class ResidentWindowViewModel(
     private fun createResident(residentState: Resident) {
         viewModelScope.launch {
             try {
-                residentDao.createResident(residentState)
+                domainDataBag.residentDao.createResident(residentState)
                 _state.update { currentState ->
                     currentState.copy(
                         resident = residentState,
@@ -349,8 +339,8 @@ class ResidentWindowViewModel(
     private fun updateQualification(updatedQualification: Qualification) {
         viewModelScope.launch {
             try {
-                if (qualificationDao.updateQualification(updatedQualification)) {
-                    val updatedQualifications = qualificationDao.getQualificationsByResidentId(updatedQualification.residentId)
+                if (domainDataBag.qualificationDao.updateQualification(updatedQualification)) {
+                    val updatedQualifications = domainDataBag.qualificationDao.getQualificationsByResidentId(updatedQualification.residentId)
                     _state.update { currentState ->
                         currentState.copy(
                             qualifications = updatedQualifications,
@@ -375,8 +365,8 @@ class ResidentWindowViewModel(
     private fun createQualification(newQualification: Qualification) {
         viewModelScope.launch {
             try {
-                val createdQualification = qualificationDao.createQualification(newQualification)
-                val updatedQualifications = qualificationDao.getQualificationsByResidentId(createdQualification.residentId)
+                val createdQualification = domainDataBag.qualificationDao.createQualification(newQualification)
+                val updatedQualifications = domainDataBag.qualificationDao.getQualificationsByResidentId(createdQualification.residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         qualifications = updatedQualifications,
@@ -398,7 +388,7 @@ class ResidentWindowViewModel(
     private fun loadQualifications(residentId: UUID) {
         viewModelScope.launch {
             try {
-                val qualifications = qualificationDao.getQualificationsByResidentId(residentId)
+                val qualifications = domainDataBag.qualificationDao.getQualificationsByResidentId(residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         qualifications = qualifications,
@@ -419,7 +409,7 @@ class ResidentWindowViewModel(
     private fun loadResident(residentId: UUID) {
         viewModelScope.launch {
             try {
-                val resident = residentDao.getResidentById(residentId)
+                val resident = domainDataBag.residentDao.getResidentById(residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         resident = resident ?: Resident.default,
@@ -441,7 +431,7 @@ class ResidentWindowViewModel(
     private fun loadEmployment(residentId: UUID) {
         viewModelScope.launch {
             try {
-                val employment = employmentDao.getEmploymentByResidentId(residentId)
+                val employment = domainDataBag.employmentDao.getEmploymentByResidentId(residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         employmentHistory = employment,
@@ -462,8 +452,8 @@ class ResidentWindowViewModel(
     private fun createEmployment(newEmployment: Employment) {
         viewModelScope.launch {
             try {
-                val createdEmployment = employmentDao.createEmployment(newEmployment)
-                val updatedEmployment = employmentDao.getEmploymentByResidentId(createdEmployment.residentId)
+                val createdEmployment = domainDataBag.employmentDao.createEmployment(newEmployment)
+                val updatedEmployment = domainDataBag.employmentDao.getEmploymentByResidentId(createdEmployment.residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         employmentHistory = updatedEmployment,
@@ -485,8 +475,8 @@ class ResidentWindowViewModel(
     private fun updateEmployment(updatedEmployment: Employment) {
         viewModelScope.launch {
             try {
-                employmentDao.updateEmployment(updatedEmployment)
-                val updatedHistory = employmentDao.getEmploymentByResidentId(updatedEmployment.residentId)
+                domainDataBag.employmentDao.updateEmployment(updatedEmployment)
+                val updatedHistory = domainDataBag.employmentDao.getEmploymentByResidentId(updatedEmployment.residentId)
                 _state.update { currentState ->
                     currentState.copy(
                         employmentHistory = updatedHistory,
@@ -508,7 +498,7 @@ class ResidentWindowViewModel(
     private fun deleteEmployment(employmentId: UUID) {
         viewModelScope.launch {
             try {
-                employmentDao.deleteEmployment(employmentId)
+                domainDataBag.employmentDao.deleteEmployment(employmentId)
                 _state.update { currentState ->
                     currentState.copy(
                         employmentHistory = currentState.employmentHistory.filter { it.id != employmentId },

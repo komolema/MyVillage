@@ -1,9 +1,8 @@
 package ui.screens.animal
 
-import models.Animal
-import models.Resident
+import models.domain.Animal
+import models.domain.Resident
 import models.expanded.AnimalExpanded
-import java.time.LocalDate
 import java.util.UUID
 
 data class AnimalState(

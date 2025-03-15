@@ -9,7 +9,8 @@ import androidx.compose.ui.window.WindowPlacement
 import di.appModule
 import org.koin.core.context.startKoin
 import ui.navigation.AppNavigation
-import database.DatabaseConfig
+import database.DatabaseManager
+import di.viewModelModule
 import theme.BlueButtonColor
 
 @Composable
@@ -27,8 +28,13 @@ fun App() {
 fun main() {
     startKoin {
         modules(appModule)
+        modules(viewModelModule)
     }
-    DatabaseConfig.initialize()
+    // Initialize databases
+    DatabaseManager.initializeDatabases()
+
+    // Initialize security system
+
     application {
         val windowState = rememberWindowState(placement = WindowPlacement.Maximized)
         Window(onCloseRequest = ::exitApplication, state = windowState) {

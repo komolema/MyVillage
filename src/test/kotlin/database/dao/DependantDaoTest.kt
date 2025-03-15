@@ -1,8 +1,10 @@
 package database.dao
 
-import database.schema.Dependants
-import database.schema.Residents
-import models.Dependant
+import database.dao.domain.DependantDao
+import database.dao.domain.DependantDaoImpl
+import database.schema.domain.Dependants
+import database.schema.domain.Residents
+import models.domain.Dependant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Before
@@ -15,19 +17,19 @@ import kotlin.test.assertNotNull
 class DependantDaoTest {
     private lateinit var dependantDao: DependantDao
     private lateinit var testResidentId: UUID
-    
+
     @Before
     fun setUp() {
         // Initialize in-memory database for testing
         Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
-        
+
         // Initialize DAO
         dependantDao = DependantDaoImpl()
-        
+
         // Set up database schema
         transaction {
             SchemaUtils.create(Residents, Dependants)
-            
+
             // Create a test resident
             testResidentId = UUID.randomUUID()
             Residents.insert { row ->
@@ -42,23 +44,23 @@ class DependantDaoTest {
             }
         }
     }
-    
+
     @Test
     fun testGetDependantsByResidentId() {
         // Create test dependants
         val dependant1 = createTestDependant("DEP1", "John")
         val dependant2 = createTestDependant("DEP2", "Jane")
-        
+
         // Test retrieving dependants
         val dependants = dependantDao.getDependantsByResidentId(testResidentId)
-        
+
         // Verify results
         assertNotNull(dependants)
         assertEquals(2, dependants.size)
         assertEquals("John", dependants.find { it.idNumber == "DEP1" }?.name)
         assertEquals("Jane", dependants.find { it.idNumber == "DEP2" }?.name)
     }
-    
+
     private fun createTestDependant(idNumber: String, name: String): Dependant {
         return transaction {
             dependantDao.createDependant(

@@ -1,0 +1,36 @@
+package models.domain
+
+import java.util.UUID
+
+data class Address(
+    val id: UUID,
+    val line: String,
+    val houseNumber: String,
+    val suburb: String,
+    val town: String,
+    val postalCode: String,
+    val geoCoordinates: String? = null,
+    val landmark: String? = null
+) {
+    fun formatFriendly(): String {
+        return buildString {
+            append("$houseNumber $line")
+            if (suburb.isNotEmpty()) append(", $suburb")
+            if (town.isNotEmpty()) append(", $town")
+            if (postalCode.isNotEmpty()) append(" $postalCode")
+        }
+    }
+
+    companion object {
+        val default = Address(
+            id = UUID.randomUUID(),
+            line = "",
+            houseNumber = "",
+            suburb = "",
+            town = "",
+            postalCode = "",
+            geoCoordinates = null,
+            landmark = null
+        )
+    }
+}

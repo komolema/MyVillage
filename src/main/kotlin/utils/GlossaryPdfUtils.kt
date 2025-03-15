@@ -1,8 +1,7 @@
 package utils
 
-import models.*
+import models.domain.*
 import java.io.File
-import java.time.format.DateTimeFormatter
 
 /**
  * Utility class for generating PDF documents for the glossary screen.

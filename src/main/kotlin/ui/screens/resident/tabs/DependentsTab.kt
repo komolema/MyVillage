@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import com.seanproctor.datatable.TableColumnWidth
-import models.Dependant
+import models.domain.Dependant
 import ui.components.table.GenericTable
 import ui.components.table.TableCellType
 import ui.components.table.TableColumn
@@ -20,7 +20,6 @@ import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
 import viewmodel.ResidentWindowViewModel.Intent
 import java.util.*
-import ui.screens.resident.tabs.TabCompletionState
 import localization.LocaleManager
 import localization.StringResourcesManager
 

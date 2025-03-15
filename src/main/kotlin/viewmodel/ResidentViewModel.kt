@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import database.dao.ResidentDao
-import models.Resident
+import database.dao.domain.ResidentDao
+import models.domain.Resident
 import ui.screens.resident.ResidentState
 import java.util.*
 

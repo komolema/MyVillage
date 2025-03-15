@@ -14,26 +14,24 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
-import models.*
 import ui.components.ScrollableContainer
 import utils.GlossaryPdfUtils
 import viewmodel.ResidentWindowViewModel
 import java.awt.Desktop
-import java.io.File
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import models.domain.Dependant
+import models.domain.Employment
+import models.domain.Qualification
 
 /**
  * Glossary dialog that displays all information about a resident in a dialog.

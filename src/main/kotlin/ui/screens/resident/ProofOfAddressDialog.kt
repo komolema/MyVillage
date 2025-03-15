@@ -9,16 +9,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import database.dao.ProofOfAddressDao
-import models.Address
-import models.ProofOfAddress
-import models.Resident
-import models.Residence
+import models.domain.Address
+import models.domain.Resident
+import models.domain.Residence
 import org.koin.java.KoinJavaComponent.inject
-import utils.PdfGenerator
 import java.awt.Desktop
 import java.io.File
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -36,7 +32,6 @@ fun ProofOfAddressDialog(
     residence: Residence,
     onDismiss: () -> Unit
 ) {
-    val proofOfAddressDao: ProofOfAddressDao by inject(ProofOfAddressDao::class.java)
     var isGenerating by remember { mutableStateOf(true) }
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var referenceNumber by remember { mutableStateOf("") }

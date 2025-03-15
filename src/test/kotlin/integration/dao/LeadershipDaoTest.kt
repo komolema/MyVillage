@@ -1,7 +1,8 @@
-package database.dao
+package integration.dao
 
-import database.schema.Leadership
-import models.Leadership as LeadershipModel
+import database.dao.domain.LeadershipDaoImpl
+import database.schema.domain.Leadership
+import models.domain.Leadership as LeadershipModel
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -46,7 +47,7 @@ class LeadershipDaoTest {
     fun testGetLeadershipById() = transaction {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
-        
+
         val fetchedLeadership = leadershipDao.getLeadershipById(createdLeadership.id)
         assertNotNull(fetchedLeadership)
         assertEquals(createdLeadership.name, fetchedLeadership?.name)
@@ -90,15 +91,15 @@ class LeadershipDaoTest {
     fun testUpdateLeadership() = transaction {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
-        
+
         val updatedLeadership = createdLeadership.copy(
             name = "Updated Leader",
             role = "Updated Role"
         )
-        
+
         val updateResult = leadershipDao.updateLeadership(updatedLeadership)
         assertTrue(updateResult)
-        
+
         val fetchedLeadership = leadershipDao.getLeadershipById(createdLeadership.id)
         assertEquals(updatedLeadership.name, fetchedLeadership?.name)
         assertEquals(updatedLeadership.role, fetchedLeadership?.role)
@@ -108,10 +109,10 @@ class LeadershipDaoTest {
     fun testDeleteLeadership() = transaction {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
-        
+
         val deleteResult = leadershipDao.deleteLeadership(createdLeadership.id)
         assertTrue(deleteResult)
-        
+
         val fetchedLeadership = leadershipDao.getLeadershipById(createdLeadership.id)
         assertNull(fetchedLeadership)
     }

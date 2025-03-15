@@ -1,11 +1,11 @@
 package integration.dao
 
-import database.dao.OwnershipDaoImpl
-import database.schema.Ownerships
-import database.schema.Animals
-import database.schema.Residents
-import database.schema.Payments
-import models.Ownership
+import database.dao.domain.OwnershipDaoImpl
+import database.schema.domain.Ownerships
+import database.schema.domain.Animals
+import database.schema.domain.Residents
+import database.schema.domain.Payments
+import models.domain.Ownership
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -49,13 +49,13 @@ class OwnershipDaoTest {
         transaction {
             val ownership = createTestOwnership()
             val createdOwnership = ownershipDao.createOwnership(ownership)
-            
+
             assertNotNull(createdOwnership.id)
             assertEquals(ownership.residentId, createdOwnership.residentId)
             assertEquals(ownership.animalId, createdOwnership.animalId)
             assertEquals(ownership.valid, createdOwnership.valid)
             assertEquals(ownership.acquisitionMethod, createdOwnership.acquisitionMethod)
-            
+
             val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
             assertNotNull(fetchedOwnership)
             assertEquals(createdOwnership.ownershipType, fetchedOwnership?.ownershipType)
@@ -67,7 +67,7 @@ class OwnershipDaoTest {
         transaction {
             val ownership = createTestOwnership()
             val createdOwnership = ownershipDao.createOwnership(ownership)
-            
+
             val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
             assertNotNull(fetchedOwnership)
             assertEquals(createdOwnership.residentId, fetchedOwnership?.residentId)
@@ -158,10 +158,10 @@ class OwnershipDaoTest {
                 ownershipType = "Shared",
                 sharedWith = "User1,User2"
             )
-            
+
             val updateResult = ownershipDao.updateOwnership(updatedOwnership)
             assertTrue(updateResult)
-            
+
             val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
             assertNotNull(fetchedOwnership)
             assertEquals(updatedOwnership.valid, fetchedOwnership?.valid)
@@ -175,10 +175,10 @@ class OwnershipDaoTest {
         transaction {
             val ownership = createTestOwnership()
             val createdOwnership = ownershipDao.createOwnership(ownership)
-            
+
             val deleteResult = ownershipDao.deleteOwnership(createdOwnership.id)
             assertTrue(deleteResult)
-            
+
             val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
             assertNull(fetchedOwnership)
         }

@@ -1,15 +1,22 @@
-import models.Qualification
-import models.Resident
-import models.Residence
-import models.Address
+import models.domain.Qualification
+import models.domain.Resident
+import models.domain.Residence
+import models.domain.Address
 import viewmodel.ResidentWindowViewModel
 import java.time.LocalDate
-import database.dao.ResidentDao
-import database.dao.QualificationDao
-import database.dao.DependantDao
-import database.dao.ResidenceDao
-import database.dao.AddressDao
-import database.dao.EmploymentDao
+import database.dao.domain.ResidentDao
+import database.dao.domain.QualificationDao
+import database.dao.domain.DependantDao
+import database.dao.domain.ResidenceDao
+import database.dao.domain.AddressDao
+import database.dao.domain.EmploymentDao
+import database.dao.domain.DomainDataBag
+import database.dao.domain.AnimalDao
+import database.dao.domain.LeadershipDao
+import database.dao.domain.ManagedByDao
+import database.dao.domain.OwnershipDao
+import database.dao.domain.PaymentDao
+import database.dao.domain.ResourceDao
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,6 +45,13 @@ class ResidentWindowTest {
     private val residenceDao = mockk<ResidenceDao>(relaxed = true)
     private val addressDao = mockk<AddressDao>(relaxed = true)
     private val employmentDao = mockk<EmploymentDao>(relaxed = true)
+    private val animalDao = mockk<AnimalDao>(relaxed = true)
+    private val leadershipDao = mockk<LeadershipDao>(relaxed = true)
+    private val managedByDao = mockk<ManagedByDao>(relaxed = true)
+    private val ownershipDao = mockk<OwnershipDao>(relaxed = true)
+    private val paymentDao = mockk<PaymentDao>(relaxed = true)
+    private val resourceDao = mockk<ResourceDao>(relaxed = true)
+    private lateinit var domainDataBag: DomainDataBag
     private lateinit var viewModel: ResidentWindowViewModel
 
     @BeforeEach
@@ -54,13 +68,26 @@ class ResidentWindowTest {
         every { residenceDao.getResidenceByResidentId(any()) } returns null
         every { addressDao.getById(any()) } returns null
         every { employmentDao.getEmploymentByResidentId(any()) } returns emptyList()
-        viewModel = ResidentWindowViewModel(
-            qualificationDao = qualificationDao,
-            residentDao = residentDao,
-            dependantDao = dependantDao,
-            residenceDao = residenceDao,
+
+        // Initialize the DomainDataBag with all the mocked DAOs
+        domainDataBag = DomainDataBag(
             addressDao = addressDao,
+            animalDao = animalDao,
+            dependantDao = dependantDao,
             employmentDao = employmentDao,
+            leadershipDao = leadershipDao,
+            managedByDao = managedByDao,
+            ownershipDao = ownershipDao,
+            paymentDao = paymentDao,
+            qualificationDao = qualificationDao,
+            residenceDao = residenceDao,
+            residentDao = residentDao,
+            resourceDao = resourceDao
+        )
+
+        // Initialize the ViewModel with the DomainDataBag
+        viewModel = ResidentWindowViewModel(
+            domainDataBag = domainDataBag,
             dispatcher = testDispatcher
         )
     }
@@ -381,12 +408,7 @@ class ResidentWindowTest {
     fun `test successful save in NEW mode`() = testScope.runTest {
         // Create a new ViewModel instance with NEW mode
         val newViewModel = ResidentWindowViewModel(
-            qualificationDao = qualificationDao,
-            residentDao = residentDao,
-            dependantDao = dependantDao,
-            residenceDao = residenceDao,
-            addressDao = addressDao,
-            employmentDao = employmentDao,
+            domainDataBag = domainDataBag,
             initialMode = WindowMode.NEW,
             dispatcher = testDispatcher
         )

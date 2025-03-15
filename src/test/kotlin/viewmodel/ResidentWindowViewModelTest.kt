@@ -1,14 +1,14 @@
 package viewmodel
 
-import database.dao.*
+import database.dao.domain.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import models.Address
-import models.Residence
+import models.domain.Address
+import models.domain.Residence
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,14 +36,31 @@ class ResidentWindowViewModelTest {
         val qualificationDao = mockk<QualificationDao>()
         val dependantDao = mockk<DependantDao>()
         val employmentDao = mockk<EmploymentDao>()
+        val animalDao = mockk<AnimalDao>()
+        val leadershipDao = mockk<LeadershipDao>()
+        val managedByDao = mockk<ManagedByDao>()
+        val ownershipDao = mockk<OwnershipDao>()
+        val paymentDao = mockk<PaymentDao>()
+        val resourceDao = mockk<ResourceDao>()
+
+        // Create DomainDataBag with all mocked DAOs
+        val domainDataBag = DomainDataBag(
+            addressDao = addressDao,
+            animalDao = animalDao,
+            dependantDao = dependantDao,
+            employmentDao = employmentDao,
+            leadershipDao = leadershipDao,
+            managedByDao = managedByDao,
+            ownershipDao = ownershipDao,
+            paymentDao = paymentDao,
+            qualificationDao = qualificationDao,
+            residenceDao = residenceDao,
+            residentDao = residentDao,
+            resourceDao = resourceDao
+        )
 
         viewModel = ResidentWindowViewModel(
-            qualificationDao = qualificationDao,
-            residentDao = residentDao,
-            dependantDao = dependantDao,
-            residenceDao = residenceDao,
-            addressDao = addressDao,
-            employmentDao = employmentDao,
+            domainDataBag = domainDataBag,
             dispatcher = testDispatcher
         )
     }

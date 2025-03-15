@@ -1,10 +1,10 @@
 package unit.dao
 
-import models.Resident
-import models.Qualification
-import models.Dependant
-import models.Address
-import models.Residence
+import models.domain.Resident
+import models.domain.Qualification
+import models.domain.Dependant
+import models.domain.Address
+import models.domain.Residence
 import org.junit.Test
 import org.junit.Assert.*
 import java.time.LocalDate
@@ -12,8 +12,12 @@ import java.util.UUID
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.SchemaUtils
-import database.schema.*
-import database.dao.*
+import database.dao.domain.*
+import database.schema.domain.Residents
+import database.schema.domain.Qualifications
+import database.schema.domain.Dependants
+import database.schema.domain.Addresses
+import database.schema.domain.Residences
 
 class ResidentDaoTest {
     private val qualificationDao = QualificationDaoImpl()

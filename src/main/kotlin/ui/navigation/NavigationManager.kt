@@ -11,6 +11,7 @@ import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
 import ui.screens.onboarding.WelcomeScreen
 import ui.screens.onboarding.UserRoleScreen
+import ui.screens.onboarding.AdminSetupScreen
 import ui.screens.resident.GlossaryScreen
 import ui.screens.resident.ResidentScreen
 import ui.screens.resident.ResidentWindow
@@ -91,9 +92,7 @@ fun AppNavigation() {
         }
 
         composable(NavigationRoute.OnboardingAdminConfig.route) {
-            // TODO: Implement AdminConfigScreen
-            // For now, navigate to the next screen
-            navController.navigate(NavigationRoute.OnboardingFeatureTour.route)
+            AdminSetupScreen(navigationService.navController)
         }
 
         composable(NavigationRoute.OnboardingFeatureTour.route) {

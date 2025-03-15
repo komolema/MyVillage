@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import database.dao.AnimalDao
-import database.dao.OwnershipDao
-import database.dao.ResidentDao
-import models.Animal
-import models.Ownership
+import database.dao.domain.AnimalDao
+import database.dao.domain.OwnershipDao
+import database.dao.domain.ResidentDao
+import models.domain.Animal
+import models.domain.Ownership
 import ui.screens.animal.AnimalState
 import java.util.*
 import arrow.core.Some

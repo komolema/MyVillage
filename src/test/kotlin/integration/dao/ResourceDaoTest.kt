@@ -1,7 +1,8 @@
-package database.dao
+package integration.dao
 
-import database.schema.Resources
-import models.Resource
+import database.dao.domain.ResourceDaoImpl
+import database.schema.domain.Resources
+import models.domain.Resource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -33,7 +34,7 @@ class ResourceDaoTest {
     fun testCreateAndGetById() = transaction {
         val resource = createTestResource()
         resourceDao.create(resource)
-        
+
         val fetchedResource = resourceDao.getById(resource.id)
         assertNotNull(fetchedResource)
         assertEquals(resource.type, fetchedResource?.type)
@@ -54,7 +55,7 @@ class ResourceDaoTest {
         // Test second page
         val secondPage = resourceDao.getAll(page = 1, pageSize = 5)
         assertEquals(5, secondPage.size)
-        
+
         // Verify no overlap between pages
         val firstPageIds = firstPage.map { it.id }
         val secondPageIds = secondPage.map { it.id }
@@ -90,13 +91,13 @@ class ResourceDaoTest {
     fun testUpdate() = transaction {
         val resource = createTestResource()
         resourceDao.create(resource)
-        
+
         val updatedResource = resource.copy(
             type = "Updated Type",
             location = "Updated Location"
         )
         resourceDao.update(updatedResource)
-        
+
         val fetchedResource = resourceDao.getById(resource.id)
         assertEquals(updatedResource.type, fetchedResource?.type)
         assertEquals(updatedResource.location, fetchedResource?.location)
@@ -106,9 +107,9 @@ class ResourceDaoTest {
     fun testDelete() = transaction {
         val resource = createTestResource()
         resourceDao.create(resource)
-        
+
         resourceDao.delete(resource.id)
-        
+
         val fetchedResource = resourceDao.getById(resource.id)
         assertNull(fetchedResource)
     }

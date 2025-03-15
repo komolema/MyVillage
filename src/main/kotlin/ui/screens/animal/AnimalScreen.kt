@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import models.domain.Animal
+import models.domain.Resident
 import org.koin.compose.koinInject
 import theme.PurpleButtonColor
 import ui.components.navigation.ScreenWithAppBar
@@ -156,12 +158,12 @@ fun AnimalScreen(navController: NavController) {
 
 @Composable
 fun AnimalDialog(
-    animal: models.Animal,
+    animal: Animal,
     isEditMode: Boolean,
-    residents: List<models.Resident>,
+    residents: List<Resident>,
     selectedResidentId: UUID?,
     onResidentSelected: (UUID) -> Unit,
-    onSave: (models.Animal) -> Unit,
+    onSave: (Animal) -> Unit,
     onCancel: () -> Unit
 ) {
     var species by remember { mutableStateOf(animal.species) }

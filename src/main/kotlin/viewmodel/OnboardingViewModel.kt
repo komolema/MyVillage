@@ -2,6 +2,7 @@ package viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import database.DatabaseManager
 import localization.LocaleManager
 import localization.SupportedLanguage
 import localization.StringResourcesManager
@@ -65,7 +66,19 @@ class OnboardingViewModel {
 
     fun isOnboardingRequired(): Boolean {
         val settings = AppSettingsManager.getCurrentSettings()
+        // Always show onboarding on first startup
+        if (DatabaseManager.isFirstStartup()) {
+            return true
+        }
         return settings.showOnboardingOnStartup && !settings.onboardingCompleted
+    }
+
+    /**
+     * Check if this is the first startup of the application.
+     * This is used to determine whether to show the admin setup screen.
+     */
+    fun isFirstStartup(): Boolean {
+        return DatabaseManager.isFirstStartup()
     }
 
     fun updateShowOnboardingOnStartup(show: Boolean) {

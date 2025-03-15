@@ -1,9 +1,8 @@
 package integration.dao
 
-import database.schema.EmploymentTable
-import models.Employment
-import database.dao.EmploymentDao
-import database.dao.EmploymentDaoImpl
+import database.schema.domain.EmploymentTable
+import models.domain.Employment
+import database.dao.domain.EmploymentDaoImpl
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction

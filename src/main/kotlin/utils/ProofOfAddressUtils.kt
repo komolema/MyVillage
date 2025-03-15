@@ -1,11 +1,11 @@
 package utils
 
-import androidx.compose.runtime.Composable
-import database.dao.ProofOfAddressDao
-import models.Address
-import models.ProofOfAddress
-import models.Resident
-import models.Residence
+import database.dao.audit.ProofOfAddressDao
+import models.audit.ProofOfAddressDocument
+import models.domain.Address
+import models.domain.ProofOfAddress
+import models.domain.Resident
+import models.domain.Residence
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.time.LocalDateTime
@@ -31,11 +31,11 @@ object ProofOfAddressUtils {
         residence: Residence
     ): Pair<File, ProofOfAddress> {
         val proofOfAddressDao: ProofOfAddressDao by inject(ProofOfAddressDao::class.java)
-        
+
         // Generate reference number and verification code
         val referenceNumber = PdfGenerator.generateReferenceNumber()
         val verificationCode = PdfGenerator.generateVerificationCode(resident, address, referenceNumber)
-        
+
         // Generate the PDF
         val pdf = PdfGenerator.generateProofOfAddressPdf(
             resident = resident,
@@ -44,25 +44,39 @@ object ProofOfAddressUtils {
             referenceNumber = referenceNumber,
             verificationCode = verificationCode
         )
-        
+
         // Calculate the hash of the PDF content
         val hash = PdfGenerator.calculatePdfHash(pdf)
-        
-        // Create the proof of address record
+
+        // Get the current user ID (in a real app, this would be from the current user)
+        val currentUserId = UUID.randomUUID() // Placeholder
+
+        // Create the proof of address document
+        val proofOfAddressDocument = ProofOfAddressDocument.create(
+            resident = resident,
+            address = address,
+            referenceNumber = referenceNumber,
+            verificationCode = verificationCode,
+            hash = hash,
+            generatedBy = currentUserId,
+            filePath = pdf.absolutePath
+        )
+
+        // Save the proof of address document to the database
+        proofOfAddressDao.create(proofOfAddressDocument)
+
+        // For backward compatibility, create a ProofOfAddress object
         val proofOfAddress = ProofOfAddress(
-            id = UUID.randomUUID(),
+            id = proofOfAddressDocument.id,
             residentId = resident.id,
             addressId = address.id,
             referenceNumber = referenceNumber,
-            generatedAt = LocalDateTime.now(),
-            generatedBy = "System", // In a real app, this would be the current user
+            generatedAt = proofOfAddressDocument.generatedAt,
+            generatedBy = "System", // For backward compatibility
             verificationCode = verificationCode,
             hash = hash
         )
-        
-        // Save the proof of address record to the database
-        proofOfAddressDao.create(proofOfAddress)
-        
+
         return Pair(pdf, proofOfAddress)
     }
 }

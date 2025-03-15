@@ -1,12 +1,11 @@
 package integration.dao
 
-import database.dao.DependantDaoImpl
-import database.schema.Dependants
-import database.schema.Residents
-import models.Dependant
+import database.dao.domain.DependantDaoImpl
+import database.schema.domain.Dependants
+import database.schema.domain.Residents
+import models.domain.Dependant
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

@@ -1,7 +1,8 @@
 package database.dao
 
-import database.schema.Qualifications
-import models.Qualification
+import database.dao.domain.QualificationDaoImpl
+import database.schema.domain.Qualifications
+import models.domain.Qualification
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction

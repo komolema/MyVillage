@@ -2,10 +2,10 @@ package models.expanded
 
 import arrow.core.None
 import arrow.core.Option
-import models.Address
-import models.Dependant
-import models.Residence
-import models.Resident
+import models.domain.Address
+import models.domain.Dependant
+import models.domain.Residence
+import models.domain.Resident
 
 data class ResidentExpanded(
     val resident: Resident,

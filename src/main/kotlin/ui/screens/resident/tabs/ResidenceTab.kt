@@ -8,14 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import models.Residence
-import models.Address
+import models.domain.Residence
+import models.domain.Address
 import ui.components.DatePicker
 import ui.screens.resident.WindowMode
 import viewmodel.ResidentWindowViewModel
 import viewmodel.ResidentWindowViewModel.Intent
 import java.util.*
-import ui.screens.resident.tabs.TabCompletionState
 import java.time.LocalDate
 import localization.LocaleManager
 import localization.StringResourcesManager

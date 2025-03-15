@@ -1,39 +1,79 @@
 package di
 
+import database.*
 import database.dao.*
-import org.koin.core.context.GlobalContext.get
+import database.dao.domain.*
+import database.dao.audit.*
 import org.koin.dsl.module
 import viewmodel.*
 
-val daoModule = module {
+// Domain DAO module
+val domainDaoModule = module {
     single<AddressDao> { AddressDaoImpl() }
-    single<AnimalDao> { AnimalDaoImpl() }
+    single<AnimalDao> { AnimalDaoImpl(DomainTransactionProvider) }
     single<DependantDao> { DependantDaoImpl() }
     single<EmploymentDao> { EmploymentDaoImpl() }
     single<LeadershipDao> { LeadershipDaoImpl() }
     single<ManagedByDao> { ManagedByDaoImpl() }
     single<OwnershipDao> { OwnershipDaoImpl() }
     single<PaymentDao> { PaymentDaoImpl() }
-    single<ProofOfAddressDao> { ProofOfAddressDaoImpl() }
     single<QualificationDao> { QualificationDaoImpl() }
     single<ResidenceDao> { ResidenceDaoImpl() }
     single<ResidentDao> { ResidentDaoImpl(get(), get()) }
     single<ResourceDao> { ResourceDaoImpl() }
 }
 
+// Audit DAO module
+val auditDaoModule = module {
+    single<DocumentsGeneratedDao> { DocumentsGeneratedDaoImpl() }
+    single<ProofOfAddressDao> { ProofOfAddressDaoImpl() }
+    single<UserDao> { UserDaoImpl() }
+    single<RoleDao> { RoleDaoImpl() }
+    single<PermissionDao> { PermissionDaoImpl() }
+}
+
+// DataBag module
+val domainDataBagModule = module {
+    single { 
+        DomainDataBag(
+            // Domain DAOs
+            addressDao = get(),
+            animalDao = get(),
+            dependantDao = get(),
+            employmentDao = get(),
+            leadershipDao = get(),
+            managedByDao = get(),
+            ownershipDao = get(),
+            paymentDao = get(),
+            qualificationDao = get(),
+            residenceDao = get(),
+            residentDao = get(),
+            resourceDao = get(),
+        ) 
+    }
+}
+
+val auditDataBagModule = module {
+    single {
+        AuditDataBag(
+            // Audit DAOs
+            documentsGeneratedDao = get(),
+            proofOfAddressDao = get(),
+            userDao = get(),
+            roleDao = get(),
+            permissionDao = get()
+        )
+    }
+}
+
 val viewModelModule = module {
     factory { ResidentViewModel(get()) }
     factory { ResidentWindowViewModel(
-        qualificationDao = get(),
-        residentDao = get(),
-        dependantDao = get(),
-        residenceDao = get(),
-        addressDao = get(),
-        employmentDao = get()
+        domainDataBag = get()
     ) }
     factory { AnimalViewModel(get(), get(), get()) }
     factory { OnboardingViewModel() }
     factory { SettingsViewModel() }
 }
 
-val appModule = listOf(daoModule, viewModelModule)
+val appModule = listOf(domainDaoModule, auditDaoModule, domainDataBagModule, securityModule, viewModelModule)

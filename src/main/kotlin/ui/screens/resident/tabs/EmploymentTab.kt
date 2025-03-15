@@ -1,16 +1,12 @@
 package ui.screens.resident.tabs
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
 import com.seanproctor.datatable.TableColumnWidth
-import models.Employment
+import models.domain.Employment
 import ui.components.table.GenericTable
 import ui.components.table.TableCellType
 import ui.components.table.TableColumn

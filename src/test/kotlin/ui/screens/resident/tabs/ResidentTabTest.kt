@@ -8,13 +8,10 @@ import ui.screens.resident.WindowMode
 import ui.screens.resident.ResidentWindowState
 import viewmodel.ResidentWindowViewModel
 import java.util.*
-import models.Resident
-import java.time.LocalDate
+import models.domain.Resident
 import io.mockk.mockk
 import io.mockk.every
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import ui.screens.resident.tabs.Gender
 
 class ResidentTabTest {
     @get:Rule

@@ -1,17 +1,15 @@
 package integration.dao
 
-import database.dao.AddressDaoImpl
-import database.schema.Addresses
-import models.Address
+import database.dao.domain.AddressDaoImpl
+import database.schema.domain.Addresses
+import models.domain.Address
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.util.*
 import kotlin.io.createTempFile
 

@@ -1,9 +1,13 @@
-package database.dao
+package integration.dao
 
-import database.schema.Animals
-import models.Animal
+import database.TransactionProvider
+import database.TestTransactionProvider
+import database.dao.domain.AnimalDaoImpl
+import database.schema.domain.Animals
+import models.domain.Animal
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,7 +16,10 @@ import java.time.LocalDate
 import java.util.*
 
 class AnimalDaoTest {
-    private val animalDao = AnimalDaoImpl()
+    // Use the test-specific TransactionProvider
+    private val testTransactionProvider = TestTransactionProvider()
+
+    private val animalDao = AnimalDaoImpl(testTransactionProvider)
 
     @BeforeEach
     fun setup() {
@@ -40,10 +47,10 @@ class AnimalDaoTest {
     }
 
     @Test
-    fun testCreateAnimal() = transaction {
+    fun testCreateAnimal() {
         val animal = createTestAnimal()
         val createdAnimal = animalDao.createAnimal(animal)
-        
+
         assertNotNull(createdAnimal.id)
         assertEquals(animal.species, createdAnimal.species)
         assertEquals(animal.breed, createdAnimal.breed)
@@ -54,10 +61,10 @@ class AnimalDaoTest {
     }
 
     @Test
-    fun testGetAnimalById() = transaction {
+    fun testGetAnimalById() {
         val animal = createTestAnimal()
         val createdAnimal = animalDao.createAnimal(animal)
-        
+
         val fetchedAnimal = animalDao.getAnimalById(createdAnimal.id)
         assertNotNull(fetchedAnimal)
         assertEquals(createdAnimal.species, fetchedAnimal?.species)
@@ -66,11 +73,11 @@ class AnimalDaoTest {
     }
 
     @Test
-    fun testGetAnimalByTagNumber() = transaction {
+    fun testGetAnimalByTagNumber() {
         val tagNumber = "TEST-TAG-001"
         val animal = createTestAnimal(tagNumber = tagNumber)
         animalDao.createAnimal(animal)
-        
+
         val fetchedAnimal = animalDao.getAnimalByTagNumber(tagNumber)
         assertNotNull(fetchedAnimal)
         assertEquals(tagNumber, fetchedAnimal?.tagNumber)
@@ -78,7 +85,7 @@ class AnimalDaoTest {
     }
 
     @Test
-    fun testGetAllAnimals() = transaction {
+    fun testGetAllAnimals() {
         val animals = listOf(
             createTestAnimal(),
             createTestAnimal(),
@@ -91,7 +98,7 @@ class AnimalDaoTest {
     }
 
     @Test
-    fun testGetAnimalsBySpecies() = transaction {
+    fun testGetAnimalsBySpecies() {
         val species = "Sheep"
         val animals = listOf(
             createTestAnimal(species = species),
@@ -108,45 +115,45 @@ class AnimalDaoTest {
     }
 
     @Test
-    fun testGetAnimalsByHealthStatus() = transaction {
+    fun testGetAnimalsByHealthStatus() {
         val healthStatus = "Sick"
         val animal = createTestAnimal()
         val createdAnimal = animalDao.createAnimal(animal)
-        
+
         val updatedAnimal = createdAnimal.copy(healthStatus = healthStatus)
         animalDao.updateAnimal(updatedAnimal)
-        
+
         val fetchedAnimals = animalDao.getAnimalsByHealthStatus(healthStatus)
         assertEquals(1, fetchedAnimals.size)
         assertEquals(healthStatus, fetchedAnimals[0].healthStatus)
     }
 
     @Test
-    fun testUpdateAnimal() = transaction {
+    fun testUpdateAnimal() {
         val animal = createTestAnimal()
         val createdAnimal = animalDao.createAnimal(animal)
-        
+
         val updatedAnimal = createdAnimal.copy(
             healthStatus = "Sick",
             vaccinationStatus = false
         )
-        
+
         val updateResult = animalDao.updateAnimal(updatedAnimal)
         assertTrue(updateResult)
-        
+
         val fetchedAnimal = animalDao.getAnimalById(createdAnimal.id)
         assertEquals(updatedAnimal.healthStatus, fetchedAnimal?.healthStatus)
         assertEquals(updatedAnimal.vaccinationStatus, fetchedAnimal?.vaccinationStatus)
     }
 
     @Test
-    fun testDeleteAnimal() = transaction {
+    fun testDeleteAnimal() {
         val animal = createTestAnimal()
         val createdAnimal = animalDao.createAnimal(animal)
-        
+
         val deleteResult = animalDao.deleteAnimal(createdAnimal.id)
         assertTrue(deleteResult)
-        
+
         val fetchedAnimal = animalDao.getAnimalById(createdAnimal.id)
         assertNull(fetchedAnimal)
     }

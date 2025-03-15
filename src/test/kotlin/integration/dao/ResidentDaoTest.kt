@@ -1,7 +1,10 @@
-package database.dao
+package integration.dao
 
-import database.schema.Residents
-import models.Resident
+import database.dao.domain.DependantDaoImpl
+import database.dao.domain.ResidenceDaoImpl
+import database.dao.domain.ResidentDaoImpl
+import database.schema.domain.Residents
+import models.domain.Resident
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -36,7 +39,7 @@ class ResidentDaoTest {
     fun testCreateAndGetResident() = transaction(db) {
         val resident = createTestResident()
         residentDao.createResident(resident)
-        
+
         val fetchedResident = residentDao.getResidentById(resident.id)
         assertNotNull(fetchedResident)
         assertEquals(resident.firstName, fetchedResident?.firstName)
@@ -48,15 +51,15 @@ class ResidentDaoTest {
     fun testUpdateResident() = transaction(db) {
         val resident = createTestResident()
         residentDao.createResident(resident)
-        
+
         val updatedResident = resident.copy(
             firstName = "UpdatedFirstName",
             lastName = "UpdatedLastName",
             gender = "Female"
         )
-        
+
         residentDao.updateResident(updatedResident)
-        
+
         val fetchedResident = residentDao.getResidentById(resident.id)
         assertNotNull(fetchedResident)
         assertEquals("UpdatedFirstName", fetchedResident?.firstName)
@@ -71,9 +74,9 @@ class ResidentDaoTest {
     fun testDeleteResident() = transaction(db) {
         val resident = createTestResident()
         residentDao.createResident(resident)
-        
+
         residentDao.delete(resident.id)
-        
+
         val fetchedResident = residentDao.getResidentById(resident.id)
         assertNull(fetchedResident)
     }
