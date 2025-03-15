@@ -25,5 +25,5 @@ object LocaleManager {
         Locale.setDefault(Locale(language.code))
     }
 
-    fun getSupportedLanguages(): List<SupportedLanguage> = SupportedLanguage.values().toList()
+    fun getSupportedLanguages(): List<SupportedLanguage> = SupportedLanguage.entries
 }

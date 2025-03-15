@@ -39,7 +39,6 @@ import localization.LocaleManager
 internal fun isTabDisabled(index: Int, mode: WindowMode, viewModel: ResidentWindowViewModel): Boolean {
     return when {
         mode == WindowMode.NEW && index > 0 && viewModel.state.value.resident == Resident.default -> true
-        viewModel.state.value.resident == null && index > 0 -> true
         else -> false
     }
 }

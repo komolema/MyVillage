@@ -66,7 +66,7 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
         withContext(Dispatchers.IO) {
             val rows = transaction {
                 Residents.selectAll()
-                    .limit(pageSize).offset(start = (0 * pageSize).toLong())
+                    .limit(pageSize).offset(start = (page * pageSize).toLong())
                     .toList()
             }
             rows.map { row -> row.toResidentExpanded() }

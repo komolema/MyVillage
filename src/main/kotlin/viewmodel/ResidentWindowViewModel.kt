@@ -47,7 +47,7 @@ class ResidentWindowViewModel(
         data class UpdateResidence(val residence: Residence, val address: Address) : Intent
         data class DeleteResidence(val residenceId: UUID, val addressId: UUID) : Intent
 
-        object ToggleMode : Intent
+        data object ToggleMode : Intent
     }
 
     private val _state = MutableStateFlow(ResidentWindowState(mode = initialMode))

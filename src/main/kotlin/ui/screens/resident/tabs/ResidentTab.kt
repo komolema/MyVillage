@@ -51,7 +51,7 @@ enum class Gender {
     }
 
     companion object {
-        fun fromString(value: String?, strings: StringResources): Gender? = values().find { it.getDisplayName(strings) == value }
+        fun fromString(value: String?, strings: StringResources): Gender? = entries.find { it.getDisplayName(strings) == value }
     }
 }
 
@@ -205,7 +205,7 @@ fun ResidentTab(
                                 layout = java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0)
                                 add(datePicker)
                                 preferredSize = java.awt.Dimension(200, 30)
-                                isEnabled = mode != WindowMode.VIEW
+                                isEnabled = true
                             }
                         },
                         modifier = Modifier
