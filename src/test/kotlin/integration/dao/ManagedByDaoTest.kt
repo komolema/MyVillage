@@ -1,6 +1,6 @@
 package integration.dao
 
-import database.dao.domain.ManagedByDaoImpl
+import database.dao.domain.ManagedByDao
 import database.schema.domain.ManagedBy
 import database.schema.domain.Resources
 import database.schema.domain.Residents
@@ -15,8 +15,6 @@ import java.time.LocalDate
 import java.util.*
 
 class ManagedByDaoTest {
-    private val managedByDao = ManagedByDaoImpl()
-
     @BeforeEach
     fun setup() {
         Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
@@ -40,9 +38,9 @@ class ManagedByDaoTest {
     }
 
     @Test
-    fun testCreateManagedBy() = transaction {
+    fun testCreateManagedBy() {
         val managedBy = createTestManagedBy()
-        val createdManagedBy = managedByDao.createManagedBy(managedBy)
+        val createdManagedBy = ManagedByDao.createManagedBy(managedBy)
 
         assertNotNull(createdManagedBy.id)
         assertEquals(managedBy.resourceId, createdManagedBy.resourceId)
@@ -52,11 +50,11 @@ class ManagedByDaoTest {
     }
 
     @Test
-    fun testGetManagedById() = transaction {
+    fun testGetManagedById() {
         val managedBy = createTestManagedBy()
-        val createdManagedBy = managedByDao.createManagedBy(managedBy)
+        val createdManagedBy = ManagedByDao.createManagedBy(managedBy)
 
-        val fetchedManagedBy = managedByDao.getManagedById(createdManagedBy.id)
+        val fetchedManagedBy = ManagedByDao.getManagedById(createdManagedBy.id)
         assertNotNull(fetchedManagedBy)
         assertEquals(createdManagedBy.resourceId, fetchedManagedBy?.resourceId)
         assertEquals(createdManagedBy.residentId, fetchedManagedBy?.residentId)
@@ -65,29 +63,29 @@ class ManagedByDaoTest {
     }
 
     @Test
-    fun testGetAllManagedBy() = transaction {
+    fun testGetAllManagedBy() {
         val managedByList = listOf(
             createTestManagedBy(),
             createTestManagedBy(),
             createTestManagedBy()
         )
-        managedByList.forEach { managedByDao.createManagedBy(it) }
+        managedByList.forEach { ManagedByDao.createManagedBy(it) }
 
-        val fetchedManagedBy = managedByDao.getAllManagedBy()
+        val fetchedManagedBy = ManagedByDao.getAllManagedBy()
         assertEquals(managedByList.size, fetchedManagedBy.size)
     }
 
     @Test
-    fun testGetManagedByResource() = transaction {
+    fun testGetManagedByResource() {
         val resourceId = UUID.randomUUID()
         val managedByList = listOf(
             createTestManagedBy(resourceId = resourceId),
             createTestManagedBy(resourceId = resourceId),
             createTestManagedBy()
         )
-        managedByList.forEach { managedByDao.createManagedBy(it) }
+        managedByList.forEach { ManagedByDao.createManagedBy(it) }
 
-        val fetchedManagedBy = managedByDao.getManagedByResource(resourceId)
+        val fetchedManagedBy = ManagedByDao.getManagedByResource(resourceId)
         assertEquals(2, fetchedManagedBy.size)
         fetchedManagedBy.forEach { 
             assertEquals(resourceId, it.resourceId)
@@ -95,16 +93,16 @@ class ManagedByDaoTest {
     }
 
     @Test
-    fun testGetManagedByResident() = transaction {
+    fun testGetManagedByResident() {
         val residentId = UUID.randomUUID()
         val managedByList = listOf(
             createTestManagedBy(residentId = residentId),
             createTestManagedBy(residentId = residentId),
             createTestManagedBy()
         )
-        managedByList.forEach { managedByDao.createManagedBy(it) }
+        managedByList.forEach { ManagedByDao.createManagedBy(it) }
 
-        val fetchedManagedBy = managedByDao.getManagedByResident(residentId)
+        val fetchedManagedBy = ManagedByDao.getManagedByResident(residentId)
         assertEquals(2, fetchedManagedBy.size)
         fetchedManagedBy.forEach { 
             assertEquals(residentId, it.residentId)
@@ -112,32 +110,32 @@ class ManagedByDaoTest {
     }
 
     @Test
-    fun testUpdateManagedBy() = transaction {
+    fun testUpdateManagedBy() {
         val managedBy = createTestManagedBy()
-        val createdManagedBy = managedByDao.createManagedBy(managedBy)
+        val createdManagedBy = ManagedByDao.createManagedBy(managedBy)
 
         val updatedManagedBy = createdManagedBy.copy(
             status = "Inactive",
             position = "Senior Manager"
         )
 
-        val updateResult = managedByDao.updateManagedBy(updatedManagedBy)
+        val updateResult = ManagedByDao.updateManagedBy(updatedManagedBy)
         assertTrue(updateResult)
 
-        val fetchedManagedBy = managedByDao.getManagedById(createdManagedBy.id)
+        val fetchedManagedBy = ManagedByDao.getManagedById(createdManagedBy.id)
         assertEquals(updatedManagedBy.status, fetchedManagedBy?.status)
         assertEquals(updatedManagedBy.position, fetchedManagedBy?.position)
     }
 
     @Test
-    fun testDeleteManagedBy() = transaction {
+    fun testDeleteManagedBy() {
         val managedBy = createTestManagedBy()
-        val createdManagedBy = managedByDao.createManagedBy(managedBy)
+        val createdManagedBy = ManagedByDao.createManagedBy(managedBy)
 
-        val deleteResult = managedByDao.deleteManagedBy(createdManagedBy.id)
+        val deleteResult = ManagedByDao.deleteManagedBy(createdManagedBy.id)
         assertTrue(deleteResult)
 
-        val fetchedManagedBy = managedByDao.getManagedById(createdManagedBy.id)
+        val fetchedManagedBy = ManagedByDao.getManagedById(createdManagedBy.id)
         assertNull(fetchedManagedBy)
     }
 }

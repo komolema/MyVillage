@@ -1,10 +1,11 @@
 package database.dao.audit
 
+import database.AuditTransactionProvider
+import database.TransactionProvider
 import database.schema.audit.DocumentsGenerated
 import models.audit.DocumentGenerated
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.dao.id.EntityID
 import java.time.LocalDateTime
 import java.util.UUID
@@ -20,20 +21,39 @@ interface DocumentsGeneratedDao {
     fun getByRelatedEntity(relatedEntityId: UUID, relatedEntityType: String): List<DocumentGenerated>
     fun update(document: DocumentGenerated): DocumentGenerated
     fun delete(id: UUID): Boolean
+
+    companion object {
+        private val impl = DocumentsGeneratedDaoImpl()
+
+        fun create(document: DocumentGenerated): DocumentGenerated = 
+            impl.create(document)
+        fun getById(id: UUID): DocumentGenerated? = 
+            impl.getById(id)
+        fun getByReferenceNumber(referenceNumber: String): DocumentGenerated? = 
+            impl.getByReferenceNumber(referenceNumber)
+        fun getByDocumentType(documentType: String): List<DocumentGenerated> = 
+            impl.getByDocumentType(documentType)
+        fun getByRelatedEntity(relatedEntityId: UUID, relatedEntityType: String): List<DocumentGenerated> = 
+            impl.getByRelatedEntity(relatedEntityId, relatedEntityType)
+        fun update(document: DocumentGenerated): DocumentGenerated = 
+            impl.update(document)
+        fun delete(id: UUID): Boolean = 
+            impl.delete(id)
+    }
 }
 
 /**
  * Implementation of the DocumentsGeneratedDao interface.
  * Provides CRUD operations for generated documents.
  */
-class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
+class DocumentsGeneratedDaoImpl(private val transactionProvider: TransactionProvider = AuditTransactionProvider) : DocumentsGeneratedDao {
     /**
      * Creates a new document record in the database.
      *
      * @param document The document to create
      * @return The created document
      */
-    override fun create(document: DocumentGenerated): DocumentGenerated = transaction {
+    override fun create(document: DocumentGenerated): DocumentGenerated = transactionProvider.executeTransaction {
         DocumentsGenerated.insert {
             it[id] = document.id
             it[documentType] = document.documentType
@@ -55,7 +75,7 @@ class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
      * @param id The ID of the document to retrieve
      * @return The document, or null if not found
      */
-    override fun getById(id: UUID): DocumentGenerated? = transaction {
+    override fun getById(id: UUID): DocumentGenerated? = transactionProvider.executeTransaction {
         DocumentsGenerated.selectAll()
             .where { DocumentsGenerated.id eq id }
             .limit(1)
@@ -69,7 +89,7 @@ class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
      * @param referenceNumber The reference number of the document to retrieve
      * @return The document, or null if not found
      */
-    override fun getByReferenceNumber(referenceNumber: String): DocumentGenerated? = transaction {
+    override fun getByReferenceNumber(referenceNumber: String): DocumentGenerated? = transactionProvider.executeTransaction {
         DocumentsGenerated.selectAll()
             .where { DocumentsGenerated.referenceNumber eq referenceNumber }
             .limit(1)
@@ -83,7 +103,7 @@ class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
      * @param documentType The type of documents to retrieve
      * @return A list of documents of the specified type
      */
-    override fun getByDocumentType(documentType: String): List<DocumentGenerated> = transaction {
+    override fun getByDocumentType(documentType: String): List<DocumentGenerated> = transactionProvider.executeTransaction {
         DocumentsGenerated.selectAll()
             .where { DocumentsGenerated.documentType eq documentType }
             .map { it.toDocumentGenerated() }
@@ -96,7 +116,7 @@ class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
      * @param relatedEntityType The type of the related entity
      * @return A list of documents related to the specified entity
      */
-    override fun getByRelatedEntity(relatedEntityId: UUID, relatedEntityType: String): List<DocumentGenerated> = transaction {
+    override fun getByRelatedEntity(relatedEntityId: UUID, relatedEntityType: String): List<DocumentGenerated> = transactionProvider.executeTransaction {
         DocumentsGenerated.selectAll()
             .where { 
                 (DocumentsGenerated.relatedEntityId eq relatedEntityId) and 
@@ -111,7 +131,7 @@ class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
      * @param document The document to update
      * @return The updated document
      */
-    override fun update(document: DocumentGenerated): DocumentGenerated = transaction {
+    override fun update(document: DocumentGenerated): DocumentGenerated = transactionProvider.executeTransaction {
         DocumentsGenerated.update({ DocumentsGenerated.id eq document.id }) {
             it[documentType] = document.documentType
             it[referenceNumber] = document.referenceNumber
@@ -132,7 +152,7 @@ class DocumentsGeneratedDaoImpl : DocumentsGeneratedDao {
      * @param id The ID of the document to delete
      * @return true if the document was deleted, false otherwise
      */
-    override fun delete(id: UUID): Boolean = transaction {
+    override fun delete(id: UUID): Boolean = transactionProvider.executeTransaction {
         DocumentsGenerated.deleteWhere { DocumentsGenerated.id eq id } > 0
     }
 
