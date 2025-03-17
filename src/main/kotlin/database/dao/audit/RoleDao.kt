@@ -1,6 +1,8 @@
 package database.dao.audit
 
+import database.AuditTransactionProvider
 import database.DatabaseManager
+import database.TransactionProvider
 import database.schema.audit.Roles
 import database.schema.audit.UserRoles
 import models.audit.Role
@@ -20,39 +22,22 @@ interface RoleDao {
     fun update(role: Role): Role
     fun delete(id: UUID): Boolean
     fun getUsersWithRole(roleId: UUID): List<UUID>
-
-    companion object : RoleDao {
-        private var impl: RoleDao = RoleDaoImpl()
-
-        /**
-         * Set a custom implementation for testing.
-         */
-        fun setImplementation(implementation: RoleDao) {
-            impl = implementation
-        }
-
-        override fun create(role: Role): Role = impl.create(role)
-        override fun getById(id: UUID): Role? = impl.getById(id)
-        override fun getByName(name: String): Role? = impl.getByName(name)
-        override fun getAll(): List<Role> = impl.getAll()
-        override fun update(role: Role): Role = impl.update(role)
-        override fun delete(id: UUID): Boolean = impl.delete(id)
-        override fun getUsersWithRole(roleId: UUID): List<UUID> = impl.getUsersWithRole(roleId)
-    }
 }
 
 /**
  * Implementation of the RoleDao interface.
  * Provides CRUD operations for roles.
  */
-class RoleDaoImpl : RoleDao {
+class RoleDaoImpl(
+    private val transactionProvider: TransactionProvider = AuditTransactionProvider
+) : RoleDao {
     /**
      * Creates a new role in the database.
      *
      * @param role The role to create
      * @return The created role
      */
-    override fun create(role: Role): Role = DatabaseManager.auditTransaction {
+    override fun create(role: Role): Role = transactionProvider.executeTransaction {
         Roles.insert {
             it[id] = role.id
             it[name] = role.name
@@ -68,7 +53,7 @@ class RoleDaoImpl : RoleDao {
      * @param id The ID of the role to retrieve
      * @return The role if found, null otherwise
      */
-    override fun getById(id: UUID): Role? = DatabaseManager.auditTransaction {
+    override fun getById(id: UUID): Role? = transactionProvider.executeTransaction {
         Roles.selectAll()
             .where { Roles.id eq id }
             .limit(1)
@@ -82,7 +67,7 @@ class RoleDaoImpl : RoleDao {
      * @param name The name of the role to retrieve
      * @return The role if found, null otherwise
      */
-    override fun getByName(name: String): Role? = DatabaseManager.auditTransaction {
+    override fun getByName(name: String): Role? = transactionProvider.executeTransaction {
         Roles.selectAll()
             .where { Roles.name eq name }
             .limit(1)
@@ -95,7 +80,7 @@ class RoleDaoImpl : RoleDao {
      *
      * @return A list of all roles
      */
-    override fun getAll(): List<Role> = DatabaseManager.auditTransaction {
+    override fun getAll(): List<Role> = transactionProvider.executeTransaction {
         Roles.selectAll()
             .map { toRole(it) }
     }
@@ -106,7 +91,7 @@ class RoleDaoImpl : RoleDao {
      * @param role The role to update
      * @return The updated role
      */
-    override fun update(role: Role): Role = DatabaseManager.auditTransaction {
+    override fun update(role: Role): Role = transactionProvider.executeTransaction {
         Roles.update({ Roles.id eq role.id }) {
             it[name] = role.name
             it[description] = role.description
@@ -121,11 +106,11 @@ class RoleDaoImpl : RoleDao {
      * @param id The ID of the role to delete
      * @return true if the role was deleted, false otherwise
      */
-    override fun delete(id: UUID): Boolean = DatabaseManager.auditTransaction {
+    override fun delete(id: UUID): Boolean = transactionProvider.executeTransaction {
         // Check if it's a system role
         val role = getById(id)
         if (role?.isSystem == true) {
-            return@auditTransaction false
+            return@executeTransaction false
         }
 
         // First delete any user role mappings
@@ -141,7 +126,7 @@ class RoleDaoImpl : RoleDao {
      * @param roleId The ID of the role
      * @return A list of user IDs with the specified role
      */
-    override fun getUsersWithRole(roleId: UUID): List<UUID> = DatabaseManager.auditTransaction {
+    override fun getUsersWithRole(roleId: UUID): List<UUID> = transactionProvider.executeTransaction {
         UserRoles.selectAll()
             .where { UserRoles.roleId eq roleId }
             .map { (it[UserRoles.userId] as EntityID<UUID>).value }

@@ -5,12 +5,13 @@ import database.dao.*
 import database.dao.domain.*
 import database.dao.audit.*
 import org.koin.dsl.module
+import security.VillageSecurityManager
 import viewmodel.*
 
 // Domain DAO module
 val domainDaoModule = module {
     single<AddressDao> { AddressDaoImpl() }
-    single<AnimalDao> { AnimalDaoImpl(DomainTransactionProvider) }
+    single<AnimalDao> { AnimalDaoImpl() }
     single<DependantDao> { DependantDaoImpl() }
     single<EmploymentDao> { EmploymentDaoImpl() }
     single<LeadershipDao> { LeadershipDaoImpl() }
@@ -34,7 +35,7 @@ val auditDaoModule = module {
 
 // DataBag module
 val domainDataBagModule = module {
-    single { 
+    single {
         DomainDataBag(
             // Domain DAOs
             addressDao = get(),
@@ -49,7 +50,7 @@ val domainDataBagModule = module {
             residenceDao = get(),
             residentDao = get(),
             resourceDao = get(),
-        ) 
+        )
     }
 }
 
@@ -68,12 +69,19 @@ val auditDataBagModule = module {
 
 val viewModelModule = module {
     factory { ResidentViewModel(get()) }
-    factory { ResidentWindowViewModel(
-        domainDataBag = get()
-    ) }
+    factory {
+        ResidentWindowViewModel(
+            domainDataBag = get()
+        )
+    }
     factory { AnimalViewModel(get(), get(), get()) }
     factory { OnboardingViewModel() }
     factory { SettingsViewModel() }
+}
+
+val securityModule = module {
+    // Create a single instance of SecurityManager with the DataBag injected
+    single { VillageSecurityManager(get(), get()) }
 }
 
 val appModule = listOf(domainDaoModule, auditDaoModule, domainDataBagModule, securityModule, viewModelModule)

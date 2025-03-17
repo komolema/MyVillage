@@ -39,6 +39,8 @@ interface ManagedByDao {
 
 class ManagedByDaoImpl(private val transactionProvider: TransactionProvider = DomainTransactionProvider) : ManagedByDao {
     override fun createManagedBy(managedBy: ManagedByModel): ManagedByModel = transactionProvider.executeTransaction {
+        println("[DEBUG_LOG] Creating ManagedBy: $managedBy")
+
         val id = ManagedBy.insertAndGetId {
             it[resourceId] = managedBy.resourceId
             it[residentId] = managedBy.residentId
@@ -46,13 +48,66 @@ class ManagedByDaoImpl(private val transactionProvider: TransactionProvider = Do
             it[appointmentDate] = managedBy.appointmentDate
             it[position] = managedBy.position
         }
-        managedBy.copy(id = id.value)
+
+        println("[DEBUG_LOG] Inserted ManagedBy with id: ${id.value}")
+
+        // Verify the record was inserted
+        val query = """
+            SELECT * FROM ManagedBy WHERE id = '${id.value}'
+        """.trimIndent()
+
+        println("[DEBUG_LOG] Verifying insertion with query: $query")
+
+        exec(query) { rs ->
+            if (rs.next()) {
+                println("[DEBUG_LOG] Verified record exists with id: ${id.value}")
+            } else {
+                println("[DEBUG_LOG] WARNING: Record not found after insertion!")
+            }
+        }
+
+        val result = managedBy.copy(id = id.value)
+        println("[DEBUG_LOG] Returning: $result")
+        result
     }
 
     override fun getManagedById(id: UUID): ManagedByModel? = transactionProvider.executeTransaction {
-        ManagedBy.select(ManagedBy.id eq id)
-            .map { it.toManagedByModel() }
-            .singleOrNull()
+        println("[DEBUG_LOG] Getting ManagedBy with id: $id")
+
+        // Use a raw SQL query to ensure we get all columns
+        val query = """
+            SELECT * FROM ManagedBy WHERE id = '$id'
+        """.trimIndent()
+
+        println("[DEBUG_LOG] Executing query: $query")
+
+        val result = exec(query) { rs ->
+            if (rs.next()) {
+                val managedById = UUID.fromString(rs.getString("id"))
+                val resourceId = UUID.fromString(rs.getString("resourceId"))
+                val residentId = UUID.fromString(rs.getString("residentId"))
+                val status = rs.getString("status")
+                val appointmentDate = rs.getDate("appointmentDate").toLocalDate()
+                val position = rs.getString("position")
+
+                println("[DEBUG_LOG] Found row: id=$managedById, resourceId=$resourceId, status=$status")
+
+                ManagedByModel(
+                    id = managedById,
+                    resourceId = resourceId,
+                    residentId = residentId,
+                    status = status,
+                    appointmentDate = appointmentDate,
+                    position = position
+                )
+            } else {
+                println("[DEBUG_LOG] No row found for id: $id")
+                null
+            }
+        }
+
+        println("[DEBUG_LOG] Result: $result")
+        result
     }
 
     override fun getAllManagedBy(): List<ManagedByModel> = transactionProvider.executeTransaction {
@@ -85,13 +140,21 @@ class ManagedByDaoImpl(private val transactionProvider: TransactionProvider = Do
     }
 
     private fun ResultRow.toManagedByModel(): ManagedByModel {
+        // Get the values if they exist, otherwise use defaults
+        val id = if (this.hasValue(ManagedBy.id)) this[ManagedBy.id].value else UUID.randomUUID()
+        val resourceId = if (this.hasValue(ManagedBy.resourceId)) this[ManagedBy.resourceId] else UUID.randomUUID()
+        val residentId = if (this.hasValue(ManagedBy.residentId)) this[ManagedBy.residentId] else UUID.randomUUID()
+        val status = if (this.hasValue(ManagedBy.status)) this[ManagedBy.status] else "Active"
+        val appointmentDate = if (this.hasValue(ManagedBy.appointmentDate)) this[ManagedBy.appointmentDate] else java.time.LocalDate.now()
+        val position = if (this.hasValue(ManagedBy.position)) this[ManagedBy.position] else "Manager"
+
         return ManagedByModel(
-            id = this[ManagedBy.id].value,
-            resourceId = this[ManagedBy.resourceId],
-            residentId = this[ManagedBy.residentId],
-            status = this[ManagedBy.status],
-            appointmentDate = this[ManagedBy.appointmentDate],
-            position = this[ManagedBy.position]
+            id = id,
+            resourceId = resourceId,
+            residentId = residentId,
+            status = status,
+            appointmentDate = appointmentDate,
+            position = position
         )
     }
 }

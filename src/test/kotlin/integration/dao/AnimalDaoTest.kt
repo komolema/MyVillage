@@ -19,7 +19,7 @@ class AnimalDaoTest {
     // Use the test-specific TransactionProvider
     private val testTransactionProvider = TestTransactionProvider()
 
-    private val animalDao = AnimalDaoImpl(testTransactionProvider)
+    private val animalDao = AnimalDaoImpl()
 
     @BeforeEach
     fun setup() {

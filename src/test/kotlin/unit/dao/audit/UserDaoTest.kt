@@ -2,6 +2,7 @@ package unit.dao.audit
 
 import database.DatabaseManager
 import database.dao.audit.UserDao
+import database.dao.audit.UserDaoImpl
 import database.schema.audit.Users
 import database.schema.audit.Roles
 import database.schema.audit.UserRoles
@@ -16,7 +17,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class UserDaoTest {
-    
+    private val userDao = UserDaoImpl()
     @BeforeEach
     fun setUp() {
         // Initialize in-memory database for testing
@@ -39,7 +40,7 @@ class UserDaoTest {
     @Test
     fun `test create user`() {
         // Create a user
-        val userId = UserDao.createUser(
+        val userId = userDao.createUser(
             username = "testuser",
             password = "password123",
             firstName = "Test",
@@ -52,7 +53,7 @@ class UserDaoTest {
         assertNotNull(userId)
         
         // Retrieve the user
-        val user = UserDao.getById(userId)
+        val user = userDao.getById(userId)
         
         // Verify the user properties
         assertNotNull(user)
@@ -67,7 +68,7 @@ class UserDaoTest {
     @Test
     fun `test get user by username`() {
         // Create a user
-        val userId = UserDao.createUser(
+        val userId = userDao.createUser(
             username = "testuser",
             password = "password123",
             firstName = "Test",
@@ -76,7 +77,7 @@ class UserDaoTest {
         )
         
         // Retrieve the user by username
-        val user = UserDao.getByUsername("testuser")
+        val user = userDao.getByUsername("testuser")
         
         // Verify the user was retrieved
         assertNotNull(user)
@@ -86,7 +87,7 @@ class UserDaoTest {
     @Test
     fun `test get user by email`() {
         // Create a user
-        val userId = UserDao.createUser(
+        val userId = userDao.createUser(
             username = "testuser",
             password = "password123",
             firstName = "Test",
@@ -95,7 +96,7 @@ class UserDaoTest {
         )
         
         // Retrieve the user by email
-        val user = UserDao.getByEmail("test@example.com")
+        val user = userDao.getByEmail("test@example.com")
         
         // Verify the user was retrieved
         assertNotNull(user)
@@ -105,7 +106,7 @@ class UserDaoTest {
     @Test
     fun `test update user`() {
         // Create a user
-        val userId = UserDao.createUser(
+        val userId = userDao.createUser(
             username = "testuser",
             password = "password123",
             firstName = "Test",
@@ -114,7 +115,7 @@ class UserDaoTest {
         )
         
         // Retrieve the user
-        val user = UserDao.getById(userId)
+        val user = userDao.getById(userId)
         assertNotNull(user)
         
         // Update the user
@@ -124,10 +125,10 @@ class UserDaoTest {
             email = "updated@example.com"
         )
         
-        UserDao.update(updatedUser)
+        userDao.update(updatedUser)
         
         // Retrieve the updated user
-        val retrievedUser = UserDao.getById(userId)
+        val retrievedUser = userDao.getById(userId)
         
         // Verify the user was updated
         assertNotNull(retrievedUser)
@@ -139,7 +140,7 @@ class UserDaoTest {
     @Test
     fun `test delete user`() {
         // Create a user
-        val userId = UserDao.createUser(
+        val userId = userDao.createUser(
             username = "testuser",
             password = "password123",
             firstName = "Test",
@@ -148,20 +149,20 @@ class UserDaoTest {
         )
         
         // Verify the user exists
-        assertNotNull(UserDao.getById(userId))
+        assertNotNull(userDao.getById(userId))
         
         // Delete the user
-        val result = UserDao.delete(userId)
+        val result = userDao.delete(userId)
         
         // Verify the user was deleted
         assertTrue(result)
-        assertNull(UserDao.getById(userId))
+        assertNull(userDao.getById(userId))
     }
     
     @Test
     fun `test create default roles`() {
         // Create default roles
-        val roles = UserDao.createDefaultRoles()
+        val roles = userDao.createDefaultRoles()
         
         // Verify the roles were created
         assertNotNull(roles)
@@ -175,7 +176,7 @@ class UserDaoTest {
     @Test
     fun `test assign role to user`() {
         // Create a user
-        val userId = UserDao.createUser(
+        val userId = userDao.createUser(
             username = "testuser",
             password = "password123",
             firstName = "Test",
@@ -184,11 +185,11 @@ class UserDaoTest {
         )
         
         // Create default roles
-        val roles = UserDao.createDefaultRoles()
+        val roles = userDao.createDefaultRoles()
         val adminRoleId = roles["ADMIN"]!!
         
         // Assign the ADMIN role to the user
-        val userRole = UserDao.assignRoleToUser(userId, adminRoleId)
+        val userRole = userDao.assignRoleToUser(userId, adminRoleId)
         
         // Verify the role was assigned
         assertNotNull(userRole)
@@ -196,7 +197,7 @@ class UserDaoTest {
         assertEquals(adminRoleId, userRole.roleId)
         
         // Get user roles
-        val userRoles = UserDao.getUserRoles(userId)
+        val userRoles = userDao.getUserRoles(userId)
         
         // Verify the user has the ADMIN role
         assertNotNull(userRoles)

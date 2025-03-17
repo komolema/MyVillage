@@ -1,11 +1,12 @@
 package database.dao.domain
 
+import database.DomainTransactionProvider
+import database.TransactionProvider
 import database.schema.domain.Addresses
 import models.domain.Address
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
@@ -64,15 +65,17 @@ interface AddressDao {
     fun delete(id: UUID)
 }
 
-class AddressDaoImpl : AddressDao {
-    override fun getAll(page: Int, pageSize: Int): List<Address> = transaction {
+class AddressDaoImpl(
+    private val transactionProvider: TransactionProvider = DomainTransactionProvider
+) : AddressDao {
+    override fun getAll(page: Int, pageSize: Int): List<Address> = transactionProvider.executeTransaction {
         Addresses.selectAll()
             .limit(pageSize)
             .offset(start = (page * pageSize).toLong())
             .map { row -> row.toAddress() }
     }
 
-    override fun search(query: String, page: Int, pageSize: Int): List<Address> = transaction {
+    override fun search(query: String, page: Int, pageSize: Int): List<Address> = transactionProvider.executeTransaction {
         val searchPattern = "%$query%"
         Addresses.selectAll()
             .where { 
@@ -84,7 +87,7 @@ class AddressDaoImpl : AddressDao {
             .map { row -> row.toAddress() }
     }
 
-    override fun getById(id: UUID): Address? = transaction {
+    override fun getById(id: UUID): Address? = transactionProvider.executeTransaction {
         Addresses.selectAll()
             .where { Addresses.id eq id }
             .limit(1)
@@ -92,7 +95,7 @@ class AddressDaoImpl : AddressDao {
             .singleOrNull()
     }
 
-    override fun create(address: Address): Unit = transaction {
+    override fun create(address: Address): Unit = transactionProvider.executeTransaction {
         Addresses.insert {
             it[id] = address.id
             it[line] = address.line
@@ -106,7 +109,7 @@ class AddressDaoImpl : AddressDao {
         Unit
     }
 
-    override fun update(address: Address): Unit = transaction {
+    override fun update(address: Address): Unit = transactionProvider.executeTransaction {
         Addresses.update({ Addresses.id eq address.id }) {
             it[line] = address.line
             it[houseNumber] = address.houseNumber
@@ -119,7 +122,7 @@ class AddressDaoImpl : AddressDao {
         Unit
     }
 
-    override fun delete(id: UUID): Unit = transaction {
+    override fun delete(id: UUID): Unit = transactionProvider.executeTransaction {
         Addresses.deleteWhere { Addresses.id eq id }
         Unit
     }

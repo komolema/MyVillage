@@ -24,6 +24,8 @@ import database.TestTransactionProvider
 
 class PermissionDaoTest {
 
+    private val permissionDao: PermissionDao = PermissionDaoImpl()
+    private val roleDao: RoleDao = RoleDaoImpl(TestTransactionProvider())
     @BeforeEach
     fun setUp() {
         // Initialize in-memory database for testing
@@ -67,7 +69,7 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        val createdPermission = PermissionDao.create(permission)
+        val createdPermission = permissionDao.create(permission)
 
         // Verify the permission was created
         assertNotNull(createdPermission)
@@ -77,7 +79,7 @@ class PermissionDaoTest {
         assertEquals(permission.action, createdPermission.action)
 
         // Retrieve the permission
-        val retrievedPermission = PermissionDao.getById(permission.id)
+        val retrievedPermission = permissionDao.getById(permission.id)
 
         // Verify the permission properties
         assertNotNull(retrievedPermission)
@@ -97,10 +99,10 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Retrieve the permission by name
-        val retrievedPermission = PermissionDao.getByName("TEST_PERMISSION")
+        val retrievedPermission = permissionDao.getByName("TEST_PERMISSION")
 
         // Verify the permission was retrieved
         assertNotNull(retrievedPermission)
@@ -131,12 +133,12 @@ class PermissionDaoTest {
             action = "view"
         )
 
-        PermissionDao.create(permission1)
-        PermissionDao.create(permission2)
-        PermissionDao.create(permission3)
+        permissionDao.create(permission1)
+        permissionDao.create(permission2)
+        permissionDao.create(permission3)
 
         // Retrieve permissions by action
-        val viewPermissions = PermissionDao.getByAction("view")
+        val viewPermissions = permissionDao.getByAction("view")
 
         // Verify the permissions were retrieved
         assertNotNull(viewPermissions)
@@ -162,11 +164,11 @@ class PermissionDaoTest {
             action = "edit"
         )
 
-        PermissionDao.create(permission1)
-        PermissionDao.create(permission2)
+        permissionDao.create(permission1)
+        permissionDao.create(permission2)
 
         // Retrieve all permissions
-        val permissions = PermissionDao.getAll()
+        val permissions = permissionDao.getAll()
 
         // Verify the permissions were retrieved
         assertNotNull(permissions)
@@ -185,7 +187,7 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Update the permission
         val updatedPermission = permission.copy(
@@ -194,10 +196,10 @@ class PermissionDaoTest {
             action = "updated"
         )
 
-        PermissionDao.update(updatedPermission)
+        permissionDao.update(updatedPermission)
 
         // Retrieve the updated permission
-        val retrievedPermission = PermissionDao.getById(permission.id)
+        val retrievedPermission = permissionDao.getById(permission.id)
 
         // Verify the permission was updated
         assertNotNull(retrievedPermission)
@@ -216,17 +218,17 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Verify the permission exists
-        assertNotNull(PermissionDao.getById(permission.id))
+        assertNotNull(permissionDao.getById(permission.id))
 
         // Delete the permission
-        val result = PermissionDao.delete(permission.id)
+        val result = permissionDao.delete(permission.id)
 
         // Verify the permission was deleted
         assertTrue(result)
-        assertNull(PermissionDao.getById(permission.id))
+        assertNull(permissionDao.getById(permission.id))
     }
 
     @Test
@@ -239,7 +241,7 @@ class PermissionDaoTest {
             isSystem = false
         )
 
-        RoleDao.create(role)
+        roleDao.create(role)
 
         // Create a permission
         val permission = Permission(
@@ -249,10 +251,10 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Assign the permission to the role
-        val rolePermission = PermissionDao.assignPermissionToRole(role.id, permission.id)
+        val rolePermission = permissionDao.assignPermissionToRole(role.id, permission.id)
 
         // Verify the permission was assigned
         assertNotNull(rolePermission)
@@ -260,7 +262,7 @@ class PermissionDaoTest {
         assertEquals(permission.id, rolePermission.permissionId)
 
         // Get role permissions
-        val rolePermissions = PermissionDao.getRolePermissions(role.id)
+        val rolePermissions = permissionDao.getRolePermissions(role.id)
 
         // Verify the role has the permission
         assertNotNull(rolePermissions)
@@ -278,7 +280,7 @@ class PermissionDaoTest {
             isSystem = false
         )
 
-        RoleDao.create(role)
+        roleDao.create(role)
 
         // Create a permission
         val permission = Permission(
@@ -288,21 +290,21 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Assign the permission to the role
-        PermissionDao.assignPermissionToRole(role.id, permission.id)
+        permissionDao.assignPermissionToRole(role.id, permission.id)
 
         // Verify the role has the permission
-        val rolePermissions = PermissionDao.getRolePermissions(role.id)
+        val rolePermissions = permissionDao.getRolePermissions(role.id)
         assertEquals(1, rolePermissions.size)
 
         // Remove the permission from the role
-        val result = PermissionDao.removePermissionFromRole(role.id, permission.id)
+        val result = permissionDao.removePermissionFromRole(role.id, permission.id)
 
         // Verify the permission was removed
         assertTrue(result)
-        val updatedRolePermissions = PermissionDao.getRolePermissions(role.id)
+        val updatedRolePermissions = permissionDao.getRolePermissions(role.id)
         assertEquals(0, updatedRolePermissions.size)
     }
 
@@ -316,7 +318,7 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Create a component permission
         val componentPermission = ComponentPermission(
@@ -327,7 +329,7 @@ class PermissionDaoTest {
             description = "A test component permission"
         )
 
-        val createdComponentPermission = PermissionDao.createComponentPermission(componentPermission)
+        val createdComponentPermission = permissionDao.createComponentPermission(componentPermission)
 
         // Verify the component permission was created
         assertNotNull(createdComponentPermission)
@@ -338,7 +340,7 @@ class PermissionDaoTest {
         assertEquals(componentPermission.description, createdComponentPermission.description)
 
         // Get component permissions
-        val componentPermissions = PermissionDao.getComponentPermissions("test-component")
+        val componentPermissions = permissionDao.getComponentPermissions("test-component")
 
         // Verify the component has the permission
         assertNotNull(componentPermissions)
@@ -356,7 +358,7 @@ class PermissionDaoTest {
             action = "test"
         )
 
-        PermissionDao.create(permission)
+        permissionDao.create(permission)
 
         // Create a component permission
         val componentPermission = ComponentPermission(
@@ -367,18 +369,18 @@ class PermissionDaoTest {
             description = "A test component permission"
         )
 
-        PermissionDao.createComponentPermission(componentPermission)
+        permissionDao.createComponentPermission(componentPermission)
 
         // Verify the component has the permission
-        val componentPermissions = PermissionDao.getComponentPermissions("test-component")
+        val componentPermissions = permissionDao.getComponentPermissions("test-component")
         assertEquals(1, componentPermissions.size)
 
         // Remove the component permission
-        val result = PermissionDao.removeComponentPermission(componentPermission.id)
+        val result = permissionDao.removeComponentPermission(componentPermission.id)
 
         // Verify the component permission was removed
         assertTrue(result)
-        val updatedComponentPermissions = PermissionDao.getComponentPermissions("test-component")
+        val updatedComponentPermissions = permissionDao.getComponentPermissions("test-component")
         assertEquals(0, updatedComponentPermissions.size)
     }
 }

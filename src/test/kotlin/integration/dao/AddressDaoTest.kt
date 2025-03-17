@@ -1,5 +1,7 @@
 package integration.dao
 
+import database.TestTransactionProvider
+import database.TransactionProvider
 import database.dao.domain.AddressDaoImpl
 import database.schema.domain.Addresses
 import models.domain.Address
@@ -20,7 +22,8 @@ import kotlin.io.createTempFile
  * Uses an in-memory SQLite database that is recreated for each test.
  */
 class AddressDaoTest {
-    private val addressDao = AddressDaoImpl()
+    private lateinit var testTransactionProvider: TestTransactionProvider
+    private lateinit var addressDao: AddressDaoImpl
 
     companion object {
         private lateinit var db: Database
@@ -75,6 +78,10 @@ class AddressDaoTest {
             val count = Addresses.selectAll().count()
             println("[DEBUG_LOG] Table row count: $count")
         }
+
+        // Initialize the DAO with the TestTransactionProvider
+        testTransactionProvider = TestTransactionProvider(db)
+        addressDao = AddressDaoImpl(testTransactionProvider)
     }
 
     @Test

@@ -1,6 +1,8 @@
 package integration.dao
 
+import database.TransactionProvider
 import database.dao.domain.OwnershipDao
+import database.dao.domain.OwnershipDaoImpl
 import database.schema.domain.Ownerships
 import database.schema.domain.Animals
 import database.schema.domain.Residents
@@ -16,6 +18,8 @@ import java.time.LocalDate
 import java.util.*
 
 class OwnershipDaoTest {
+
+    private val ownershipDao = OwnershipDaoImpl()
     @BeforeEach
     fun setup() {
         Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
@@ -45,7 +49,7 @@ class OwnershipDaoTest {
     @Test
     fun testCreateOwnership() {
         val ownership = createTestOwnership()
-        val createdOwnership = OwnershipDao.createOwnership(ownership)
+        val createdOwnership = ownershipDao.createOwnership(ownership)
 
         assertNotNull(createdOwnership.id)
         assertEquals(ownership.residentId, createdOwnership.residentId)
@@ -53,7 +57,7 @@ class OwnershipDaoTest {
         assertEquals(ownership.valid, createdOwnership.valid)
         assertEquals(ownership.acquisitionMethod, createdOwnership.acquisitionMethod)
 
-        val fetchedOwnership = OwnershipDao.getOwnershipById(createdOwnership.id)
+        val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
         assertNotNull(fetchedOwnership)
         assertEquals(createdOwnership.ownershipType, fetchedOwnership?.ownershipType)
     }
@@ -61,9 +65,9 @@ class OwnershipDaoTest {
     @Test
     fun testGetOwnershipById() {
         val ownership = createTestOwnership()
-        val createdOwnership = OwnershipDao.createOwnership(ownership)
+        val createdOwnership = ownershipDao.createOwnership(ownership)
 
-        val fetchedOwnership = OwnershipDao.getOwnershipById(createdOwnership.id)
+        val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
         assertNotNull(fetchedOwnership)
         assertEquals(createdOwnership.residentId, fetchedOwnership?.residentId)
         assertEquals(createdOwnership.animalId, fetchedOwnership?.animalId)
@@ -77,9 +81,9 @@ class OwnershipDaoTest {
             createTestOwnership(),
             createTestOwnership()
         )
-        ownerships.forEach { OwnershipDao.createOwnership(it) }
+        ownerships.forEach { ownershipDao.createOwnership(it) }
 
-        val fetchedOwnerships = OwnershipDao.getAllOwnerships()
+        val fetchedOwnerships = ownershipDao.getAllOwnerships()
         assertEquals(ownerships.size, fetchedOwnerships.size)
     }
 
@@ -91,9 +95,9 @@ class OwnershipDaoTest {
             createTestOwnership(residentId = residentId),
             createTestOwnership() // Different resident
         )
-        ownerships.forEach { OwnershipDao.createOwnership(it) }
+        ownerships.forEach { ownershipDao.createOwnership(it) }
 
-        val fetchedOwnerships = OwnershipDao.getOwnershipsByResident(residentId)
+        val fetchedOwnerships = ownershipDao.getOwnershipsByResident(residentId)
         assertEquals(2, fetchedOwnerships.size)
         fetchedOwnerships.forEach { 
             assertEquals(residentId, it.residentId)
@@ -108,9 +112,9 @@ class OwnershipDaoTest {
             createTestOwnership(animalId = animalId),
             createTestOwnership() // Different animal
         )
-        ownerships.forEach { OwnershipDao.createOwnership(it) }
+        ownerships.forEach { ownershipDao.createOwnership(it) }
 
-        val fetchedOwnerships = OwnershipDao.getOwnershipsByAnimal(animalId)
+        val fetchedOwnerships = ownershipDao.getOwnershipsByAnimal(animalId)
         assertEquals(2, fetchedOwnerships.size)
         fetchedOwnerships.forEach { 
             assertEquals(animalId, it.animalId)
@@ -124,9 +128,9 @@ class OwnershipDaoTest {
             createTestOwnership(valid = true),
             createTestOwnership(valid = false)
         )
-        ownerships.forEach { OwnershipDao.createOwnership(it) }
+        ownerships.forEach { ownershipDao.createOwnership(it) }
 
-        val fetchedOwnerships = OwnershipDao.getValidOwnerships()
+        val fetchedOwnerships = ownershipDao.getValidOwnerships()
         assertEquals(2, fetchedOwnerships.size)
         fetchedOwnerships.forEach { 
             assertTrue(it.valid)
@@ -136,7 +140,7 @@ class OwnershipDaoTest {
     @Test
     fun testUpdateOwnership() {
         val ownership = createTestOwnership()
-        val createdOwnership = OwnershipDao.createOwnership(ownership)
+        val createdOwnership = ownershipDao.createOwnership(ownership)
 
         val updatedOwnership = createdOwnership.copy(
             valid = false,
@@ -144,10 +148,10 @@ class OwnershipDaoTest {
             sharedWith = "User1,User2"
         )
 
-        val updateResult = OwnershipDao.updateOwnership(updatedOwnership)
+        val updateResult = ownershipDao.updateOwnership(updatedOwnership)
         assertTrue(updateResult)
 
-        val fetchedOwnership = OwnershipDao.getOwnershipById(createdOwnership.id)
+        val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
         assertNotNull(fetchedOwnership)
         assertEquals(updatedOwnership.valid, fetchedOwnership?.valid)
         assertEquals(updatedOwnership.ownershipType, fetchedOwnership?.ownershipType)
@@ -157,12 +161,12 @@ class OwnershipDaoTest {
     @Test
     fun testDeleteOwnership() {
         val ownership = createTestOwnership()
-        val createdOwnership = OwnershipDao.createOwnership(ownership)
+        val createdOwnership = ownershipDao.createOwnership(ownership)
 
-        val deleteResult = OwnershipDao.deleteOwnership(createdOwnership.id)
+        val deleteResult = ownershipDao.deleteOwnership(createdOwnership.id)
         assertTrue(deleteResult)
 
-        val fetchedOwnership = OwnershipDao.getOwnershipById(createdOwnership.id)
+        val fetchedOwnership = ownershipDao.getOwnershipById(createdOwnership.id)
         assertNull(fetchedOwnership)
     }
 }

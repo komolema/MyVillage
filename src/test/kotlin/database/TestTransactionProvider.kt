@@ -12,11 +12,17 @@ class TestTransactionProvider(private val db: Database? = null) : TransactionPro
     override fun <T> executeTransaction(block: Transaction.() -> T): T {
         return if (db != null) {
             transaction(db) {
-                block()
+                val result = block()
+                commit()  // Explicitly commit the transaction
+                println("[DEBUG_LOG] Transaction committed")
+                result
             }
         } else {
             transaction {
-                block()
+                val result = block()
+                commit()  // Explicitly commit the transaction
+                println("[DEBUG_LOG] Transaction committed")
+                result
             }
         }
     }

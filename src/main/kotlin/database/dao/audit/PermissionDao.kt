@@ -33,39 +33,6 @@ interface PermissionDao {
     fun createComponentPermission(componentPermission: ComponentPermission): ComponentPermission
     fun getComponentPermissions(componentId: String): List<Permission>
     fun removeComponentPermission(id: UUID): Boolean
-
-    companion object : PermissionDao {
-        private var impl: PermissionDao = PermissionDaoImpl()
-
-        /**
-         * Set a custom implementation for testing.
-         */
-        fun setImplementation(implementation: PermissionDao) {
-            impl = implementation
-        }
-
-        override fun create(permission: Permission): Permission = impl.create(permission)
-        override fun getById(id: UUID): Permission? = impl.getById(id)
-        override fun getByName(name: String): Permission? = impl.getByName(name)
-        override fun getByAction(action: String): List<Permission> = impl.getByAction(action)
-        override fun getAll(): List<Permission> = impl.getAll()
-        override fun update(permission: Permission): Permission = impl.update(permission)
-        override fun delete(id: UUID): Boolean = impl.delete(id)
-
-        override fun assignPermissionToRole(roleId: UUID, permissionId: UUID): RolePermission = 
-            impl.assignPermissionToRole(roleId, permissionId)
-        override fun removePermissionFromRole(roleId: UUID, permissionId: UUID): Boolean = 
-            impl.removePermissionFromRole(roleId, permissionId)
-        override fun getRolePermissions(roleId: UUID): List<Permission> = 
-            impl.getRolePermissions(roleId)
-
-        override fun createComponentPermission(componentPermission: ComponentPermission): ComponentPermission = 
-            impl.createComponentPermission(componentPermission)
-        override fun getComponentPermissions(componentId: String): List<Permission> = 
-            impl.getComponentPermissions(componentId)
-        override fun removeComponentPermission(id: UUID): Boolean = 
-            impl.removeComponentPermission(id)
-    }
 }
 
 /**

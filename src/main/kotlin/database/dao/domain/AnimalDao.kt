@@ -22,6 +22,7 @@ interface AnimalDao {
 class AnimalDaoImpl(
     private val transactionProvider: TransactionProvider = DomainTransactionProvider
 ) : AnimalDao {
+
     override fun createAnimal(animal: Animal): Animal = transactionProvider.executeTransaction {
         val id = Animals.insertAndGetId {
             it[species] = animal.species

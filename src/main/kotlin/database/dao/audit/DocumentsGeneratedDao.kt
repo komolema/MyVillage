@@ -22,24 +22,6 @@ interface DocumentsGeneratedDao {
     fun update(document: DocumentGenerated): DocumentGenerated
     fun delete(id: UUID): Boolean
 
-    companion object {
-        private val impl = DocumentsGeneratedDaoImpl()
-
-        fun create(document: DocumentGenerated): DocumentGenerated = 
-            impl.create(document)
-        fun getById(id: UUID): DocumentGenerated? = 
-            impl.getById(id)
-        fun getByReferenceNumber(referenceNumber: String): DocumentGenerated? = 
-            impl.getByReferenceNumber(referenceNumber)
-        fun getByDocumentType(documentType: String): List<DocumentGenerated> = 
-            impl.getByDocumentType(documentType)
-        fun getByRelatedEntity(relatedEntityId: UUID, relatedEntityType: String): List<DocumentGenerated> = 
-            impl.getByRelatedEntity(relatedEntityId, relatedEntityType)
-        fun update(document: DocumentGenerated): DocumentGenerated = 
-            impl.update(document)
-        fun delete(id: UUID): Boolean = 
-            impl.delete(id)
-    }
 }
 
 /**

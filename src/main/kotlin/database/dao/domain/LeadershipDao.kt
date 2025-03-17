@@ -1,10 +1,11 @@
 package database.dao.domain
 
+import database.DomainTransactionProvider
+import database.TransactionProvider
 import database.schema.domain.Leadership
 import models.domain.Leadership as LeadershipModel
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 interface LeadershipDao {
@@ -16,8 +17,10 @@ interface LeadershipDao {
     fun deleteLeadership(id: UUID): Boolean
 }
 
-class LeadershipDaoImpl : LeadershipDao {
-    override fun createLeadership(leadership: LeadershipModel): LeadershipModel = transaction {
+class LeadershipDaoImpl(
+    private val transactionProvider: TransactionProvider = DomainTransactionProvider
+) : LeadershipDao {
+    override fun createLeadership(leadership: LeadershipModel): LeadershipModel = transactionProvider.executeTransaction {
         val id = Leadership.insertAndGetId {
             it[name] = leadership.name
             it[role] = leadership.role
@@ -28,23 +31,23 @@ class LeadershipDaoImpl : LeadershipDao {
         leadership.copy(id = id.value)
     }
 
-    override fun getLeadershipById(id: UUID): LeadershipModel? = transaction {
+    override fun getLeadershipById(id: UUID): LeadershipModel? = transactionProvider.executeTransaction {
         Leadership.select(Leadership.id eq id)
             .map { it.toLeadershipModel() }
             .singleOrNull()
     }
 
-    override fun getAllLeadership(): List<LeadershipModel> = transaction {
+    override fun getAllLeadership(): List<LeadershipModel> = transactionProvider.executeTransaction {
         Leadership.selectAll()
             .map { it.toLeadershipModel() }
     }
 
-    override fun getLeadershipByVillage(villageName: String): List<LeadershipModel> = transaction {
+    override fun getLeadershipByVillage(villageName: String): List<LeadershipModel> = transactionProvider.executeTransaction {
         Leadership.select(Leadership.villageName eq villageName)
             .map { it.toLeadershipModel() }
     }
 
-    override fun updateLeadership(leadership: LeadershipModel): Boolean = transaction {
+    override fun updateLeadership(leadership: LeadershipModel): Boolean = transactionProvider.executeTransaction {
         Leadership.update({ Leadership.id eq leadership.id }) {
             it[name] = leadership.name
             it[role] = leadership.role
@@ -54,7 +57,7 @@ class LeadershipDaoImpl : LeadershipDao {
         } > 0
     }
 
-    override fun deleteLeadership(id: UUID): Boolean = transaction {
+    override fun deleteLeadership(id: UUID): Boolean = transactionProvider.executeTransaction {
         Leadership.deleteWhere { Leadership.id eq id } > 0
     }
 

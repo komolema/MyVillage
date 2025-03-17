@@ -34,35 +34,6 @@ interface UserDao {
     fun createDefaultRoles(): Map<String, UUID>
     fun assignRoleToUser(userId: UUID, roleId: UUID): UserRole
     fun getUserRoles(userId: UUID): List<Role>
-
-    companion object : UserDao {
-        private var impl: UserDao = UserDaoImpl()
-
-        /**
-         * Set a custom implementation for testing.
-         */
-        fun setImplementation(implementation: UserDao) {
-            impl = implementation
-        }
-
-        override fun createUser(
-            username: String,
-            password: String,
-            firstName: String,
-            lastName: String,
-            email: String,
-            phoneNumber: String?
-        ): UUID = impl.createUser(username, password, firstName, lastName, email, phoneNumber)
-
-        override fun getById(id: UUID): User? = impl.getById(id)
-        override fun getByUsername(username: String): User? = impl.getByUsername(username)
-        override fun getByEmail(email: String): User? = impl.getByEmail(email)
-        override fun update(user: User): User = impl.update(user)
-        override fun delete(id: UUID): Boolean = impl.delete(id)
-        override fun createDefaultRoles(): Map<String, UUID> = impl.createDefaultRoles()
-        override fun assignRoleToUser(userId: UUID, roleId: UUID): UserRole = impl.assignRoleToUser(userId, roleId)
-        override fun getUserRoles(userId: UUID): List<Role> = impl.getUserRoles(userId)
-    }
 }
 
 /**

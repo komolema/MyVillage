@@ -1,5 +1,7 @@
 package integration.dao
 
+import database.TestTransactionProvider
+import database.TransactionProvider
 import database.dao.domain.LeadershipDaoImpl
 import database.schema.domain.Leadership
 import models.domain.Leadership as LeadershipModel
@@ -13,14 +15,18 @@ import java.time.LocalDate
 import java.util.*
 
 class LeadershipDaoTest {
-    private val leadershipDao = LeadershipDaoImpl()
+    private lateinit var db: Database
+    private lateinit var testTransactionProvider: TestTransactionProvider
+    private lateinit var leadershipDao: LeadershipDaoImpl
 
     @BeforeEach
     fun setup() {
-        Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
-        transaction {
+        db = Database.connect("jdbc:sqlite::memory:", driver = "org.sqlite.JDBC")
+        transaction(db) {
             SchemaUtils.create(Leadership)
         }
+        testTransactionProvider = TestTransactionProvider(db)
+        leadershipDao = LeadershipDaoImpl(testTransactionProvider)
     }
 
     private fun createTestLeadership(villageName: String = "Test Village"): LeadershipModel {
@@ -35,7 +41,7 @@ class LeadershipDaoTest {
     }
 
     @Test
-    fun testCreateLeadership() = transaction {
+    fun testCreateLeadership() {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
         assertNotNull(createdLeadership.id)
@@ -44,7 +50,7 @@ class LeadershipDaoTest {
     }
 
     @Test
-    fun testGetLeadershipById() = transaction {
+    fun testGetLeadershipById() {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
 
@@ -55,7 +61,7 @@ class LeadershipDaoTest {
     }
 
     @Test
-    fun testGetAllLeadership() = transaction {
+    fun testGetAllLeadership() {
         val leaderships = listOf(
             createTestLeadership("Village 1"),
             createTestLeadership("Village 2"),
@@ -71,7 +77,7 @@ class LeadershipDaoTest {
     }
 
     @Test
-    fun testGetLeadershipByVillage() = transaction {
+    fun testGetLeadershipByVillage() {
         val villageName = "Test Village"
         val leaderships = listOf(
             createTestLeadership(villageName),
@@ -88,7 +94,7 @@ class LeadershipDaoTest {
     }
 
     @Test
-    fun testUpdateLeadership() = transaction {
+    fun testUpdateLeadership() {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
 
@@ -106,7 +112,7 @@ class LeadershipDaoTest {
     }
 
     @Test
-    fun testDeleteLeadership() = transaction {
+    fun testDeleteLeadership() {
         val leadership = createTestLeadership()
         val createdLeadership = leadershipDao.createLeadership(leadership)
 

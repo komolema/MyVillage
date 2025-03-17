@@ -17,27 +17,6 @@ interface OwnershipDao {
     fun getValidOwnerships(): List<Ownership>
     fun updateOwnership(ownership: Ownership): Boolean
     fun deleteOwnership(id: UUID): Boolean
-
-    companion object {
-        private val impl = OwnershipDaoImpl()
-
-        fun createOwnership(ownership: Ownership): Ownership = 
-            impl.createOwnership(ownership)
-        fun getOwnershipById(id: UUID): Ownership? = 
-            impl.getOwnershipById(id)
-        fun getAllOwnerships(): List<Ownership> = 
-            impl.getAllOwnerships()
-        fun getOwnershipsByResident(residentId: UUID): List<Ownership> = 
-            impl.getOwnershipsByResident(residentId)
-        fun getOwnershipsByAnimal(animalId: UUID): List<Ownership> = 
-            impl.getOwnershipsByAnimal(animalId)
-        fun getValidOwnerships(): List<Ownership> = 
-            impl.getValidOwnerships()
-        fun updateOwnership(ownership: Ownership): Boolean = 
-            impl.updateOwnership(ownership)
-        fun deleteOwnership(id: UUID): Boolean = 
-            impl.deleteOwnership(id)
-    }
 }
 
 class OwnershipDaoImpl(private val transactionProvider: TransactionProvider = DomainTransactionProvider) : OwnershipDao {
