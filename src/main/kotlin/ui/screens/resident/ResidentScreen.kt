@@ -249,12 +249,12 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
     }
 
     LaunchedEffect(dataTableState.pageIndex) {
-        viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize))
+        viewModel.processIntent(ResidentViewModel.Intent.LoadResidents(dataTableState.pageIndex))
     }
 
     fun performSearch() {
         viewModel.processIntent(
-            if (searchText.isEmpty()) ResidentViewModel.Intent.LoadResidents(dataTableState.pageSize)
+            if (searchText.isEmpty()) ResidentViewModel.Intent.LoadResidents(dataTableState.pageIndex)
             else ResidentViewModel.Intent.Search(searchText, dataTableState.pageIndex)
         )
     }
