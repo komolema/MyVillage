@@ -68,6 +68,9 @@ dependencies {
     implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
     implementation("org.apache.pdfbox:fontbox:$pdfboxVersion")
 
+    // BCrypt for password hashing
+    implementation("org.mindrot:jbcrypt:0.4")
+
     // Test dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")

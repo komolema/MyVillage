@@ -4,6 +4,7 @@ import java.util.UUID
 import ui.screens.resident.WindowMode
 
 sealed class NavigationRoute(val route: String) {
+    data object Login : NavigationRoute("login")
     data object Dashboard : NavigationRoute("dashboard")
     data object Resident : NavigationRoute("resident")
     data class ResidentDetail(val residentId: UUID? = null, val mode: WindowMode = WindowMode.VIEW) : 
@@ -27,6 +28,7 @@ sealed class NavigationRoute(val route: String) {
     companion object {
         fun fromRoute(route: String): NavigationRoute? {
             return when {
+                route == Login.route -> Login
                 route == Dashboard.route -> Dashboard
                 route == Resident.route -> Resident
                 route == Animal.route -> Animal

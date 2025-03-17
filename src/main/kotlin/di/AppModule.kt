@@ -77,6 +77,7 @@ val viewModelModule = module {
     factory { AnimalViewModel(get(), get(), get()) }
     factory { OnboardingViewModel() }
     factory { SettingsViewModel() }
+    factory { LoginViewModel(get(), get()) }
 }
 
 val securityModule = module {
@@ -84,4 +85,4 @@ val securityModule = module {
     single { VillageSecurityManager(get(), get()) }
 }
 
-val appModule = listOf(domainDaoModule, auditDaoModule, domainDataBagModule, securityModule, viewModelModule)
+val appModule = listOf(domainDaoModule, auditDaoModule, domainDataBagModule, auditDataBagModule, securityModule, viewModelModule)

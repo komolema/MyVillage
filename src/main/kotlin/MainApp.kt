@@ -34,6 +34,19 @@ fun main() {
     DatabaseManager.initializeDatabases()
 
     // Initialize security system
+    val securityManager = org.koin.core.context.GlobalContext.get().get<security.VillageSecurityManager>()
+    securityManager.initialize()
+
+    // Create default admin user if this is the first startup
+    if (database.DatabaseManager.isFirstStartup()) {
+        securityManager.createAdminUser(
+            username = "admin",
+            password = "admin",
+            firstName = "Admin",
+            lastName = "User",
+            email = "admin@myvillage.com"
+        )
+    }
 
     application {
         val windowState = rememberWindowState(placement = WindowPlacement.Maximized)

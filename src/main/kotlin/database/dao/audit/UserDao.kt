@@ -30,6 +30,7 @@ interface UserDao {
     fun getByUsername(username: String): User?
     fun getByEmail(email: String): User?
     fun update(user: User): User
+    fun updateLastLogin(id: UUID): Boolean
     fun delete(id: UUID): Boolean
     fun createDefaultRoles(): Map<String, UUID>
     fun assignRoleToUser(userId: UUID, roleId: UUID): UserRole
@@ -60,9 +61,8 @@ class UserDaoImpl : UserDao {
         email: String,
         phoneNumber: String?
     ): UUID = DatabaseManager.auditTransaction {
-        // In a real implementation, we would hash the password
-        val passwordHash = password // Placeholder for password hashing
-        val salt = "salt" // Placeholder for salt generation
+        // Hash the password using BCrypt
+        val (passwordHash, salt) = security.PasswordUtils.hashPasswordWithNewSalt(password)
 
         val userId = Users.insert {
             it[id] = UUID.randomUUID()
@@ -158,6 +158,20 @@ class UserDaoImpl : UserDao {
 
         // Then delete the user
         Users.deleteWhere { Users.id eq id } > 0
+    }
+
+    /**
+     * Updates the last login time for a user.
+     *
+     * @param id The ID of the user to update
+     * @return True if the user was updated, false otherwise
+     */
+    override fun updateLastLogin(id: UUID): Boolean = DatabaseManager.auditTransaction {
+        val updatedCount = Users.update({ Users.id eq id }) {
+            it[lastLogin] = LocalDateTime.now()
+        }
+
+        return@auditTransaction updatedCount > 0
     }
 
     /**

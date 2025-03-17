@@ -9,6 +9,7 @@ import org.koin.compose.koinInject
 import ui.screens.DashboardScreen
 import ui.screens.admin.AdminScreen
 import ui.screens.animal.AnimalScreen
+import ui.screens.login.LoginScreen
 import ui.screens.onboarding.WelcomeScreen
 import ui.screens.onboarding.UserRoleScreen
 import ui.screens.onboarding.AdminSetupScreen
@@ -31,14 +32,13 @@ fun AppNavigation() {
     val residentWindowViewModel: ResidentWindowViewModel = koinInject()
     val onboardingViewModel: OnboardingViewModel = koinInject()
 
-    // Determine start destination based on onboarding settings
-    val startDestination = if (onboardingViewModel.isOnboardingRequired()) {
-        NavigationRoute.OnboardingWelcome.route
-    } else {
-        NavigationRoute.Dashboard.route
-    }
+    // Always start with the login screen
+    val startDestination = NavigationRoute.Login.route
 
     NavHost(navController = navController, startDestination = startDestination) {
+        composable(NavigationRoute.Login.route) {
+            LoginScreen(navigationService.navController)
+        }
         composable(NavigationRoute.Dashboard.route) { 
             DashboardScreen(navigationService.navController) 
         }
