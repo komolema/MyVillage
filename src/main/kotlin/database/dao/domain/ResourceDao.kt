@@ -1,11 +1,13 @@
 package database.dao.domain
 
+import database.DomainTransactionProvider
+import database.TransactionProvider
 import database.schema.domain.Resources
 import models.domain.Resource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
 /**
@@ -63,15 +65,17 @@ interface ResourceDao {
     fun delete(id: UUID): Unit
 }
 
-class ResourceDaoImpl : ResourceDao {
-    override fun getAll(page: Int, pageSize: Int): List<Resource> = transaction {
+class ResourceDaoImpl(
+    private val transactionProvider: TransactionProvider = DomainTransactionProvider
+) : ResourceDao {
+    override fun getAll(page: Int, pageSize: Int): List<Resource> = transactionProvider.executeTransaction {
         Resources.selectAll()
             .limit(pageSize)
             .offset(start = (page * pageSize).toLong())
             .map { it.toResource() }
     }
 
-    override fun search(query: String, page: Int, pageSize: Int): List<Resource> = transaction {
+    override fun search(query: String, page: Int, pageSize: Int): List<Resource> = transactionProvider.executeTransaction {
         Resources.select(
             (Resources.type like "%$query%") or
             (Resources.location like "%$query%")
@@ -81,13 +85,13 @@ class ResourceDaoImpl : ResourceDao {
             .map { it.toResource() }
     }
 
-    override fun getById(id: UUID): Resource? = transaction {
+    override fun getById(id: UUID): Resource? = transactionProvider.executeTransaction {
         Resources.select(Resources.id eq id)
             .mapNotNull { it.toResource() }
             .singleOrNull()
     }
 
-    override fun create(resource: Resource): Unit = transaction {
+    override fun create(resource: Resource): Unit = transactionProvider.executeTransaction {
         Resources.insert {
             it[id] = resource.id
             it[type] = resource.type
@@ -96,7 +100,7 @@ class ResourceDaoImpl : ResourceDao {
         Unit
     }
 
-    override fun update(resource: Resource): Unit = transaction {
+    override fun update(resource: Resource): Unit = transactionProvider.executeTransaction {
         Resources.update({ Resources.id eq resource.id }) {
             it[type] = resource.type
             it[location] = resource.location
@@ -104,7 +108,7 @@ class ResourceDaoImpl : ResourceDao {
         Unit
     }
 
-    override fun delete(id: UUID): Unit = transaction {
+    override fun delete(id: UUID): Unit = transactionProvider.executeTransaction {
         Resources.deleteWhere { Resources.id eq id }
         Unit
     }

@@ -1,10 +1,12 @@
 package database.dao.domain
 
+import database.DomainTransactionProvider
+import database.TransactionProvider
 import database.schema.domain.Dependants
 import models.domain.Dependant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
 interface DependantDao {
@@ -16,69 +18,56 @@ interface DependantDao {
     fun deleteDependant(id: UUID): Boolean
 }
 
-class DependantDaoImpl : DependantDao {
-    override fun createDependant(dependant: Dependant): Dependant = transaction {
+class DependantDaoImpl(
+    private val transactionProvider: TransactionProvider = DomainTransactionProvider
+) : DependantDao {
+    override fun createDependant(dependant: Dependant): Dependant = transactionProvider.executeTransaction {
         println("[DEBUG_LOG] Starting createDependant transaction")
-        println("[DEBUG_LOG] Verifying database state...")
-
-        // Verify the Dependants table exists and is accessible
-        try {
-            val tableExists = Dependants.exists()
-            println("[DEBUG_LOG] Dependants table exists: $tableExists")
-
-            if (!tableExists) {
-                println("[DEBUG_LOG] Attempting to create Dependants table")
-                SchemaUtils.create(Dependants)
-            }
-        } catch (e: Exception) {
-            println("[DEBUG_LOG] Error checking table existence: ${e.message}")
-            throw e
-        }
-
         println("[DEBUG_LOG] Inserting new dependant with residentId: ${dependant.residentId}")
-        val id = Dependants.insertAndGetId {
+        Dependants.insert {
+            it[id] = dependant.id
             it[residentId] = dependant.residentId
             it[idNumber] = dependant.idNumber
             it[name] = dependant.name
             it[surname] = dependant.surname
             it[gender] = dependant.gender
         }
-        println("[DEBUG_LOG] Insert successful, new id: ${id.value}")
+        println("[DEBUG_LOG] Insert successful, id: ${dependant.id}")
 
-        dependant.copy(id = id.value)
+        dependant
     }
 
-    override fun getDependantById(id: UUID): Dependant? = transaction {
+    override fun getDependantById(id: UUID): Dependant? = transactionProvider.executeTransaction {
         println("[DEBUG_LOG] Getting dependant by id: $id")
-        val query = Dependants.select ( Dependants.id eq id )
-        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
-        query.map { row ->
-            println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
-            row.toDependant()
-        }.singleOrNull()
+        Dependants.selectAll()
+            .where { Dependants.id eq id }
+            .limit(1)
+            .map { row ->
+                println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
+                row.toDependant()
+            }.singleOrNull()
     }
 
-    override fun getDependantsByResidentId(residentId: UUID): List<Dependant> = transaction {
+    override fun getDependantsByResidentId(residentId: UUID): List<Dependant> = transactionProvider.executeTransaction {
         println("[DEBUG_LOG] Querying dependants for residentId: $residentId")
-        val query = Dependants.selectAll().where { Dependants.residentId eq residentId }
-        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
-        query.map { row ->
-            println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
-            row.toDependant()
-        }
+        Dependants.selectAll()
+            .where { Dependants.residentId eq residentId }
+            .map { row ->
+                println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
+                row.toDependant()
+            }
     }
 
-    override fun getAllDependants(): List<Dependant> = transaction {
+    override fun getAllDependants(): List<Dependant> = transactionProvider.executeTransaction {
         println("[DEBUG_LOG] Getting all dependants")
-        val query = Dependants.selectAll()
-        println("[DEBUG_LOG] SQL: ${query.prepareSQL(this)}")
-        query.map { row ->
-            println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
-            row.toDependant()
-        }
+        Dependants.selectAll()
+            .map { row ->
+                println("[DEBUG_LOG] Row data: id=${row[Dependants.id]}, name=${row[Dependants.name]}")
+                row.toDependant()
+            }
     }
 
-    override fun updateDependant(dependant: Dependant): Boolean = transaction {
+    override fun updateDependant(dependant: Dependant): Boolean = transactionProvider.executeTransaction {
         Dependants.update({ Dependants.id eq dependant.id }) {
             it[residentId] = dependant.residentId
             it[idNumber] = dependant.idNumber
@@ -88,20 +77,21 @@ class DependantDaoImpl : DependantDao {
         } > 0
     }
 
-    override fun deleteDependant(id: UUID): Boolean = transaction {
+    override fun deleteDependant(id: UUID): Boolean = transactionProvider.executeTransaction {
         Dependants.deleteWhere { Dependants.id eq id } > 0
     }
 
     private fun ResultRow.toDependant(): Dependant {
+        val entityId = this[Dependants.id] as EntityID<UUID>
         return Dependant(
-            id = this[Dependants.id].value,
+            id = entityId.value,
             residentId = this[Dependants.residentId],
             idNumber = this[Dependants.idNumber],
             name = this[Dependants.name],
             surname = this[Dependants.surname],
             gender = this[Dependants.gender]
         ).also {
-            println("[DEBUG_LOG] Converting row to Dependant: id=${this[Dependants.id]}, residentId=${this[Dependants.residentId]}")
+            println("[DEBUG_LOG] Converting row to Dependant: id=${entityId.value}, residentId=${this[Dependants.residentId]}")
         }
     }
 }

@@ -1,12 +1,14 @@
 package database.dao.domain
 
+import database.DomainTransactionProvider
+import database.TransactionProvider
 import database.schema.domain.Addresses
 import database.schema.domain.Residences
 import models.domain.Address
 import models.domain.Residence
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
 interface ResidenceDao {
@@ -19,9 +21,11 @@ interface ResidenceDao {
     fun deleteResidence(id: UUID): Boolean
 }
 
-class ResidenceDaoImpl : ResidenceDao {
+class ResidenceDaoImpl(
+    private val transactionProvider: TransactionProvider = DomainTransactionProvider
+) : ResidenceDao {
 
-    override fun getResidenceByResidentId(residentId: UUID): Residence? = transaction {
+    override fun getResidenceByResidentId(residentId: UUID): Residence? = transactionProvider.executeTransaction {
         Residences.selectAll()
             .where { Residences.residentId eq residentId }
             .limit(1)
@@ -35,7 +39,7 @@ class ResidenceDaoImpl : ResidenceDao {
             }
     }
 
-    override fun getAddressByResidentId(residentId: UUID): Address? = transaction {
+    override fun getAddressByResidentId(residentId: UUID): Address? = transactionProvider.executeTransaction {
         (Addresses innerJoin Residences)
             .selectAll()
             .where { Residences.residentId eq residentId }
@@ -55,28 +59,29 @@ class ResidenceDaoImpl : ResidenceDao {
             }
     }
 
-    override fun getAllResidences(): List<Residence> = transaction {
+    override fun getAllResidences(): List<Residence> = transactionProvider.executeTransaction {
         Residences.selectAll()
             .map { it.toResidence() }
     }
 
-    override fun getResidenceById(id: UUID): Residence? = transaction {
+    override fun getResidenceById(id: UUID): Residence? = transactionProvider.executeTransaction {
         Residences.selectAll()
             .andWhere { Residences.id eq id }
             .mapNotNull { it.toResidence() }
             .singleOrNull()
     }
 
-    override fun createResidence(residence: Residence): Residence = transaction {
-        val id = Residences.insertAndGetId {
+    override fun createResidence(residence: Residence): Residence = transactionProvider.executeTransaction {
+        Residences.insert {
+            it[id] = residence.id
             it[residentId] = residence.residentId
             it[addressId] = residence.addressId
             it[occupationDate] = residence.occupationDate
         }
-        residence.copy(id = id.value)
+        residence
     }
 
-    override fun updateResidence(residence: Residence): Boolean = transaction {
+    override fun updateResidence(residence: Residence): Boolean = transactionProvider.executeTransaction {
         Residences.update({ Residences.id eq residence.id }) {
             it[residentId] = residence.residentId
             it[addressId] = residence.addressId
@@ -84,7 +89,7 @@ class ResidenceDaoImpl : ResidenceDao {
         } > 0
     }
 
-    override fun deleteResidence(id: UUID): Boolean = transaction {
+    override fun deleteResidence(id: UUID): Boolean = transactionProvider.executeTransaction {
         Residences.deleteWhere { Residences.id eq id } > 0
     }
 

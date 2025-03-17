@@ -1,13 +1,15 @@
 package database.dao.domain
 
 import arrow.core.toOption
+import database.DomainTransactionProvider
+import database.TransactionProvider
 import database.schema.domain.*
 import models.domain.Resident
 import models.expanded.ResidentExpanded
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.dao.id.EntityID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -24,15 +26,19 @@ interface ResidentDao {
     fun delete(id: UUID)
 }
 
-class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val dependantDao: DependantDao) : ResidentDao {
+class ResidentDaoImpl(
+    private val residenceDao: ResidenceDao, 
+    private val dependantDao: DependantDao,
+    private val transactionProvider: TransactionProvider = DomainTransactionProvider
+) : ResidentDao {
 
-    override fun getAll(page: Int, pageSize: Int): List<Resident> = transaction {
+    override fun getAll(page: Int, pageSize: Int): List<Resident> = transactionProvider.executeTransaction {
         Residents.selectAll()
             .limit(pageSize).offset(start = (page * pageSize).toLong())
             .map { it.toResident() }
     }
 
-    private fun searchResidents(searchTerm: String, page: Int, pageSize: Int): Query {
+    private fun Transaction.searchResidents(searchTerm: String, page: Int, pageSize: Int): Query {
         return Residents.selectAll()
             .andWhere { 
                 (Residents.firstName like "%$searchTerm%") or
@@ -43,19 +49,19 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
             .offset(start = (page * pageSize).toLong())
     }
 
-    override fun search(query: String, page: Int, pageSize: Int): List<Resident> = transaction {
+    override fun search(query: String, page: Int, pageSize: Int): List<Resident> = transactionProvider.executeTransaction {
         searchResidents(query, page, pageSize).map { it.toResident() }
     }
 
     override suspend fun searchExpanded(query: String, page: Int, pageSize: Int): List<ResidentExpanded> = 
         withContext(Dispatchers.IO) {
-            val rows = transaction {
+            val rows = transactionProvider.executeTransaction {
                 searchResidents(query, page, pageSize).toList()
             }
             rows.map { row -> row.toResidentExpanded() }
         }
 
-    override fun getResidentById(id: UUID): Resident? = transaction {
+    override fun getResidentById(id: UUID): Resident? = transactionProvider.executeTransaction {
         Residents.selectAll()
             .andWhere { Residents.id eq id }
             .mapNotNull { it.toResident() }
@@ -64,7 +70,7 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
 
     override suspend fun getAllResidentExpanded(page: Int, pageSize: Int): List<ResidentExpanded> = 
         withContext(Dispatchers.IO) {
-            val rows = transaction {
+            val rows = transactionProvider.executeTransaction {
                 Residents.selectAll()
                     .limit(pageSize).offset(start = (page * pageSize).toLong())
                     .toList()
@@ -74,7 +80,7 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
 
     override suspend fun getResidentExpandedById(id: UUID): ResidentExpanded? = 
         withContext(Dispatchers.IO) {
-            val row = transaction {
+            val row = transactionProvider.executeTransaction {
                 Residents.selectAll()
                     .andWhere { Residents.id eq id }
                     .firstOrNull()
@@ -83,7 +89,7 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
         }
 
     override fun createResident(residentState: Resident) {
-        transaction {
+        transactionProvider.executeTransaction {
             Residents.insert {
                 it[id] = residentState.id
                 it[idNumber] = residentState.idNumber
@@ -93,13 +99,12 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
                 it[email] = residentState.email
                 it[phoneNumber] = residentState.phoneNumber
                 it[gender] = residentState.gender
-
             }
         }
     }
 
     override fun updateResident(residentState: Resident) {
-        transaction {
+        transactionProvider.executeTransaction {
             Residents.update({ Residents.id eq residentState.id }) {
                 it[idNumber] = residentState.idNumber
                 it[firstName] = residentState.firstName
@@ -113,7 +118,7 @@ class ResidentDaoImpl(private val residenceDao: ResidenceDao, private val depend
     }
 
     override fun delete(id: UUID) {
-        transaction {
+        transactionProvider.executeTransaction {
             // Delete qualifications first
             Qualifications.deleteWhere { Qualifications.residentId eq id }
 

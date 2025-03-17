@@ -6,6 +6,7 @@ import database.schema.domain.Animals
 import models.domain.Animal
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.dao.id.EntityID
 import java.util.*
 
 interface AnimalDao {
@@ -24,7 +25,8 @@ class AnimalDaoImpl(
 ) : AnimalDao {
 
     override fun createAnimal(animal: Animal): Animal = transactionProvider.executeTransaction {
-        val id = Animals.insertAndGetId {
+        Animals.insert {
+            it[id] = animal.id
             it[species] = animal.species
             it[breed] = animal.breed
             it[gender] = animal.gender
@@ -34,17 +36,21 @@ class AnimalDaoImpl(
             it[vaccinationStatus] = animal.vaccinationStatus
             it[vaccinationDate] = animal.vaccinationDate
         }
-        animal.copy(id = id.value)
+        animal
     }
 
     override fun getAnimalById(id: UUID): Animal? = transactionProvider.executeTransaction {
-        Animals.select(Animals.id eq id)
+        Animals.selectAll()
+            .where { Animals.id eq id }
+            .limit(1)
             .map { it.toAnimal() }
             .singleOrNull()
     }
 
     override fun getAnimalByTagNumber(tagNumber: String): Animal? = transactionProvider.executeTransaction {
-        Animals.select(Animals.tagNumber eq tagNumber)
+        Animals.selectAll()
+            .where { Animals.tagNumber eq tagNumber }
+            .limit(1)
             .map { it.toAnimal() }
             .singleOrNull()
     }
@@ -55,12 +61,14 @@ class AnimalDaoImpl(
     }
 
     override fun getAnimalsBySpecies(species: String): List<Animal> = transactionProvider.executeTransaction {
-        Animals.select(Animals.species eq species)
+        Animals.selectAll()
+            .where { Animals.species eq species }
             .map { it.toAnimal() }
     }
 
     override fun getAnimalsByHealthStatus(status: String): List<Animal> = transactionProvider.executeTransaction {
-        Animals.select(Animals.healthStatus eq status)
+        Animals.selectAll()
+            .where { Animals.healthStatus eq status }
             .map { it.toAnimal() }
     }
 
@@ -82,8 +90,9 @@ class AnimalDaoImpl(
     }
 
     private fun ResultRow.toAnimal(): Animal {
+        val entityId = this[Animals.id] as EntityID<UUID>
         return Animal(
-            id = this[Animals.id].value,
+            id = entityId.value,
             species = this[Animals.species],
             breed = this[Animals.breed],
             gender = this[Animals.gender],
