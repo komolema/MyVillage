@@ -54,7 +54,7 @@ fun AdminScreen(navController: NavController) {
         if (showDocumentsDialog) {
             val documents = remember {
                 transaction {
-                    documentsGeneratedDao.getByDocumentType("")
+                    documentsGeneratedDao.getAllDocuments()
                 }
             }
 

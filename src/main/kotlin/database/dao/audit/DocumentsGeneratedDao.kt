@@ -21,6 +21,7 @@ interface DocumentsGeneratedDao {
     fun getByRelatedEntity(relatedEntityId: UUID, relatedEntityType: String): List<DocumentGenerated>
     fun update(document: DocumentGenerated): DocumentGenerated
     fun delete(id: UUID): Boolean
+    fun getAllDocuments(): List<DocumentGenerated>
 
 }
 
@@ -136,6 +137,16 @@ class DocumentsGeneratedDaoImpl(private val transactionProvider: TransactionProv
      */
     override fun delete(id: UUID): Boolean = transactionProvider.executeTransaction {
         DocumentsGenerated.deleteWhere { DocumentsGenerated.id eq id } > 0
+    }
+
+    /**
+     * Retrieves all documents from the database.
+     *
+     * @return A list of all documents
+     */
+    override fun getAllDocuments(): List<DocumentGenerated> = transactionProvider.executeTransaction {
+        DocumentsGenerated.selectAll()
+            .map { it.toDocumentGenerated() }
     }
 
     /**

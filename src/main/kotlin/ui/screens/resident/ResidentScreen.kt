@@ -598,32 +598,37 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                             .background(rowBackground),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        IconButton(
-                                            onClick = {
-                                                if (isRowModified(index)) {
-                                                    // Save changes
-                                                    viewModel.processIntent(
-                                                        ResidentViewModel.Intent.SaveResidentChanges(
-                                                            resExp.resident.copy(
-                                                                idNumber = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
-                                                                firstName = editedCells[index to "firstName"] ?: resExp.resident.firstName,
-                                                                lastName = editedCells[index to "lastName"] ?: resExp.resident.lastName,
-                                                                gender = editedCells[index to "gender"] ?: resExp.resident.gender,
-                                                                dob = editedCells[index to "dob"]?.let { LocalDate.parse(it) } ?: resExp.resident.dob
+                                        val isEnabled = isRowModified(index)
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .clickable(
+                                                    enabled = isEnabled,
+                                                    onClick = {
+                                                        if (isEnabled) {
+                                                            // Save changes
+                                                            viewModel.processIntent(
+                                                                ResidentViewModel.Intent.SaveResidentChanges(
+                                                                    resExp.resident.copy(
+                                                                        idNumber = editedCells[index to "idNumber"] ?: resExp.resident.idNumber,
+                                                                        firstName = editedCells[index to "firstName"] ?: resExp.resident.firstName,
+                                                                        lastName = editedCells[index to "lastName"] ?: resExp.resident.lastName,
+                                                                        gender = editedCells[index to "gender"] ?: resExp.resident.gender,
+                                                                        dob = editedCells[index to "dob"]?.let { LocalDate.parse(it) } ?: resExp.resident.dob
+                                                                    )
+                                                                )
                                                             )
-                                                        )
-                                                    )
-                                                    // Clear edited cells for this row
-                                                    editedCells = editedCells.filterNot { it.key.first == index }.toMutableMap()
-                                                }
-                                            },
-                                            enabled = isRowModified(index),
-                                            modifier = Modifier.size(32.dp)
+                                                            // Clear edited cells for this row
+                                                            editedCells = editedCells.filterNot { it.key.first == index }.toMutableMap()
+                                                        }
+                                                    }
+                                                ),
+                                            contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
                                                 Icons.Default.Done,
                                                 contentDescription = StringResourcesManager.getCurrentStringResources().contentDescSave,
-                                                tint = if (isRowModified(index)) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
+                                                tint = if (isEnabled) MaterialTheme.colors.primary else MaterialTheme.colors.primary.copy(alpha = 0.5f)
                                             )
                                         }
                                     }
@@ -635,21 +640,26 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                                             .background(rowBackground),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        IconButton(
-                                            onClick = {
-                                                if (isRowModified(index)) {
-                                                    // Clear edited cells for this row
-                                                    editedCells = editedCells.filterNot { it.key.first == index }.toMutableMap()
-                                                    editingCell = null
-                                                }
-                                            },
-                                            enabled = isRowModified(index),
-                                            modifier = Modifier.size(32.dp)
+                                        val isEnabled = isRowModified(index)
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .clickable(
+                                                    enabled = isEnabled,
+                                                    onClick = {
+                                                        if (isEnabled) {
+                                                            // Clear edited cells for this row
+                                                            editedCells = editedCells.filterNot { it.key.first == index }.toMutableMap()
+                                                            editingCell = null
+                                                        }
+                                                    }
+                                                ),
+                                            contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
-                                                Icons.Default.Close,
+                                                Icons.Default.Refresh,
                                                 contentDescription = StringResourcesManager.getCurrentStringResources().contentDescReload,
-                                                tint = if (isRowModified(index)) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.3f)
+                                                tint = if (isEnabled) MaterialTheme.colors.primary else MaterialTheme.colors.primary.copy(alpha = 0.5f)
                                             )
                                         }
                                     }
