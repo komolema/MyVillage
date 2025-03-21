@@ -22,6 +22,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import ui.components.ScrollableContainer
 import utils.GlossaryPdfUtils
+import utils.ProofOfAddressUtils
 import viewmodel.ResidentWindowViewModel
 import java.awt.Desktop
 import java.time.LocalDate
@@ -51,6 +52,7 @@ fun GlossaryDialog(
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadDependants(residentId))
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadQualifications(residentId))
         viewModel.processIntent(ResidentWindowViewModel.Intent.LoadEmployment(residentId))
+        viewModel.processIntent(ResidentWindowViewModel.Intent.LoadResidence(residentId))
     }
 
     Dialog(
@@ -201,37 +203,6 @@ fun GlossaryDialog(
                             )
                         }
 
-                        // Print Proof of Address Button
-                        var showProofOfAddressDialog by remember { mutableStateOf(false) }
-                        OutlinedButton(
-                            onClick = { showProofOfAddressDialog = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)  // Fixed height for consistency
-                                .padding(vertical = 8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colors.primary)  // Added border color
-                        ) {
-                            Text(
-                                "Print Proof of Address",
-                                style = MaterialTheme.typography.button,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-
-                        // Show the proof of address dialog when the button is clicked
-                        if (showProofOfAddressDialog) {
-                            val resident = state.resident
-                            val address = state.address
-                            val residence = state.residence
-                            if (resident != null && address != null && residence != null) {
-                                ProofOfAddressDialog(
-                                    resident = resident,
-                                    address = address,
-                                    residence = residence,
-                                    onDismiss = { showProofOfAddressDialog = false }
-                                )
-                            }
-                        }
 
                         // Print Dependents List Button
                         var isGeneratingDependentsPdf by remember { mutableStateOf(false) }
@@ -567,6 +538,56 @@ private fun PrintOptionsDialog(
                 if (glossaryPdfError != null) {
                     Text(
                         text = glossaryPdfError!!,
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
+
+                // Print Proof of Address Button
+                var isGeneratingProofOfAddressPdf by remember { mutableStateOf(false) }
+                var proofOfAddressPdfError by remember { mutableStateOf<String?>(null) }
+
+                Button(
+                    onClick = {
+                        isGeneratingProofOfAddressPdf = true
+                        proofOfAddressPdfError = null
+
+                        try {
+                            val resident = state.resident
+                            val address = state.address
+                            val residence = state.residence
+
+                            if (resident != null && address != null && residence != null) {
+                                val (pdfFile, _) = ProofOfAddressUtils.generateProofOfAddress(
+                                    resident = resident,
+                                    address = address,
+                                    residence = residence
+                                )
+
+                                // Open the PDF file with the default PDF viewer
+                                if (Desktop.isDesktopSupported()) {
+                                    Desktop.getDesktop().open(pdfFile)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            proofOfAddressPdfError = "Error generating PDF: ${e.message}"
+                        } finally {
+                            isGeneratingProofOfAddressPdf = false
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    enabled = !isGeneratingProofOfAddressPdf
+                ) {
+                    Text("Print Proof of Address")
+                }
+
+                // Show error message if there was an error generating the PDF
+                if (proofOfAddressPdfError != null) {
+                    Text(
+                        text = proofOfAddressPdfError!!,
                         color = MaterialTheme.colors.error,
                         style = MaterialTheme.typography.caption,
                         modifier = Modifier.padding(horizontal = 8.dp)

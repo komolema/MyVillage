@@ -173,7 +173,11 @@ private fun HeaderCell(text: String) {
             text = text,
             style = MaterialTheme.typography.subtitle1,
             color = MaterialTheme.colors.onSurface,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
