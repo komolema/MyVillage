@@ -4,33 +4,33 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import localization.StringResourcesManager
 import models.expanded.ResidentExpanded
 import org.koin.compose.koinInject
-import ui.components.WindowToolbar
 import ui.components.ScrollableContainer
+import ui.components.WindowToolbar
 import viewmodel.ResidentViewModel
-import viewmodel.ResidentWindowViewModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import localization.StringResourcesManager
 
 // State for tracking edited cells
 data class EditedCell(val rowIndex: Int, val columnName: String, val value: String)
@@ -241,7 +241,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
     var windowMode by remember { mutableStateOf(WindowMode.VIEW) }
     val pageSize = 20
     val dataTableState = rememberPaginatedDataTableState(10, 0, 0)
-    var clickedRow by remember { mutableStateOf(-1) }
+    val clickedRow by remember { mutableStateOf(-1) }
 
     // State for tracking edited cells
     var editingCell by remember { mutableStateOf<EditedCell?>(null) }
@@ -737,7 +737,7 @@ internal fun ResidentScreen(navController: NavController, viewModel: ResidentVie
                             enabled = dataTableState.pageIndex < dataTableState.pageSize - 1,
                             modifier = Modifier.height(36.dp)
                         ) {
-                            Icon(Icons.Default.ArrowForward, StringResourcesManager.getCurrentStringResources().contentDescNext)
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, StringResourcesManager.getCurrentStringResources().contentDescNext)
                         }
                     }
                 }

@@ -250,7 +250,7 @@ fun ResidentTab(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        Gender.values().forEach { gender ->
+                        Gender.entries.forEach { gender ->
                             DropdownMenuItem(
                                 onClick = {
                                     residentState = residentState.copy(gender = gender.getDisplayName(strings.value))
