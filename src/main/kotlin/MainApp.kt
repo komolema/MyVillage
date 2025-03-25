@@ -1,57 +1,51 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
-import androidx.compose.ui.window.WindowPlacement
-import di.appModule
-import org.koin.core.context.startKoin
-import ui.navigation.AppNavigation
 import database.DatabaseManager
+import di.appModule
 import di.viewModelModule
-import theme.BlueButtonColor
+import javafx.application.Application
+import javafx.stage.Stage
+import org.koin.core.context.startKoin
+import security.VillageSecurityManager
+import ui.navigation.NavigationManager
 
-@Composable
-@Preview
-fun App() {
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = BlueButtonColor
-        )
-    ) {
-        AppNavigation()
+class MainApp : Application() {
+    override fun start(stage: Stage) {
+        // Initialize Koin
+        startKoin {
+            modules(appModule)
+            modules(viewModelModule)
+        }
+
+        // Initialize databases
+        DatabaseManager.initializeDatabases()
+
+        // Initialize security system
+        val securityManager = org.koin.core.context.GlobalContext.get().get<VillageSecurityManager>()
+        securityManager.initialize()
+
+        // Create default admin user if this is the first startup
+        if (DatabaseManager.isFirstStartup()) {
+            securityManager.createAdminUser(
+                username = "admin",
+                password = "admin",
+                firstName = "Admin",
+                lastName = "User",
+                email = "admin@myvillage.com"
+            )
+        }
+
+        // Set up the primary stage
+        stage.title = "My Village"
+        stage.isMaximized = true
+
+        // Initialize the navigation manager with the primary stage
+        val navigationManager = NavigationManager.getInstance()
+        navigationManager.initialize(stage)
+
+        // Show the stage
+        stage.show()
     }
 }
 
 fun main() {
-    startKoin {
-        modules(appModule)
-        modules(viewModelModule)
-    }
-    // Initialize databases
-    DatabaseManager.initializeDatabases()
-
-    // Initialize security system
-    val securityManager = org.koin.core.context.GlobalContext.get().get<security.VillageSecurityManager>()
-    securityManager.initialize()
-
-    // Create default admin user if this is the first startup
-    if (database.DatabaseManager.isFirstStartup()) {
-        securityManager.createAdminUser(
-            username = "admin",
-            password = "admin",
-            firstName = "Admin",
-            lastName = "User",
-            email = "admin@myvillage.com"
-        )
-    }
-
-    application {
-        val windowState = rememberWindowState(placement = WindowPlacement.Maximized)
-        Window(onCloseRequest = ::exitApplication, state = windowState) {
-            App()
-        }
-    }
+    Application.launch(MainApp::class.java)
 }

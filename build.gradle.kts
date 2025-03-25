@@ -1,9 +1,9 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.compose")
+    kotlin("jvm") version "1.9.0"
+    application
+    id("org.openjfx.javafxplugin") version "0.0.13"
 }
 
 group = "org.village"
@@ -12,31 +12,36 @@ version = "1.0-SNAPSHOT"
 val koinVersion = "4.0.2"
 val exposedVersion = "0.59.0"
 val arrowVersion = "2.0.1"
-val kotestVersion = "6.0.0.M2"
 val pdfboxVersion = "2.0.29"
+val javafxVersion = "21.0.2"
 
 repositories {
     mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
 }
 
+application {
+    mainClass.set("MainKt")
+}
+
+javafx {
+    version = javafxVersion
+    modules("javafx.controls", "javafx.fxml", "javafx.web", "javafx.graphics")
+}
+
 dependencies {
-    // Note, if you develop a library, you should use compose.desktop.common.
-    // compose.desktop.currentOs should be used in launcher-sourceSet
-    // (in a separate module for demo project and in testMain).
-    // With compose.desktop.common you will also lose @Preview functionality
-    implementation(compose.desktop.currentOs)
-    // Material 3
-    implementation("org.jetbrains.compose.material3:material3-desktop:1.7.0")
-    // Compose dependencies
-    implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
-    implementation("io.github.epicarchitect:epic-calendar-compose:1.0.8")
+    // JavaFX dependencies
+    implementation("org.controlsfx:controlsfx:11.1.2")
+    implementation("com.dlsc.formsfx:formsfx-core:11.6.0")
+    implementation("org.kordamp.ikonli:ikonli-javafx:12.3.1")
+    implementation("org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0")
     implementation("org.jdatepicker:jdatepicker:1.3.4")
 
-    // Coroutines for Swing
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
+    // TornadoFX - Kotlin wrapper for JavaFX
+    implementation("no.tornado:tornadofx:1.7.20")
 
+    // Coroutines for JavaFX
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.7.3")
 
     // Exposed ORM and SQLite
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
@@ -45,26 +50,19 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("org.xerial:sqlite-jdbc:3.41.2.2")
 
-
     // Kotlin standard library
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 
     // Arrow dependencies
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
     implementation("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
 
-    implementation("com.seanproctor:data-table:0.10.1")
-
     // Koin for dependency injection
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
-
     implementation("io.insert-koin:koin-test:$koinVersion")
     implementation("io.insert-koin:koin-test-junit5:$koinVersion")
-
-    implementation("io.insert-koin:koin-compose:$koinVersion")
-    implementation("io.insert-koin:koin-compose-viewmodel:$koinVersion")
-    implementation("io.insert-koin:koin-compose-viewmodel-navigation:$koinVersion")
 
     // PDF handling with Apache PDFBox
     implementation("org.apache.pdfbox:pdfbox:$pdfboxVersion")
@@ -78,25 +76,25 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.h2database:h2:2.2.224")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.9.0")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+kotlin {
+    jvmToolchain(17)
 }
 
-compose.desktop {
-    application {
-        mainClass = "MainKt"
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "17"
+}
 
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "MyVillage"
-            packageVersion = "1.0.0"
-        }
-    }
+tasks.withType<JavaCompile> {
+    targetCompatibility = "17"
+    sourceCompatibility = "17"
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

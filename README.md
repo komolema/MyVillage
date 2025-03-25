@@ -35,7 +35,8 @@ MyVillage is a comprehensive village management system designed to help communit
 
 MyVillage is built using:
 - **Kotlin**: Modern, concise programming language
-- **Jetpack Compose for Desktop**: Declarative UI framework for desktop applications
+- **JavaFX**: Rich client application platform for desktop applications
+- **TornadoFX**: Kotlin wrapper for JavaFX
 - **Exposed SQL**: Kotlin SQL framework for database operations
 - **Koin**: Dependency injection framework
 - **SQLite Database**: Local database storage for village data
@@ -45,11 +46,11 @@ MyVillage is built using:
 The application follows an MVVM (Model-View-ViewModel) architecture pattern with clear separation of concerns:
 - **Models**: Data structures representing village entities
 - **ViewModels**: Business logic and state management
-- **UI**: Compose-based user interface components
+- **UI**: JavaFX-based user interface components
 
 ## System Requirements
 
-- Java 11 or higher
+- Java 22 or higher
 - 4GB RAM minimum (8GB recommended)
 - 500MB of disk space
 - Windows, macOS, or Linux operating system
@@ -67,7 +68,7 @@ The application follows an MVVM (Model-View-ViewModel) architecture pattern with
 
 ### Option 2: Build from Source
 
-1. Ensure you have JDK 11+ and Gradle installed
+1. Ensure you have JDK 22+ and Gradle installed
 2. Clone the repository:
    ```
    git clone https://github.com/yourusername/MyVillage.git
@@ -134,7 +135,7 @@ The databases are automatically initialized on first startup.
 ### Common Issues
 
 1. **Application won't start**
-   - Ensure Java 11+ is installed and properly configured
+   - Ensure Java 22+ is installed and properly configured
    - Check system logs for error messages
 
 2. **Database errors**

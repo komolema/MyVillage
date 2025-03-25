@@ -1,8 +1,9 @@
 package viewmodel
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import database.DatabaseManager
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import localization.LocaleManager
 import localization.SupportedLanguage
 import localization.StringResourcesManager
@@ -10,57 +11,54 @@ import settings.AppSettingsManager
 import settings.UserRole
 
 class OnboardingViewModel {
-    private val _currentLanguage = mutableStateOf(AppSettingsManager.getCurrentSettings().language)
-    val currentLanguage: State<SupportedLanguage> = _currentLanguage
+    // JavaFX properties
+    val currentLanguageProperty = SimpleObjectProperty(AppSettingsManager.getCurrentSettings().language)
+    val userRoleProperty = SimpleObjectProperty(AppSettingsManager.getCurrentSettings().userRole)
+    val onboardingCompletedProperty = SimpleBooleanProperty(AppSettingsManager.getCurrentSettings().onboardingCompleted)
+    val showOnboardingOnStartupProperty = SimpleBooleanProperty(AppSettingsManager.getCurrentSettings().showOnboardingOnStartup)
+    val villageNameProperty = SimpleStringProperty("")
+    val villageLocationProperty = SimpleStringProperty("")
+    val adminContactProperty = SimpleStringProperty("")
 
-    private val _userRole = mutableStateOf(AppSettingsManager.getCurrentSettings().userRole)
-    val userRole: State<UserRole> = _userRole
-
-    private val _onboardingCompleted = mutableStateOf(AppSettingsManager.getCurrentSettings().onboardingCompleted)
-    val onboardingCompleted: State<Boolean> = _onboardingCompleted
-
-    private val _showOnboardingOnStartup = mutableStateOf(AppSettingsManager.getCurrentSettings().showOnboardingOnStartup)
-    val showOnboardingOnStartup: State<Boolean> = _showOnboardingOnStartup
-
-    private val _villageName = mutableStateOf("")
-    val villageName: State<String> = _villageName
-
-    private val _villageLocation = mutableStateOf("")
-    val villageLocation: State<String> = _villageLocation
-
-    private val _adminContact = mutableStateOf("")
-    val adminContact: State<String> = _adminContact
+    // Convenience getters
+    val currentLanguage: SupportedLanguage get() = currentLanguageProperty.get()
+    val userRole: UserRole get() = userRoleProperty.get()
+    val onboardingCompleted: Boolean get() = onboardingCompletedProperty.get()
+    val showOnboardingOnStartup: Boolean get() = showOnboardingOnStartupProperty.get()
+    val villageName: String get() = villageNameProperty.get()
+    val villageLocation: String get() = villageLocationProperty.get()
+    val adminContact: String get() = adminContactProperty.get()
 
     val supportedLanguages = LocaleManager.getSupportedLanguages()
-    private val _strings = mutableStateOf(StringResourcesManager.getCurrentStringResources())
-    val strings get() = _strings.value
+    private val stringsProperty = SimpleObjectProperty(StringResourcesManager.getCurrentStringResources())
+    val strings get() = stringsProperty.get()
 
     fun updateLanguage(language: SupportedLanguage) {
-        _strings.value = StringResourcesManager.getStringResources(language)
-        _currentLanguage.value = language
+        stringsProperty.set(StringResourcesManager.getStringResources(language))
+        currentLanguageProperty.set(language)
         LocaleManager.setLocale(language)
         AppSettingsManager.updateLanguage(language)
     }
 
     fun updateUserRole(role: UserRole) {
-        _userRole.value = role
+        userRoleProperty.set(role)
         AppSettingsManager.updateUserRole(role)
     }
 
     fun updateVillageName(name: String) {
-        _villageName.value = name
+        villageNameProperty.set(name)
     }
 
     fun updateVillageLocation(location: String) {
-        _villageLocation.value = location
+        villageLocationProperty.set(location)
     }
 
     fun updateAdminContact(contact: String) {
-        _adminContact.value = contact
+        adminContactProperty.set(contact)
     }
 
     fun completeOnboarding() {
-        _onboardingCompleted.value = true
+        onboardingCompletedProperty.set(true)
         AppSettingsManager.updateOnboardingCompleted(true)
     }
 
@@ -82,7 +80,7 @@ class OnboardingViewModel {
     }
 
     fun updateShowOnboardingOnStartup(show: Boolean) {
-        _showOnboardingOnStartup.value = show
+        showOnboardingOnStartupProperty.set(show)
         AppSettingsManager.updateShowOnboardingOnStartup(show)
     }
 }
