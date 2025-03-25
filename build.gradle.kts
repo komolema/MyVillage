@@ -27,6 +27,8 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    // Material 3
+    implementation("org.jetbrains.compose.material3:material3-desktop:1.7.0")
     // Compose dependencies
     implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
     implementation("io.github.epicarchitect:epic-calendar-compose:1.0.8")

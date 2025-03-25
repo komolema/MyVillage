@@ -3,7 +3,7 @@ package ui.screens.animal
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -52,7 +52,7 @@ fun AnimalScreen(navController: NavController) {
                         val animal = animalExpanded.animal
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            elevation = 4.dp
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Row(
@@ -60,7 +60,7 @@ fun AnimalScreen(navController: NavController) {
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Species: ${animal.species}", style = MaterialTheme.typography.h6)
+                                    Text("Species: ${animal.species}", style = MaterialTheme.typography.headlineMedium)
                                     Row {
                                         IconButton(onClick = {
                                             viewModel.processIntent(AnimalViewModel.Intent.OpenEditDialog(animal))
@@ -76,7 +76,7 @@ fun AnimalScreen(navController: NavController) {
                                 }
                                 Text("Breed: ${animal.breed}")
                                 Text("Gender: ${animal.gender}")
-                                Text("Tag Number: ${animal.tagNumber}")
+                                Text("Tag Number/**/: ${animal.tagNumber}")
                                 Text("Health Status: ${animal.healthStatus}")
                                 Text("Vaccination Status: ${if (animal.vaccinationStatus) "Vaccinated" else "Not Vaccinated"}")
                                 animal.vaccinationDate?.let {
@@ -105,7 +105,7 @@ fun AnimalScreen(navController: NavController) {
             FloatingActionButton(
                 onClick = { viewModel.processIntent(AnimalViewModel.Intent.OpenCreateDialog()) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                backgroundColor = PurpleButtonColor
+                containerColor = PurpleButtonColor
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Animal")
             }
@@ -139,7 +139,7 @@ fun AnimalScreen(navController: NavController) {
                 confirmButton = {
                     Button(
                         onClick = { viewModel.processIntent(AnimalViewModel.Intent.ConfirmDeleteAnimal()) },
-                        colors = ButtonDefaults.buttonColors(PurpleButtonColor)
+                        colors = ButtonDefaults.buttonColors(containerColor = PurpleButtonColor)
                     ) {
                         Text("Delete")
                     }
@@ -179,7 +179,7 @@ fun AnimalDialog(
     Dialog(onDismissRequest = onCancel) {
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
-            elevation = 8.dp
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -187,7 +187,7 @@ fun AnimalDialog(
             ) {
                 Text(
                     text = if (isEditMode) "Edit Animal" else "Add New Animal",
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.headlineMedium
                 )
 
                 OutlinedTextField(
@@ -262,7 +262,7 @@ fun AnimalDialog(
                 }
 
                 // Resident selection dropdown
-                Text("Select Owner", style = MaterialTheme.typography.subtitle1)
+                Text("Select Owner", style = MaterialTheme.typography.titleMedium)
                 if (residents.isEmpty()) {
                     Text("No residents available")
                 } else {
@@ -283,12 +283,13 @@ fun AnimalDialog(
                             modifier = Modifier.fillMaxWidth(0.9f)
                         ) {
                             residents.forEach { resident ->
-                                DropdownMenuItem(onClick = {
-                                    onResidentSelected(resident.id)
-                                    expanded = false
-                                }) {
-                                    Text("${resident.firstName} ${resident.lastName}")
-                                }
+                                DropdownMenuItem(
+                                    text = { Text("${resident.firstName} ${resident.lastName}") },
+                                    onClick = {
+                                        onResidentSelected(resident.id)
+                                        expanded = false
+                                    }
+                                )
                             }
                         }
                     }
@@ -310,7 +311,7 @@ fun AnimalDialog(
                                 val month = dobMonth.toInt()
                                 val day = dobDay.toInt()
                                 val dob = LocalDate.of(year, month, day)
-                                
+
                                 val updatedAnimal = animal.copy(
                                     species = species,
                                     breed = breed,
@@ -326,7 +327,7 @@ fun AnimalDialog(
                                 // In a real app, you'd show an error message
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(PurpleButtonColor)
+                        colors = ButtonDefaults.buttonColors(containerColor = PurpleButtonColor)
                     ) {
                         Text(if (isEditMode) "Update" else "Create")
                     }

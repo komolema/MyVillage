@@ -32,8 +32,12 @@ fun AppNavigation() {
     val residentWindowViewModel: ResidentWindowViewModel = koinInject()
     val onboardingViewModel: OnboardingViewModel = koinInject()
 
-    // Always start with the login screen
-    val startDestination = NavigationRoute.Login.route
+    // Check if onboarding is required
+    val startDestination = if (onboardingViewModel.isOnboardingRequired()) {
+        NavigationRoute.OnboardingWelcome.route
+    } else {
+        NavigationRoute.Login.route
+    }
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(NavigationRoute.Login.route) {

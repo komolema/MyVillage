@@ -82,16 +82,11 @@ object DatabaseManager {
 
     /**
      * Check if this is the first startup of the application.
-     * This is determined by checking if the audit database has any users.
+     * This is determined by checking if the audit database file exists.
      */
     fun isFirstStartup(): Boolean {
-        // For simplicity, we'll check if the audit.db file exists and has data
+        // Simply check if the audit.db file exists
         val auditDbFile = java.io.File("audit.db")
-        if (!auditDbFile.exists() || auditDbFile.length() < 100) {
-            return true
-        }
-
-        // If the file exists and has some data, we'll assume it's not the first startup
-        return false
+        return !auditDbFile.exists()
     }
 }
